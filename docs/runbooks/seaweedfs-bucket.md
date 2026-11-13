@@ -1,6 +1,6 @@
 # Zaxira nusxalar uchun SeaweedFS'dagi alohida bucket — taklif
 
-> Holat: **taklif**. Avval quyidagi tekshiruvni bajaring. Mavjud SeaweedFS govita'ga tegishli, shuning uchun uning bucket'lari, kalitlari va sozlamalari o'zgartirilmaydi.
+> Holat: **B variant tanlandi va bajarildi** (travel-buddy-s3-staging, bucket'lar `tb-files`, `tb-backups`). Quyidagi matn tarix uchun qoldirildi.
 
 ## 1. Avval faqat o'qish uchun tekshiruv
 

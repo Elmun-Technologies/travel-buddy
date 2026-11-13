@@ -1,0 +1,80 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_PASSWORD: ci, POSTGRES_DB: tvb }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:ci@localhost:5432/tvb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm db:migrate
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+
+  images:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Server is ARM (Hetzner aarch64): build natively on an arm64 runner.
+    runs-on: ubuntu-24.04-arm
+    permissions: { contents: read, packages: write }
+    strategy:
+      matrix:
+        target: [web, worker]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          platforms: linux/arm64
+          push: true
+          build-args: APP_NAME=${{ vars.APP_NAME }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/travel-buddy-${{ matrix.target }}:staging
+            ghcr.io/${{ github.repository_owner }}/travel-buddy-${{ matrix.target }}:sha-${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+
+  deploy-staging:
+    needs: images
+    runs-on: ubuntu-24.04
+    steps:
+      # Optional until the owner adds COOLIFY_TOKEN + webhook URLs as GitHub secrets;
+      # without them, press "Redeploy" in Coolify.
+      - name: Trigger Coolify staging redeploy
+        env:
+          TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          WEB: ${{ secrets.COOLIFY_WEBHOOK_WEB }}
+          WORKER: ${{ secrets.COOLIFY_WEBHOOK_WORKER }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "No COOLIFY_TOKEN secret, skipping"; exit 0; fi
+          for url in "$WORKER" "$WEB"; do curl -fsS -H "Authorization: Bearer $TOKEN" "$url"; done

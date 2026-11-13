@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "{app} — sayohatga sherik toping",
+    "description": "Gruziya, Turkiya, Tailand va boshqa yo'nalishlarga birga boradigan sheriklar va shakllanayotgan guruhlar. Tasdiqlangan sayohatchilar va agentliklar."
+  },
+  "nav": { "join": "Ro'yxatga yozilish", "language": "Til" },
+  "hero": {
+    "badge": "Tez orada · Toshkentdan boshlaymiz",
+    "title": "Sayohatga sherik toping. Guruhga qo'shiling. Yo'lga chiqing.",
+    "subtitle": "Yolg'iz borishni istamaysizmi yoki do'stlaringiz bilan sana to'g'ri kelmayaptimi? Yo'nalishi, sanasi va budjeti sizga mos sayohatchilarni topamiz.",
+    "cta": "Birinchilardan bo'ling",
+    "note": "Bepul. Ishga tushganda birinchi bo'lib xabar beramiz."
+  },
+  "how": {
+    "title": "Qanday ishlaydi",
+    "s1": {
+      "title": "Odam toping",
+      "text": "Yo'nalish, sana, budjet, uslub va yosh bo'yicha sizga mos sayohatchilar."
+    },
+    "s2": {
+      "title": "Guruhga qo'shiling",
+      "text": "Sayohatchilar yoki tasdiqlangan agentliklar ochgan guruhlarga so'rov yuboring."
+    },
+    "s3": {
+      "title": "Bron qiling",
+      "text": "Agentlik turiga ariza qoldiring — agentlik o'zi bog'lanadi va joyni tasdiqlaydi."
+    }
+  },
+  "trust": {
+    "title": "Xavfsizlik — birinchi o'rinda",
+    "t1": {
+      "title": "Tasdiqlangan profillar",
+      "text": "Telegram, telefon va hujjat orqali tasdiqlash belgilari."
+    },
+    "t2": { "title": "Raqamingiz yashirin", "text": "Telefon raqami hech qachon ochiq ko'rsatilmaydi." },
+    "t3": {
+      "title": "Faqat ayollar uchun guruhlar",
+      "text": "Tashkilotchi xohlasa, guruhga faqat ayollar qo'shila oladi."
+    },
+    "t4": {
+      "title": "Shikoyat va bloklash",
+      "text": "Har bir profil va xabarda. Bloklangan odam sizni boshqa ko'rmaydi."
+    }
+  },
+  "waitlist": {
+    "title": "Ro'yxatga yoziling",
+    "subtitle": "Email yoki Telegram'ingizni qoldiring. Qaysi yo'nalish qiziq — belgilang.",
+    "contactLabel": "Email yoki Telegram username",
+    "contactPlaceholder": "siz@email.com yoki @username",
+    "destinationsLabel": "Qayerga bormoqchisiz? (ixtiyoriy)",
+    "submit": "Yozilish",
+    "submitting": "Yuborilmoqda...",
+    "success": "Rahmat! Ro'yxatdasiz. Ishga tushganda xabar beramiz.",
+    "errors": {
+      "invalid": "Email yoki Telegram username'ni to'g'ri kiriting.",
+      "rate_limited": "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring.",
+      "server": "Xatolik yuz berdi. Keyinroq qayta urinib ko'ring."
+    },
+    "consent": "Yozilish orqali siz faqat ishga tushish haqidagi xabarni olishga rozilik bildirasiz."
+  },
+  "destinations": {
+    "GE": "Gruziya",
+    "TR": "Turkiya",
+    "KZ": "Qozog'iston",
+    "TH": "Tailand",
+    "AE": "BAA (Dubay)",
+    "MY": "Malayziya",
+    "EG": "Misr",
+    "KG": "Qirg'iziston"
+  },
+  "footer": { "rights": "© {app}. Barcha huquqlar himoyalangan." },
+  "notFound": { "title": "Sahifa topilmadi", "back": "Bosh sahifaga" }
+}

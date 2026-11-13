@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "title": "{app} — find a travel buddy",
+    "description": "Travel companions and forming groups to Georgia, Turkey, Thailand and beyond. Verified travelers and agencies."
+  },
+  "nav": { "join": "Join the waitlist", "language": "Language" },
+  "hero": {
+    "badge": "Coming soon · Starting in Tashkent",
+    "title": "Find a travel buddy. Join a group. Go.",
+    "subtitle": "Don't want to go alone, or your friends' dates never match? We find travelers who fit your destination, dates and budget.",
+    "cta": "Be one of the first",
+    "note": "Free. We'll let you know first when we launch."
+  },
+  "how": {
+    "title": "How it works",
+    "s1": {
+      "title": "Find people",
+      "text": "Travelers who match your destination, dates, budget, style and age."
+    },
+    "s2": {
+      "title": "Join trips",
+      "text": "Request to join groups started by travelers or verified agencies."
+    },
+    "s3": {
+      "title": "Book",
+      "text": "Send a request for an agency tour — the agency contacts you and confirms your spot."
+    }
+  },
+  "trust": {
+    "title": "Safety comes first",
+    "t1": { "title": "Verified profiles", "text": "Telegram, phone and ID verification badges." },
+    "t2": { "title": "Your number stays private", "text": "Phone numbers are never shown publicly." },
+    "t3": { "title": "Women-only groups", "text": "Organizers can make a group open to women only." },
+    "t4": {
+      "title": "Report and block",
+      "text": "On every profile and message. Blocked people never see you again."
+    }
+  },
+  "waitlist": {
+    "title": "Join the waitlist",
+    "subtitle": "Leave your email or Telegram. Pick the destinations you care about.",
+    "contactLabel": "Email or Telegram username",
+    "contactPlaceholder": "you@email.com or @username",
+    "destinationsLabel": "Where do you want to go? (optional)",
+    "submit": "Join",
+    "submitting": "Sending...",
+    "success": "Thanks! You're on the list. We'll let you know when we launch.",
+    "errors": {
+      "invalid": "Enter a valid email or Telegram username.",
+      "rate_limited": "Too many attempts. Please try again a bit later.",
+      "server": "Something went wrong. Please try again later."
+    },
+    "consent": "By joining you agree to receive only the launch announcement."
+  },
+  "destinations": {
+    "GE": "Georgia",
+    "TR": "Turkey",
+    "KZ": "Kazakhstan",
+    "TH": "Thailand",
+    "AE": "UAE (Dubai)",
+    "MY": "Malaysia",
+    "EG": "Egypt",
+    "KG": "Kyrgyzstan"
+  },
+  "footer": { "rights": "© {app}. All rights reserved." },
+  "notFound": { "title": "Page not found", "back": "Go home" }
+}

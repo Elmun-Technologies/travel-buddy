@@ -51,17 +51,26 @@ export const reportTarget = pgEnum("report_target", ["user", "trip", "message", 
 export const reportStatus = pgEnum("report_status", ["open", "resolved", "dismissed"]);
 
 // ---------- users & auth ----------
-export const users = pgTable("users", {
-  ...base,
-  role: userRole("role").notNull().default("traveler"),
-  status: userStatus("status").notNull().default("active"),
-  locale: text("locale").notNull().default("uz"),
-  // Never exposed publicly; set only via Telegram request_contact.
-  phone: text("phone"),
-  phoneVerified: boolean("phone_verified").notNull().default(false),
-  email: text("email"),
-  deletedAt: ts("deleted_at"),
-});
+export const users = pgTable(
+  "users",
+  {
+    ...base,
+    role: userRole("role").notNull().default("traveler"),
+    status: userStatus("status").notNull().default("active"),
+    locale: text("locale").notNull().default("uz"),
+    // Never exposed publicly; set only via Telegram request_contact.
+    phone: text("phone"),
+    phoneVerified: boolean("phone_verified").notNull().default(false),
+    email: text("email"),
+    deletedAt: ts("deleted_at"),
+  },
+  // One verified phone = one account (anti-abuse).
+  (t) => [
+    uniqueIndex("users_verified_phone")
+      .on(t.phone)
+      .where(sql`${t.phoneVerified}`),
+  ],
+);
 
 export const authAccounts = pgTable(
   "auth_accounts",

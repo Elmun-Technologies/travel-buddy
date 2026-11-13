@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "users_verified_phone" ON "users" USING btree ("phone") WHERE "users"."phone_verified";

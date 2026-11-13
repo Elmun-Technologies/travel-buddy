@@ -13,8 +13,8 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx worker/migrate.ts",
-    "worker:dev": "tsx watch worker/index.ts",
-    "worker:build": "esbuild worker/index.ts worker/migrate.ts --bundle --platform=node --target=node22 --format=esm --outdir=dist --out-extension:.js=.mjs --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\""
+    "worker:dev": "tsx watch --conditions=react-server worker/index.ts",
+    "worker:build": "esbuild worker/index.ts worker/migrate.ts --bundle --platform=node --target=node22 --format=esm --conditions=react-server --outdir=dist --out-extension:.js=.mjs --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\""
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

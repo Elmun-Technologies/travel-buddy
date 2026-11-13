@@ -28,6 +28,9 @@ export default async function Landing() {
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
           <span className="font-semibold tracking-tight">{APP_NAME}</span>
           <nav aria-label={t("nav.language")} className="flex items-center gap-1 text-sm">
+            <Link href="/trips" className="mr-2 rounded-md px-2 py-1 font-medium hover:bg-muted">
+              {t("app.trips")}
+            </Link>
             {routing.locales.map((l) => (
               <Link
                 key={l}

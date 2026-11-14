@@ -118,6 +118,9 @@ export const travelerProfiles = pgTable("traveler_profiles", {
   avatarKey: text("avatar_key"),
   travelStyles: textArray("travel_styles"),
   interests: textArray("interests"),
+  groupPref: text("group_pref").notNull().default("mixed"), // mixed | women_only (women only, enforced in schema)
+  dreamDestinations: textArray("dream_destinations"), // ISO country codes, for matching
+  budgetBand: text("budget_band"), // lt300 | 300_600 | 600_1000 | any
   telegramVerified: boolean("telegram_verified").notNull().default(false),
   idVerified: boolean("id_verified").notNull().default(false),
 });

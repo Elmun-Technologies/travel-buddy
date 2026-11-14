@@ -44,7 +44,7 @@ const trip = {
   budgetMin: 50000,
   budgetMax: 65000,
   currency: "USD" as const,
-  travelStyles: ["trekking" as const],
+  travelStyles: ["mountains" as const],
   groupSizeMax: 2,
   ageMin: null,
   ageMax: null,

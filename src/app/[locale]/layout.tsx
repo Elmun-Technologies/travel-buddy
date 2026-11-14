@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter, Inter_Tight } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -8,7 +8,13 @@ import { UpdateBanner } from "@/components/update-banner";
 import { APP_NAME } from "@/lib/config";
 import "../globals.css";
 
-const sans = Geist({ variable: "--font-sans", subsets: ["latin", "latin-ext", "cyrillic"] });
+// Both cover Latin (uz) and Cyrillic (ru). Inter Tight: headings 400–500; Inter: body.
+const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext", "cyrillic"] });
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
+  weight: ["400", "500"],
+  subsets: ["latin", "latin-ext", "cyrillic"],
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -36,7 +42,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html
       lang={locale}
       data-build={process.env.NEXT_DEPLOYMENT_ID}
-      className={`${sans.variable} h-full antialiased`}
+      className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>

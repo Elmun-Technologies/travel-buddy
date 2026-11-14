@@ -45,3 +45,12 @@ export async function markPhoneVerified(userId: string, rawPhone: string): Promi
   await db.update(users).set({ phone, phoneVerified: true }).where(eq(users.id, userId));
   return "ok";
 }
+
+export async function getLocale(userId: string) {
+  const [u] = await getDb().select({ locale: users.locale }).from(users).where(eq(users.id, userId));
+  return u?.locale ?? null;
+}
+
+export async function setLocale(userId: string, locale: string) {
+  await getDb().update(users).set({ locale }).where(eq(users.id, userId));
+}

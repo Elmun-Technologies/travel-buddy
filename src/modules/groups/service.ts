@@ -4,6 +4,7 @@ import { tripMembers } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { addTripChatMember, removeTripChatMember } from "@/modules/chat/service";
 import { isBlockedBetween } from "@/modules/moderation/service";
+import { notify } from "@/modules/notifications/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
 import { lockTripForJoin, setTripStatus } from "@/modules/trips/service";
 import { getUserState } from "@/modules/users/service";
@@ -87,6 +88,7 @@ export async function requestJoin(
         target: [tripMembers.tripId, tripMembers.userId],
         set: { status: "requested", message },
       });
+    if (trip.ownerUserId) await notify(tx, trip.ownerUserId, "join_requested", { tripId, memberId: userId });
     return { ok: true };
   });
 }
@@ -116,6 +118,7 @@ export async function decideRequest(
     const r = await tx.update(tripMembers).set({ status: "approved" }).where(where).returning();
     if (!r.length) return { ok: false, error: "not_pending" };
     await addTripChatMember(tx, tripId, memberId);
+    await notify(tx, memberId, "join_approved", { tripId });
     if (trip.groupSizeMax != null && n + 1 >= trip.groupSizeMax) await setTripStatus(tx, tripId, "full");
     return { ok: true };
   });

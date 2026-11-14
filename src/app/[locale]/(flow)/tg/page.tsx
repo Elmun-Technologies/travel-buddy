@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 /** Mini App entry (bot menu button points here): exchange signed initData for a session. */
 export default function TelegramEntry() {
   const t = useTranslations("auth");
+  const locale = useLocale(); // the bot opens /{the user's language}/tg
   const [state, setState] = useState<"loading" | "outside" | "failed">("loading");
 
   useEffect(() => {
@@ -19,14 +20,14 @@ export default function TelegramEntry() {
       const res = await fetch("/api/auth/telegram/webapp", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ initData: app.initData }),
+        body: JSON.stringify({ initData: app.initData, locale }),
       }).catch(() => null);
       const data = res?.ok ? ((await res.json()) as { next?: string }) : null;
       if (data?.next) window.location.replace(data.next);
       else setState("failed");
     }, 100);
     return () => clearInterval(iv);
-  }, []);
+  }, [locale]);
 
   return (
     <div className="flex flex-1 items-center justify-center">

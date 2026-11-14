@@ -3,25 +3,19 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-declare global {
-  interface Window {
-    Telegram?: { WebApp?: { initData: string; ready: () => void; expand: () => void } };
-  }
-}
-
 /** Mini App entry (bot menu button points here): exchange signed initData for a session. */
 export default function TelegramEntry() {
   const t = useTranslations("auth");
   const [state, setState] = useState<"loading" | "outside" | "failed">("loading");
 
   useEffect(() => {
-    const s = document.createElement("script");
-    s.src = "https://telegram.org/js/telegram-web-app.js";
-    s.onload = async () => {
+    let tries = 0;
+    // telegram-web-app.js is loaded by the (flow) layout; wait for it (max ~4 s).
+    const iv = setInterval(async () => {
       const app = window.Telegram?.WebApp;
+      if (!app && ++tries < 40) return;
+      clearInterval(iv);
       if (!app?.initData) return setState("outside");
-      app.ready();
-      app.expand();
       const res = await fetch("/api/auth/telegram/webapp", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -30,14 +24,15 @@ export default function TelegramEntry() {
       const data = res?.ok ? ((await res.json()) as { next?: string }) : null;
       if (data?.next) window.location.replace(data.next);
       else setState("failed");
-    };
-    s.onerror = () => setState("failed");
-    document.head.appendChild(s);
+    }, 100);
+    return () => clearInterval(iv);
   }, []);
 
   return (
-    <p className="py-16 text-center text-muted-foreground" role="status">
-      {state === "loading" ? t("tgLoading") : state === "outside" ? t("tgOutside") : t("failed")}
-    </p>
+    <div className="flex flex-1 items-center justify-center">
+      <p className="text-center text-muted-foreground" role="status">
+        {state === "loading" ? t("tgLoading") : state === "outside" ? t("tgOutside") : t("failed")}
+      </p>
+    </div>
   );
 }

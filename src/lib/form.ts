@@ -17,6 +17,7 @@ const CODES = new Set([
   "too_small",
   "too_big",
   "required",
+  "women_only_pref",
 ]);
 
 export function fieldErrors(error: z.ZodError): Record<string, string> {

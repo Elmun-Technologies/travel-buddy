@@ -14,7 +14,7 @@ const trip = {
   groupSizeMax: "4",
   budgetMin: "500",
   budgetMax: "650",
-  travelStyles: ["trekking"],
+  travelStyles: ["mountains"],
   description: "",
 };
 

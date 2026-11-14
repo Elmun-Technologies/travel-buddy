@@ -55,21 +55,34 @@ export const LANGUAGES = [
   "it",
 ] as const;
 
+// The 8 styles from the design (onboarding 02/04, trip creation). Migration 0003 mapped the old list.
 export const TRAVEL_STYLES = [
-  "budget",
-  "comfort",
-  "luxury",
-  "adventure",
-  "trekking",
+  "mountains",
   "beach",
   "city",
-  "culture",
   "food",
-  "nightlife",
-  "nature",
-  "road_trip",
   "photo",
-  "wellness",
+  "extreme",
+  "budget",
+  "shopping",
+] as const;
+
+export const GROUP_PREFS = ["mixed", "women_only"] as const;
+export const BUDGET_BANDS = ["lt300", "300_600", "600_1000", "any"] as const;
+/** Countries offered as one-tap chips in onboarding ("Qayerga borishni orzu qilasiz?"). */
+export const POPULAR_DESTINATIONS = [
+  "GE",
+  "TR",
+  "KZ",
+  "AE",
+  "TH",
+  "KG",
+  "AZ",
+  "EG",
+  "MY",
+  "ID",
+  "VN",
+  "UZ",
 ] as const;
 
 export const INTERESTS = [

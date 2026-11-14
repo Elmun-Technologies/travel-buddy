@@ -40,12 +40,13 @@ for (const locale of ["uz", "ru", "en"]) {
   });
 }
 
-// Owner bug (4.1): "Показать" did nothing in Telegram — an invalid number in the budget field blocked
-// the native form submit silently. Budget is now a fixed choice and the form has noValidate.
-test("feed filter submits from the Russian page", async ({ page }) => {
-  await page.goto("/ru/trips");
-  await page.selectOption('select[name="country"]', "GE");
-  await page.selectOption('select[name="budget"]', "600");
-  await page.getByRole("button", { name: "Показать" }).click();
-  await expect(page).toHaveURL(/country=GE.*budget=600/);
+// Owner bug (4.1): "Показать" seemed dead in Telegram. Filters are now chips that navigate, show
+// "searching…" and scroll to a results heading with the count.
+test("feed chips filter by country and show the result count", async ({ page }) => {
+  await page.goto("/ru/trips?all=1");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "Страна" }).click();
+  await page.getByRole("link", { name: "Грузия", exact: true }).click();
+  await expect(page).toHaveURL(/country=GE/);
+  await expect(page.getByRole("heading", { name: /^Грузия: / })).toBeVisible();
 });

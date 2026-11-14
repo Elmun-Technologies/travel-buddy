@@ -16,7 +16,7 @@ import { BackAction, MainAction } from "@/components/telegram-actions";
 import { Link, useRouter } from "@/i18n/navigation";
 import { LocaleSwitch } from "@/components/locale-switch";
 import { ageOn, BUDGET_BANDS, type Option } from "@/lib/catalog";
-import { haptic, tg } from "@/lib/telegram-webapp";
+import { haptic, openExternal, tg } from "@/lib/telegram-webapp";
 import { BirthDate } from "./birth-date";
 import { StyleCards } from "./style-cards";
 
@@ -237,7 +237,7 @@ export function OnboardingWizard({
   async function sharePhone() {
     const app = tg();
     if (!app?.requestContact) {
-      window.location.href = `https://t.me/${bot}?start=phone`;
+      openExternal(`https://t.me/${bot}?start=phone`); // Mini App: via openTelegramLink
       return;
     }
     app.requestContact((shared) => {

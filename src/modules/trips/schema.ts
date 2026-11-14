@@ -96,15 +96,26 @@ export function intentFromForm(f: FormData) {
   return { ...placeFromForm(f), note: f.get("note") ?? "" };
 }
 
+/** "GE,TR" → ["GE","TR"]; unknown values dropped. */
+const csvOf = <T extends readonly [string, ...string[]]>(values: T) =>
+  z
+    .string()
+    .max(200)
+    .transform((v) => v.split(",").filter((x): x is T[number] => (values as readonly string[]).includes(x)))
+    .optional()
+    .catch(undefined);
+
 export const feedFilterSchema = z.object({
-  country: z.enum(COUNTRIES).optional().catch(undefined),
+  country: csvOf(COUNTRIES),
   month: z
     .string()
     .regex(/^\d{4}-(0[1-9]|1[0-2])$/)
     .optional()
     .catch(undefined),
+  date: z.iso.date().optional().catch(undefined), // "Aniq sana": trips running on that day (± flex)
   budget: z.coerce.number().int().min(1).optional().catch(undefined),
-  style: z.enum(TRAVEL_STYLES).optional().catch(undefined),
+  style: csvOf(TRAVEL_STYLES),
+  all: z.literal("1").optional().catch(undefined), // explicit "Hammasi": don't prefill from the profile
   page: z.coerce.number().int().min(1).max(100).default(1).catch(1),
 });
 export type FeedFilter = z.output<typeof feedFilterSchema>;

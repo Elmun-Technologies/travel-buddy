@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ExternalLink } from "@/components/external-link";
 import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import { TelegramLoginButton } from "@/components/auth/telegram-login-button";
@@ -39,12 +40,12 @@ async function Login({ params, searchParams }: PageProps<"/[locale]/login">) {
           <TelegramLoginButton bot={bot} authUrl={authUrl} lang={locale} />
           <div className="border-t pt-6">
             <p className="mb-3 text-sm text-muted-foreground">{t("orBot")}</p>
-            <a
+            <ExternalLink
               href={`https://t.me/${bot}`}
               className={buttonVariants({ variant: "outline", className: "h-11 px-4" })}
             >
               {t("openBot")} @{bot}
-            </a>
+            </ExternalLink>
           </div>
         </>
       ) : (

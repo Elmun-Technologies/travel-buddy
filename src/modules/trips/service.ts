@@ -1,8 +1,9 @@
 import "server-only";
 import {
   and,
-  arrayContains,
+  arrayOverlaps,
   asc,
+  count,
   desc,
   eq,
   gte,
@@ -12,6 +13,7 @@ import {
   lte,
   notInArray,
   or,
+  sql,
 } from "drizzle-orm";
 import { travelIntents, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
@@ -41,6 +43,7 @@ const cardFields = {
   womenOnly: trips.womenOnly,
   status: trips.status,
   ownerUserId: trips.ownerUserId,
+  isTest: trips.isTest,
 };
 
 async function withCounts<T extends { id: string; ownerUserId: string | null }>(rows: T[]) {
@@ -86,7 +89,12 @@ export async function listFeed(viewerId: string | null, f: FeedFilter) {
     eq(trips.visibility, "public"),
     gte(trips.startDate, todayISO()),
   ];
-  if (f.country) conds.push(eq(trips.destinationCountry, f.country));
+  if (f.country?.length) conds.push(inArray(trips.destinationCountry, f.country));
+  if (f.date)
+    conds.push(
+      sql`${trips.startDate} - ${trips.dateFlexDays} <= ${f.date}::date`,
+      sql`${trips.endDate} + ${trips.dateFlexDays} >= ${f.date}::date`,
+    );
   if (f.month) {
     const [y, m] = f.month.split("-").map(Number);
     const next = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
@@ -94,17 +102,21 @@ export async function listFeed(viewerId: string | null, f: FeedFilter) {
   }
   // ponytail: budget filter ignores currency; add FX conversion when non-USD trips are common.
   if (f.budget) conds.push(or(isNull(trips.budgetMin), lte(trips.budgetMin, f.budget * 100))!);
-  if (f.style) conds.push(arrayContains(trips.travelStyles, [f.style]));
+  if (f.style?.length) conds.push(arrayOverlaps(trips.travelStyles, f.style));
   if (blocked.length) conds.push(or(isNull(trips.ownerUserId), notInArray(trips.ownerUserId, blocked))!);
 
-  const rows = await getDb()
-    .select(cardFields)
-    .from(trips)
-    .where(and(...conds))
-    .orderBy(asc(trips.startDate), desc(trips.createdAt))
-    .limit(PAGE_SIZE + 1)
-    .offset((f.page - 1) * PAGE_SIZE);
-  return { items: await withCounts(rows.slice(0, PAGE_SIZE)), hasMore: rows.length > PAGE_SIZE };
+  const where = and(...conds);
+  const [rows, [{ total }]] = await Promise.all([
+    getDb()
+      .select(cardFields)
+      .from(trips)
+      .where(where)
+      .orderBy(asc(trips.startDate), desc(trips.createdAt))
+      .limit(PAGE_SIZE + 1)
+      .offset((f.page - 1) * PAGE_SIZE),
+    getDb().select({ total: count() }).from(trips).where(where),
+  ]);
+  return { items: await withCounts(rows.slice(0, PAGE_SIZE)), hasMore: rows.length > PAGE_SIZE, total };
 }
 
 /** Full trip for display, or null if hidden from this viewer. */

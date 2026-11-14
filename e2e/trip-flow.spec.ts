@@ -176,9 +176,10 @@ test.describe("trip flow", () => {
     await owner.waitForLoadState("networkidle");
     const chat = owner.getByRole("switch", { name: "Chat xabarlari" });
     await expect(chat).toHaveAttribute("aria-checked", "true");
+    const saved = owner.waitForResponse((r) => r.url().includes("/api/profile/notifications") && r.ok());
     await chat.click();
     await expect(chat).toHaveAttribute("aria-checked", "false");
-    await owner.waitForLoadState("networkidle");
+    await saved; // reload only after the server has the choice
     await owner.reload();
     await expect(owner.getByRole("switch", { name: "Chat xabarlari" })).toHaveAttribute(
       "aria-checked",

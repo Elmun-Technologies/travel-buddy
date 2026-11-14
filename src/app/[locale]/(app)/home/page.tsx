@@ -199,6 +199,17 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
         </Panel>
       )}
 
+      <Link
+        href="/visa"
+        className="press flex min-h-16 items-center justify-between rounded-panel bg-card px-4"
+      >
+        <span className="flex flex-col">
+          <span className="text-[17px] font-semibold">{t("visaTitle")}</span>
+          <span className="text-sm text-muted-foreground">{t("visaText")}</span>
+        </span>
+        <span aria-hidden="true">{"↗"}</span>
+      </Link>
+
       <div className="grid grid-cols-2 gap-2">
         <Link
           href="/clubs"

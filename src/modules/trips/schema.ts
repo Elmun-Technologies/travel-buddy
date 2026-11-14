@@ -103,6 +103,7 @@ export const feedFilterSchema = z.object({
   date: z.iso.date().optional().catch(undefined), // "Aniq sana": trips running on that day (± flex)
   budget: z.coerce.number().int().min(1).optional().catch(undefined),
   style: csvOf(TRAVEL_STYLES),
+  visa: z.literal("free").optional().catch(undefined), // "Vizasiz": no visa for the traveler's passport
   all: z.literal("1").optional().catch(undefined), // explicit "Hammasi": don't prefill from the profile
   page: z.coerce.number().int().min(1).max(100).default(1).catch(1),
 });

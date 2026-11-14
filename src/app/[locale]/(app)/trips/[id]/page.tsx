@@ -19,6 +19,7 @@ import { getSessionUser, type SessionUser } from "@/lib/session";
 import { shareLinks } from "@/lib/trip-share";
 import { cn } from "@/lib/utils";
 import { joinDenied } from "@/modules/groups/rules";
+import { getPrices, getVisaRule } from "@/modules/destinations/service";
 import { getMyMembership, listMembers } from "@/modules/groups/service";
 import { getJoinProfile, getPublicProfile } from "@/modules/profiles/service";
 import { getTripView } from "@/modules/trips/service";
@@ -57,9 +58,12 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
   const [t, ts] = await Promise.all([getTranslations("trip"), getTranslations("styles")]);
   if (!trip) return <p className="py-16 text-center text-muted-foreground">{t("notFound")}</p>;
 
-  const [organizer, members] = await Promise.all([
+  const days = Math.round((Date.parse(trip.endDate) - Date.parse(trip.startDate)) / 864e5) + 1;
+  const [organizer, members, visa, prices] = await Promise.all([
     trip.ownerUserId ? getPublicProfile(user?.id ?? trip.ownerUserId, trip.ownerUserId) : null,
     user ? listMembers(user.id, trip.id) : null,
+    getVisaRule(trip.destinationCountry),
+    getPrices(trip.destinationCountry, days),
   ]);
   const budget = formatBudget(trip.budgetMin, trip.budgetMax, trip.currency);
   const left = trip.groupSizeMax ? Math.max(0, trip.groupSizeMax - trip.approvedCount) : null;
@@ -184,6 +188,40 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
       </Panel>
 
       {links && trip.status === "open" && <ShareFriendCard {...links} />}
+
+      {(visa || prices[0]) && (
+        <Panel className="flex flex-col">
+          {visa && (
+            <Link
+              href={`/visa?c=${trip.destinationCountry}`}
+              className="flex min-h-14 items-center justify-between gap-3 border-b border-line last:border-0"
+            >
+              <span className="flex flex-col">
+                <span className={label}>{t("visaLabel")}</span>
+                <span className="text-[17px]">
+                  {t(`visa_${visa.status}` as "visa_visa_free")}
+                  {visa.maxStayDays ? ` · ${t("visaUpTo", { n: visa.maxStayDays })}` : ""}
+                </span>
+              </span>
+              <span aria-hidden="true">{"↗"}</span>
+            </Link>
+          )}
+          {prices[0] && (
+            <Link
+              href={`/price/${trip.destinationCountry}?days=${days}`}
+              className="flex min-h-14 items-center justify-between gap-3"
+            >
+              <span className="flex flex-col">
+                <span className={label}>{t("priceLabel")}</span>
+                <span className="text-[17px]">
+                  {t("priceUsually", { price: `$${Math.round(prices[0].median / 100)}` })}
+                </span>
+              </span>
+              <span aria-hidden="true">{"↗"}</span>
+            </Link>
+          )}
+        </Panel>
+      )}
 
       {trip.description && (
         <Panel className="flex flex-col gap-2">

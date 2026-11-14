@@ -147,7 +147,8 @@
     "openFirst": "Start a trip",
     "destinations": "Destinations",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "visaFree": "Visa-free"
   },
   "trip": {
     "newTitle": "Start a trip",
@@ -227,7 +228,14 @@
     "statSpots": "Spots",
     "spotsTaken": "{n}/{max} taken",
     "noBudget": "To agree",
-    "went": "Went on {went}/{total} trips"
+    "went": "Went on {went}/{total} trips",
+    "visaLabel": "Visa · Uzbekistan passport",
+    "visa_visa_free": "Visa-free",
+    "visa_evisa": "E-visa",
+    "visa_visa_required": "Visa required",
+    "visaUpTo": "up to {n} days",
+    "priceLabel": "Real price",
+    "priceUsually": "Usually {price} per person"
   },
   "intent": {
     "title": "Looking for a buddy",
@@ -578,7 +586,9 @@
     "clubsText": "Find your people",
     "memories": "Memories",
     "memoriesText": "Who came back from where",
-    "newTrip": "Start a trip"
+    "newTrip": "Start a trip",
+    "visaTitle": "Visas and documents",
+    "visaText": "Where can I go visa-free with my passport?"
   },
   "rooms": {
     "title": "Rooms",
@@ -795,7 +805,8 @@
     "familyOn": "The link is on. You can switch it off any time.",
     "familySend": "Send",
     "familyOff": "Switch the link off",
-    "familyShareText": "About my trip: plan, group and emergency numbers"
+    "familyShareText": "About my trip: plan, group and emergency numbers",
+    "realPrice": "Real price: usually {price}"
   },
   "notify": {
     "title": "Bot notifications",
@@ -865,5 +876,54 @@
     "localNumber": "{country}, emergency number",
     "write": "Message {name}",
     "footer": "{name} shared this page. Other members' profiles are not shown."
+  },
+  "visa": {
+    "back": "Back",
+    "title": "Visas and documents",
+    "passport": "With an Uzbekistan passport",
+    "headline": "Where can we go easily?",
+    "filter": "Filter",
+    "f_all": "All",
+    "f_free": "Visa-free",
+    "f_required": "Visa needed",
+    "empty": "Data is being prepared. For now, check the embassy website.",
+    "checked": "Data as of {date}. Rules change — check the embassy website before you go.",
+    "evisa": "E-visa",
+    "upTo": "up to {n} days",
+    "s_visa_free": "Visa-free",
+    "s_evisa": "E-visa",
+    "s_visa_required": "Visa needed",
+    "sample": "Sample",
+    "documents": "Documents",
+    "agencies": "Visa agencies · partners",
+    "agencyNote": "Sorted by rating, not ads.",
+    "source": "Source: official website"
+  },
+  "price": {
+    "back": "Back",
+    "title": "Real price",
+    "sub": "{country} · {days} days",
+    "groups": "What {n} groups really spent",
+    "estimate": "Approximate — editor's estimate",
+    "perPerson": "Per person",
+    "roomType": "Room type",
+    "room_quad": "Room for 4",
+    "room_double": "Double",
+    "room_single": "Single",
+    "usually": "Usually",
+    "range": "most groups {from} – {to}",
+    "sample": "Sample",
+    "whereGoes": "Where it goes",
+    "item_flight": "Return flight",
+    "item_stay": "Stay",
+    "item_food": "Food",
+    "item_transport": "Local transport",
+    "item_tours": "Tours, tickets",
+    "item_other": "Other",
+    "doubleNote": "In a double room the stay is ~{stay} — ~{total} in total.",
+    "agencies": "Agencies quote the same breakdown",
+    "agenciesText": "The request goes with group size, room type and days. If an offer is above market, you'll see it at once.",
+    "ask": "Ask for an offer at this price",
+    "empty": "No price data for {country} yet. It appears once the first groups are back."
   }
 }

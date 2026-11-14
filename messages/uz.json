@@ -147,7 +147,8 @@
     "openFirst": "Safarni ochamiz",
     "destinations": "Yo'nalishlar",
     "prev": "Oldingi",
-    "next": "Keyingi"
+    "next": "Keyingi",
+    "visaFree": "Vizasiz"
   },
   "trip": {
     "newTitle": "Safar ochish",
@@ -227,7 +228,14 @@
     "statSpots": "Joylar",
     "spotsTaken": "{n}/{max} band",
     "noBudget": "Kelishiladi",
-    "went": "{went}/{total} safarga bordi"
+    "went": "{went}/{total} safarga bordi",
+    "visaLabel": "Viza · O'zbekiston pasporti",
+    "visa_visa_free": "Vizasiz",
+    "visa_evisa": "Elektron viza",
+    "visa_visa_required": "Viza kerak",
+    "visaUpTo": "{n} kungacha",
+    "priceLabel": "Haqiqiy narx",
+    "priceUsually": "Odatda {price} kishi boshiga"
   },
   "intent": {
     "title": "Sherik izlayapman",
@@ -578,7 +586,9 @@
     "clubsText": "O'z odamlaringizni toping",
     "memories": "Taassurotlar",
     "memoriesText": "Kim qayerdan qaytdi",
-    "newTrip": "Safar ochaman"
+    "newTrip": "Safar ochaman",
+    "visaTitle": "Viza va hujjatlar",
+    "visaText": "Pasportim bilan qayerga vizasiz boraman?"
   },
   "rooms": {
     "title": "Xonalar",
@@ -795,7 +805,8 @@
     "familyOn": "Havola faol. Uni istalgan payt o'chirish mumkin.",
     "familySend": "Yuborish",
     "familyOff": "Havolani o'chirish",
-    "familyShareText": "Safarim haqida: reja, guruh va favqulodda raqamlar"
+    "familyShareText": "Safarim haqida: reja, guruh va favqulodda raqamlar",
+    "realPrice": "Haqiqiy narx: odatda {price}"
   },
   "notify": {
     "title": "Botdan bildirishnomalar",
@@ -865,5 +876,54 @@
     "localNumber": "{country}, favqulodda raqam",
     "write": "{name}ga yozish",
     "footer": "Sahifani {name}ning o'zi ulashgan. Boshqa a'zolarning profillari ko'rsatilmaydi."
+  },
+  "visa": {
+    "back": "Orqaga",
+    "title": "Viza va hujjatlar",
+    "passport": "O'zbekiston pasporti bilan",
+    "headline": "Qayerga osongina boramiz?",
+    "filter": "Saralash",
+    "f_all": "Hammasi",
+    "f_free": "Vizasiz",
+    "f_required": "Viza kerak",
+    "empty": "Ma'lumot tayyorlanmoqda. Hozircha elchixona saytini tekshiring.",
+    "checked": "Ma'lumot {date} holatiga. Qoidalar o'zgarishi mumkin — ketishdan oldin elchixona saytida tekshiring.",
+    "evisa": "Elektron viza",
+    "upTo": "{n} kungacha",
+    "s_visa_free": "Vizasiz",
+    "s_evisa": "E-viza",
+    "s_visa_required": "Viza kerak",
+    "sample": "Namuna",
+    "documents": "Hujjatlar",
+    "agencies": "Viza agentliklari · hamkor",
+    "agencyNote": "Tartib — baho bo'yicha, reklama emas.",
+    "source": "Manba: rasmiy sayt"
+  },
+  "price": {
+    "back": "Orqaga",
+    "title": "Haqiqiy narx",
+    "sub": "{country} · {days} kun",
+    "groups": "{n} ta guruhning haqiqiy xarajati",
+    "estimate": "Taxminiy — muharrir bahosi",
+    "perPerson": "Kishi boshiga",
+    "roomType": "Xona turi",
+    "room_quad": "4 kishilik xona",
+    "room_double": "2 kishilik",
+    "room_single": "Yakka",
+    "usually": "Odatda",
+    "range": "ko'pchilik guruhlarda {from} – {to}",
+    "sample": "Namuna",
+    "whereGoes": "Nimaga ketadi",
+    "item_flight": "Aviachipta, borib-kelish",
+    "item_stay": "Joy",
+    "item_food": "Ovqat",
+    "item_transport": "Ichki yo'l",
+    "item_tours": "Ekskursiya, kirish",
+    "item_other": "Boshqa",
+    "doubleNote": "2 kishilik xonada joy ~{stay} bo'ladi — jami ~{total}.",
+    "agencies": "Agentliklar ham shu tarkibda narx beradi",
+    "agenciesText": "So'rov guruh soni, xona turi va kunlar bilan boradi. Taklif bozordan qimmat bo'lsa — darhol ko'rinadi.",
+    "ask": "Shu narxga taklif so'raymiz",
+    "empty": "{country} uchun narx ma'lumoti hali yo'q. Birinchi guruhlar safardan qaytgach shu yerda chiqadi."
   }
 }

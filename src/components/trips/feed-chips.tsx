@@ -12,6 +12,7 @@ export type FeedQuery = {
   date?: string;
   budget?: number;
   style?: string[];
+  visa?: "free";
 };
 
 type Panel = "country" | "when" | "budget" | "style" | null;
@@ -28,6 +29,7 @@ function href(q: FeedQuery) {
   if (q.date) p.set("date", q.date);
   if (q.budget) p.set("budget", String(q.budget));
   if (q.style?.length) p.set("style", q.style.join(","));
+  if (q.visa) p.set("visa", q.visa);
   return `/trips?${p}`;
 }
 
@@ -43,11 +45,13 @@ export function FeedChips({
   countries,
   styles,
   months,
+  visaFilter,
 }: {
   q: FeedQuery;
   countries: Option[];
   styles: Option[];
   months: { thisMonth: Option; nextMonth: Option };
+  visaFilter: boolean;
 }) {
   const t = useTranslations("feed");
   const router = useRouter();
@@ -75,7 +79,7 @@ export function FeedChips({
 
   const nameOf = (list: Option[], v: string) => list.find((o) => o.value === v)?.label ?? v;
   const more = (n: number) => (n > 1 ? ` +${n - 1}` : "");
-  const any = !q.country?.length && !q.month && !q.date && !q.budget && !q.style?.length;
+  const any = !q.country?.length && !q.month && !q.date && !q.budget && !q.style?.length && !q.visa;
   const whenLabel = q.date
     ? q.date.split("-").reverse().slice(0, 2).join(".")
     : q.month === months.thisMonth.value
@@ -109,6 +113,7 @@ export function FeedChips({
     <div className="flex flex-col gap-3">
       <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
         {opt(t("all"), "/trips?all=1", any)}
+        {visaFilter && opt(t("visaFree"), href({ ...q, visa: q.visa ? undefined : "free" }), !!q.visa)}
         {head(
           "country",
           q.country?.length ? nameOf(countries, q.country[0]) + more(q.country.length) : t("country"),

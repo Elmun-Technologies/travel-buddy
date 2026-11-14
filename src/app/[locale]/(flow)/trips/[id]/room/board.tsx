@@ -6,6 +6,7 @@ import { ArrowUpRight, Check, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Display, Panel, clayInput } from "@/components/clay";
 import { ExternalLink } from "@/components/external-link";
+import { Link } from "@/i18n/navigation";
 import { MainAction } from "@/components/telegram-actions";
 import { haptic, openExternal } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export type BoardTrip = {
   photo: string;
   currency: string;
   familyToken: string | null;
+  price: { country: string; days: number; median: number } | null;
   tripId: string;
 };
 type Props = {
@@ -758,6 +760,14 @@ function BookTab({ data, act, me, isOwner, trip, name, money }: TabProps) {
           >
             {t("askPrice")}
           </button>
+        )}
+        {trip.price && (
+          <Link
+            href={`/price/${trip.price.country}?days=${trip.price.days}`}
+            className="min-h-11 text-center text-[15px] text-signal underline underline-offset-4"
+          >
+            {t("realPrice", { price: money(trip.price.median) })} {"↗"}
+          </Link>
         )}
         <p className="text-center text-sm text-[#9a9a9a]">{t("tourNote")}</p>
       </Panel>

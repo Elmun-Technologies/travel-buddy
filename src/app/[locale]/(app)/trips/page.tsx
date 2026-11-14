@@ -10,6 +10,7 @@ import { asLocale } from "@/lib/guard";
 import { countryPhoto, FEATURED_COUNTRIES } from "@/lib/photos";
 import { getSessionUser } from "@/lib/session";
 import { getOwnProfile } from "@/modules/profiles/service";
+import { visaFreeCountries } from "@/modules/destinations/service";
 import { feedFilterSchema } from "@/modules/trips/schema";
 import { listFeed } from "@/modules/trips/service";
 
@@ -44,7 +45,8 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
     filter.month ||
     filter.date ||
     filter.budget ||
-    filter.style
+    filter.style ||
+    filter.visa
   );
   const profile = user && !explicit ? await getOwnProfile(user.id) : null;
   const auto = !!profile && !!(profile.dreamDestinations.length || BAND_MAX[profile.budgetBand ?? ""]);
@@ -56,13 +58,21 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
       }
     : filter;
 
-  const [{ items, hasMore, total }, t, ts] = await Promise.all([
+  const [{ items, hasMore, total }, t, ts, visaFree] = await Promise.all([
     listFeed(user?.id ?? null, f),
     getTranslations("feed"),
     getTranslations("styles"),
+    visaFreeCountries(),
   ]);
 
-  const q: FeedQuery = { country: f.country, month: f.month, date: f.date, budget: f.budget, style: f.style };
+  const q: FeedQuery = {
+    country: f.country,
+    month: f.month,
+    date: f.date,
+    budget: f.budget,
+    style: f.style,
+    visa: f.visa,
+  };
   const one = f.country?.length === 1 ? countryName(f.country[0], locale) : null;
   const page = (n: number) => {
     const p = new URLSearchParams({ all: "1", page: String(n) });
@@ -79,6 +89,7 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
           countries={POPULAR_DESTINATIONS.map((c) => ({ value: c, label: countryName(c, locale) }))}
           styles={TRAVEL_STYLES.map((s) => ({ value: s, label: ts(s) }))}
           months={{ thisMonth: monthOpt(0, locale), nextMonth: monthOpt(1, locale) }}
+          visaFilter={visaFree.length > 0}
         />
         {auto && (
           <p className="text-xs text-muted-foreground">

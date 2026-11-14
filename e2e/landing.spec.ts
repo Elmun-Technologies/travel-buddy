@@ -50,3 +50,15 @@ test("feed chips filter by country and show the result count", async ({ page }) 
   await expect(page).toHaveURL(/country=GE/);
   await expect(page.getByRole("heading", { name: /^Грузия: / })).toBeVisible();
 });
+
+test("visa and real price pages open without login, with or without data", async ({ page }) => {
+  await page.goto("/uz/visa");
+  await expect(page.getByRole("heading", { name: "Qayerga osongina boramiz?" })).toBeVisible();
+  await page.getByRole("link", { name: "Vizasiz", exact: true }).click();
+  await expect(page).toHaveURL(/f=free/);
+  const res = await page.goto("/uz/price/GE");
+  expect(res?.status()).toBe(200);
+  await expect(page.getByRole("heading", { name: "Haqiqiy narx" })).toBeVisible();
+  await page.goto("/uz/price/XX"); // streamed page: the status is already 200, the content is the 404 page
+  await expect(page.getByText("Sahifa topilmadi")).toBeVisible();
+});

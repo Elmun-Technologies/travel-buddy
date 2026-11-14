@@ -2,7 +2,15 @@
 // the guard below refuses unless APP_ENV is staging or development. Idempotent (fixed ids, upserts);
 // dates are recomputed from today on every run so the samples always lie in the future.
 import { sql } from "drizzle-orm";
-import { travelerProfiles, tripMembers, trips, users } from "@/db/schema";
+import {
+  priceStats,
+  travelerProfiles,
+  tripMembers,
+  trips,
+  users,
+  visaAgencies,
+  visaRules,
+} from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import type { Db } from "@/lib/db";
 import { SAMPLE_TRIP_PREFIX } from "@/lib/sample";
@@ -124,6 +132,134 @@ export async function seedSamples(db: Db, env = process.env.APP_ENV) {
       }
     }
   });
+  await seedDestinationSamples(db);
   const [{ n }] = await db.execute<{ n: number }>(sql`select count(*)::int as n from trips where is_test`);
   return n;
+}
+
+// Visa / price / agency samples so the 5b screens can be checked on staging. All marked is_sample
+// ("Namuna"); real rows entered in admin are never overwritten (insert … on conflict do nothing).
+const usd = (n: number) => n * 100;
+async function seedDestinationSamples(db: Db) {
+  const checkedAt = todayISO();
+  await db
+    .insert(visaRules)
+    .values([
+      {
+        destination: "GE",
+        status: "visa_free",
+        maxStayDays: 365,
+        notes: "faqat pasport",
+        checkedAt,
+        isSample: true,
+      },
+      {
+        destination: "TR",
+        status: "visa_free",
+        maxStayDays: 30,
+        notes: "pasport 150+ kun amal qilsin",
+        checkedAt,
+        isSample: true,
+      },
+      { destination: "KZ", status: "visa_free", maxStayDays: 30, checkedAt, isSample: true },
+      {
+        destination: "AE",
+        status: "evisa",
+        maxStayDays: 30,
+        notes: "chegarada tekshiruv qattiq",
+        documents: ["Pasport", "Rangli foto", "Mehmonxona broni", "Qaytish chiptasi"],
+        checkedAt,
+        isSample: true,
+      },
+      {
+        destination: "DE",
+        status: "visa_required",
+        visaName: "Shengen vizasi",
+        documents: [
+          "Pasport — qaytgandan keyin ham amal qilsin",
+          "Rangli foto, biometrik o'lcham",
+          "Bank ko'chirmasi",
+          "Tibbiy sug'urta (Shengen talabiga mos)",
+          "Mehmonxona va chipta broni",
+        ],
+        checkedAt,
+        isSample: true,
+      },
+    ])
+    .onConflictDoNothing();
+  await db
+    .insert(visaAgencies)
+    .values([
+      {
+        id: uid(90),
+        name: "Visa Point",
+        countries: ["DE", "AE"],
+        rating: 4.8,
+        priceMinor: usd(60),
+        note: "hujjatlarni tekshiradi",
+        isSample: true,
+      },
+      {
+        id: uid(91),
+        name: "Euro Visa Center",
+        countries: ["DE"],
+        rating: 4.6,
+        priceMinor: usd(75),
+        note: "yozilish + tarjima",
+        isSample: true,
+      },
+    ])
+    .onConflictDoNothing();
+  const items = (flight: number, stay: number, food: number, transport: number, tours: number) => [
+    { key: "flight", amount: usd(flight) },
+    { key: "stay", amount: usd(stay) },
+    { key: "food", amount: usd(food) },
+    { key: "transport", amount: usd(transport) },
+    { key: "tours", amount: usd(tours) },
+  ];
+  await db
+    .insert(priceStats)
+    .values([
+      {
+        destination: "GE",
+        days: 7,
+        roomType: "quad",
+        p25: usd(520),
+        median: usd(585),
+        p75: usd(650),
+        items: items(210, 105, 140, 60, 70),
+        isSample: true,
+      },
+      {
+        destination: "GE",
+        days: 7,
+        roomType: "double",
+        p25: usd(590),
+        median: usd(655),
+        p75: usd(720),
+        items: items(210, 175, 140, 60, 70),
+        isSample: true,
+      },
+      {
+        destination: "GE",
+        days: 7,
+        roomType: "single",
+        p25: usd(700),
+        median: usd(780),
+        p75: usd(860),
+        items: items(210, 300, 140, 60, 70),
+        isSample: true,
+      },
+      {
+        destination: "TR",
+        days: 5,
+        roomType: "quad",
+        p25: usd(450),
+        median: usd(520),
+        p75: usd(600),
+        items: items(240, 90, 110, 40, 40),
+        isSample: true,
+      },
+    ])
+    .onConflictDoNothing();
 }

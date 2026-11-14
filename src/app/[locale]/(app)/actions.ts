@@ -7,8 +7,6 @@ import { asLocale } from "@/lib/guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { destroySession, getSessionUser } from "@/lib/session";
 import { decideRequest, leaveTrip, requestJoin } from "@/modules/groups/service";
-import { profileFromForm, profileSchema } from "@/modules/profiles/schema";
-import { saveProfile } from "@/modules/profiles/service";
 import { intentFromForm, intentSchema, tripFromForm, tripSchema } from "@/modules/trips/schema";
 import { closeIntent, closeTrip, createIntent, createTrip } from "@/modules/trips/service";
 
@@ -21,16 +19,6 @@ async function authed(f: FormData) {
 }
 
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" ? v : "");
-
-export async function saveProfileAction(_: FormState, f: FormData): Promise<FormState> {
-  const { locale, user } = await authed(f);
-  const raw = profileFromForm(f);
-  const parsed = profileSchema.safeParse(raw);
-  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values: raw };
-  await saveProfile(user.id, parsed.data);
-  redirect({ href: str(f.get("next")) === "trips" ? "/trips" : "/me", locale });
-  return null;
-}
 
 export async function logoutAction(f: FormData) {
   const locale = asLocale(f.get("locale"));

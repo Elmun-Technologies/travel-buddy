@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Built in GitHub Actions (linux/arm64), never on the shared server.
 FROM node:22-alpine AS deps
 WORKDIR /app
@@ -8,12 +9,19 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 COPY . .
 # Brand name is baked into static pages at build time.
+# GIT_SHA → deploymentId (version-skew detection + "update" banner).
+# Server Actions key: stable across builds so pages opened before a deploy still work.
+# Passed as a BuildKit secret, so it is not stored in image history.
 ARG APP_NAME
-ENV APP_NAME=$APP_NAME NEXT_TELEMETRY_DISABLED=1
-RUN pnpm build && pnpm worker:build
+ARG GIT_SHA
+ARG NEXT_PUBLIC_SENTRY_DSN
+ENV APP_NAME=$APP_NAME NEXT_DEPLOYMENT_ID=$GIT_SHA NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN NEXT_TELEMETRY_DISABLED=1
+RUN --mount=type=secret,id=sa_key,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY pnpm build && pnpm worker:build
 
 FROM node:22-alpine AS web
 WORKDIR /app
+ARG GIT_SHA
+ENV NEXT_DEPLOYMENT_ID=$GIT_SHA
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 NEXT_TELEMETRY_DISABLED=1
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static

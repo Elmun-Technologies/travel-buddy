@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { UpdateBanner } from "@/components/update-banner";
 import { APP_NAME } from "@/lib/config";
 import "../globals.css";
 
@@ -30,9 +31,18 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   return (
-    <html lang={locale} className={`${sans.variable} h-full antialiased`}>
+    // data-build: the build this page came from (read by UpdateBanner). Next's own data-dpl-id is
+    // dropped on hydration, so we render ours through React.
+    <html
+      lang={locale}
+      data-build={process.env.NEXT_DEPLOYMENT_ID}
+      className={`${sans.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {children}
+          <UpdateBanner />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

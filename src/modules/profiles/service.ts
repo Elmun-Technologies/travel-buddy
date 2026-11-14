@@ -1,6 +1,6 @@
 import "server-only";
 import { eq, inArray } from "drizzle-orm";
-import { travelerProfiles } from "@/db/schema";
+import { onboardingDrafts, travelerProfiles } from "@/db/schema";
 import { ageOn } from "@/lib/catalog";
 import { getDb } from "@/lib/db";
 import { hasTelegram } from "@/modules/auth/service";
@@ -15,10 +15,29 @@ export async function getOwnProfile(userId: string) {
 
 export async function saveProfile(userId: string, input: ProfileInput) {
   const telegramVerified = await hasTelegram(userId);
+  await getDb().transaction(async (tx) => {
+    await tx
+      .insert(travelerProfiles)
+      .values({ userId, ...input, telegramVerified })
+      .onConflictDoUpdate({ target: travelerProfiles.userId, set: { ...input, telegramVerified } });
+    await tx.delete(onboardingDrafts).where(eq(onboardingDrafts.userId, userId));
+  });
+}
+
+export async function getDraft(userId: string) {
+  const [d] = await getDb()
+    .select({ data: onboardingDrafts.data, updatedAt: onboardingDrafts.updatedAt })
+    .from(onboardingDrafts)
+    .where(eq(onboardingDrafts.userId, userId));
+  return d ? { data: d.data as Record<string, unknown>, savedAt: d.updatedAt.getTime() } : null;
+}
+
+export async function saveDraft(userId: string, data: Record<string, unknown>) {
+  const now = new Date();
   await getDb()
-    .insert(travelerProfiles)
-    .values({ userId, ...input, telegramVerified })
-    .onConflictDoUpdate({ target: travelerProfiles.userId, set: { ...input, telegramVerified } });
+    .insert(onboardingDrafts)
+    .values({ userId, data, updatedAt: now })
+    .onConflictDoUpdate({ target: onboardingDrafts.userId, set: { data, updatedAt: now } });
 }
 
 /** Display names for a set of users (trip cards, member lists). */

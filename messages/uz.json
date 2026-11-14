@@ -123,7 +123,8 @@
     "dreams": "Borishni xohlaydi",
     "findTrips": "Safar topamiz",
     "language": "Til",
-    "went": "{went}/{total} safarga bordi"
+    "went": "{went}/{total} safarga bordi",
+    "sounds": "Ovozlar"
   },
   "feed": {
     "title": "Safarlar",
@@ -925,5 +926,9 @@
     "agenciesText": "So'rov guruh soni, xona turi va kunlar bilan boradi. Taklif bozordan qimmat bo'lsa — darhol ko'rinadi.",
     "ask": "Shu narxga taklif so'raymiz",
     "empty": "{country} uchun narx ma'lumoti hali yo'q. Birinchi guruhlar safardan qaytgach shu yerda chiqadi."
+  },
+  "sound": {
+    "turnOff": "Ovozni o'chirish",
+    "turnOn": "Ovozni yoqish"
   }
 }

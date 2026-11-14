@@ -123,7 +123,8 @@
     "dreams": "Wants to visit",
     "findTrips": "Find a trip",
     "language": "Language",
-    "went": "Went on {went}/{total} trips"
+    "went": "Went on {went}/{total} trips",
+    "sounds": "Sounds"
   },
   "feed": {
     "title": "Trips",
@@ -925,5 +926,9 @@
     "agenciesText": "The request goes with group size, room type and days. If an offer is above market, you'll see it at once.",
     "ask": "Ask for an offer at this price",
     "empty": "No price data for {country} yet. It appears once the first groups are back."
+  },
+  "sound": {
+    "turnOff": "Mute sounds",
+    "turnOn": "Turn sounds on"
   }
 }

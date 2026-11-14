@@ -24,7 +24,7 @@ export function JoinAction({ tripId, organizer }: { tripId: string; organizer: s
       body: "{}",
     }).catch(() => null);
     if (res?.ok) {
-      haptic.success();
+      haptic.celebrate(); // "Men ham boraman!"
       router.refresh(); // page now shows "request sent"
       return;
     }

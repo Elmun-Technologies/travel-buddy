@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Panel } from "@/components/clay";
 import { ExternalLink } from "@/components/external-link";
 import { LocaleSwitch } from "@/components/locale-switch";
+import { SoundSwitch } from "@/components/sound";
 import { NotifySettings } from "@/components/profile/notify-settings";
 import { PageLoading } from "@/components/page-loading";
 import { ProfileCard, profileChip } from "@/components/profile/profile-card";
@@ -161,6 +162,12 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
         <div className={row}>
           <span className="font-medium">{t("language")}</span>
           <LocaleSwitch />
+        </div>
+        <div className={row}>
+          <span id="sound-label" className="font-medium">
+            {t("sounds")}
+          </span>
+          <SoundSwitch />
         </div>
         <div className={row}>
           <form action={logoutAction}>

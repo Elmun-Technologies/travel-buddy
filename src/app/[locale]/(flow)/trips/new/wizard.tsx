@@ -148,7 +148,7 @@ export function CreateWizard({
     }).catch(() => null);
     setPending(false);
     if (res?.ok) {
-      haptic.success();
+      haptic.celebrate(); // the trip is open: the biggest moment of the flow
       setCreated((await res.json()) as Created);
       setStep(3);
       window.scrollTo({ top: 0 });

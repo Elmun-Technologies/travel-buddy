@@ -121,7 +121,7 @@ async function VisaCard({ r, open, locale }: { r: VisaRule; open: boolean; local
       <Link
         href={`/visa?c=${r.destination}`}
         id={r.destination}
-        className="flex items-center gap-4 rounded-panel bg-card p-4"
+        className="press lift flex items-center gap-4 rounded-panel bg-card p-4"
       >
         {head}
       </Link>

@@ -26,7 +26,7 @@ export async function TripCard({ trip, badge, href }: { trip: Trip; badge?: stri
   return (
     <Link
       href={href ?? `/trips/${trip.id}`}
-      className="press relative flex flex-col overflow-hidden rounded-[22px] bg-card"
+      className="press lift relative flex flex-col overflow-hidden rounded-[22px] bg-card"
     >
       <LinkPending />
       <div className="relative h-[132px] bg-[#b9c7d6]">
@@ -65,7 +65,7 @@ export async function TripCard({ trip, badge, href }: { trip: Trip; badge?: stri
         {trip.groupSizeMax && (
           <div className="flex items-center gap-2.5">
             <div className="h-1.5 flex-1 rounded-full bg-background">
-              <div className="h-full rounded-full bg-ink" style={{ width: `${fill}%` }} />
+              <div className="grow-x h-full rounded-full bg-ink" style={{ width: `${fill}%` }} />
             </div>
             <span className="text-[13px] font-semibold">
               {trip.approvedCount}/{trip.groupSizeMax}

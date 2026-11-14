@@ -569,6 +569,49 @@ export const reliability = pgTable(
   (t) => [uniqueIndex("reliability_unique").on(t.userId, t.tripId)],
 );
 
+// ---------- safety: family page, trusted contacts, SOS ----------
+
+/** "Yaqinlarimga ko'rsataman": a read-only page the traveler shares; can be switched off any time. */
+export const familyLinks = pgTable(
+  "family_links",
+  {
+    ...base,
+    token: text("token").notNull().unique(),
+    tripId: tripRef(),
+    userId: userRef("user_id"),
+    revokedAt: ts("revoked_at"),
+  },
+  (t) => [index("family_links_owner").on(t.userId, t.tripId)],
+);
+
+/** A person who gets SOS and "Hammasi joyida" in Telegram. Linked when they open the bot invite. */
+export const trustedContacts = pgTable(
+  "trusted_contacts",
+  {
+    ...base,
+    userId: userRef("user_id"),
+    name: text("name").notNull(),
+    token: text("token").notNull().unique(),
+    chatId: text("chat_id"), // set when the contact presses Start in the bot
+  },
+  (t) => [index("trusted_contacts_user").on(t.userId)],
+);
+
+/** "Hammasi joyida" check-ins, SOS presses and 1-hour location shares. */
+export const safetyEvents = pgTable(
+  "safety_events",
+  {
+    ...base,
+    userId: userRef("user_id"),
+    tripId: tripRef(),
+    kind: text("kind").notNull(), // checkin | sos | location
+    lat: real("lat"),
+    lng: real("lng"),
+    expiresAt: ts("expires_at"), // location share end
+  },
+  (t) => [index("safety_events_trip").on(t.tripId, t.userId, t.createdAt)],
+);
+
 // ---------- trust & safety ----------
 export const reviews = pgTable(
   "reviews",

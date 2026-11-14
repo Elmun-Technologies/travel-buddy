@@ -7,7 +7,7 @@ import { Display, Panel } from "@/components/clay";
 import { ReportLink } from "@/components/report-link";
 import { BackAction } from "@/components/telegram-actions";
 import { InviteButton, type ShareLinks } from "@/components/trips/share";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { haptic } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, PollView } from "@/modules/chat/service";
@@ -136,9 +136,16 @@ export function Room({
   return (
     <>
       <BackAction label={t("back")} onClick={() => router.push(`/trips/${tripId}`)} />
-      <div className="text-center">
+      <div className="relative text-center">
         <div className="font-semibold">{title}</div>
         <div className="text-xs text-muted-foreground">{t("subtitle")}</div>
+        <Link
+          href={`/trips/${tripId}/sos`}
+          aria-label={t("sosLabel")}
+          className="absolute top-0 right-0 flex min-h-11 items-center rounded-full bg-danger px-4 text-sm font-bold text-white"
+        >
+          SOS
+        </Link>
       </div>
 
       <div role="tablist" className="grid grid-cols-4 gap-1 rounded-full bg-card p-1">

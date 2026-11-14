@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { ArrowUpRight, Check, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Display, Panel, clayInput } from "@/components/clay";
 import { ExternalLink } from "@/components/external-link";
 import { MainAction } from "@/components/telegram-actions";
-import { haptic } from "@/lib/telegram-webapp";
+import { haptic, openExternal } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 import type { Board as BoardData } from "@/modules/board/service";
 import type { BoardOp } from "@/modules/board/schema";
@@ -25,6 +25,8 @@ export type BoardTrip = {
   flightUrl: string | null;
   photo: string;
   currency: string;
+  familyToken: string | null;
+  tripId: string;
 };
 type Props = {
   tab: "plan" | "book" | "costs";
@@ -108,7 +110,7 @@ type TabProps = {
 
 // ---------- Reja ----------
 
-function PlanTab({ data, act, isOwner }: TabProps) {
+function PlanTab({ data, act, isOwner, trip }: TabProps) {
   const t = useTranslations("board");
   const [adding, setAdding] = useState(false);
   const [checkText, setCheckText] = useState("");
@@ -183,6 +185,8 @@ function PlanTab({ data, act, isOwner }: TabProps) {
           ))}
         </ol>
       </Panel>
+
+      <FamilyCard tripId={trip.tripId} initial={trip.familyToken} />
 
       <Panel className="flex flex-col">
         <div className="flex items-center justify-between pb-2">
@@ -348,6 +352,63 @@ function InlineForm({
         </button>
       </div>
     </form>
+  );
+}
+
+/** "Yaqinlarim ham ko'rib tursin": a read-only page for family (App-Family), revocable any time. */
+function FamilyCard({ tripId, initial }: { tripId: string; initial: string | null }) {
+  const t = useTranslations("board");
+  const locale = useLocale();
+  const [token, setToken] = useState(initial);
+  const call = (op: string) =>
+    fetch("/api/safety", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ op, tripId }),
+    }).catch(() => null);
+
+  async function send() {
+    let tok = token;
+    if (!tok) {
+      const r = await call("family.create");
+      if (!r?.ok) return;
+      tok = ((await r.json()) as { token: string }).token;
+      setToken(tok);
+    }
+    const url = `${window.location.origin}/${locale}/f/${tok}`;
+    openExternal(
+      `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(t("familyShareText"))}`,
+    );
+  }
+  async function revoke() {
+    if ((await call("family.revoke"))?.ok) setToken(null);
+  }
+
+  return (
+    <Panel tone="soft" className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col">
+          <span className="text-xl font-semibold text-blue-ink">{t("familyTitle")}</span>
+          <span className="text-[15px] text-blue-ink/80">{token ? t("familyOn") : t("familyText")}</span>
+        </div>
+        <button
+          type="button"
+          onClick={send}
+          className="press min-h-12 flex-none rounded-full bg-blue px-6 font-semibold text-white"
+        >
+          {t("familySend")}
+        </button>
+      </div>
+      {token && (
+        <button
+          type="button"
+          onClick={revoke}
+          className="min-h-11 self-start text-sm text-blue-ink underline"
+        >
+          {t("familyOff")}
+        </button>
+      )}
+    </Panel>
   );
 }
 

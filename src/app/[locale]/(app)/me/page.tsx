@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Panel } from "@/components/clay";
 import { ExternalLink } from "@/components/external-link";
 import { LocaleSwitch } from "@/components/locale-switch";
+import { NotifySettings } from "@/components/profile/notify-settings";
 import { PageLoading } from "@/components/page-loading";
 import { ProfileCard, profileChip } from "@/components/profile/profile-card";
 import { TripCard } from "@/components/trips/trip-card";
@@ -12,6 +13,7 @@ import { botUsername, formatDateRange } from "@/lib/format";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { getPublicProfile } from "@/modules/profiles/service";
 import { listMyIntents, listMyTrips } from "@/modules/trips/service";
+import { getNotifyOff } from "@/modules/users/service";
 import { closeIntentAction, logoutAction } from "../actions";
 
 export default function MePage(props: PageProps<"/[locale]/me">) {
@@ -30,10 +32,11 @@ const row = "flex min-h-14 items-center justify-between gap-3 border-b border-li
 async function Me({ params }: PageProps<"/[locale]/me">) {
   const locale = asLocale((await params).locale);
   const { user, profile } = await requireProfile(locale);
-  const [p, trips, intents, t, tt, tc, ta, ts] = await Promise.all([
+  const [p, trips, intents, notifyOff, t, tt, tc, ta, ts] = await Promise.all([
     getPublicProfile(user.id, user.id),
     listMyTrips(user.id),
     listMyIntents(user.id),
+    getNotifyOff(user.id),
     getTranslations("profile"),
     getTranslations("trip"),
     getTranslations("common"),
@@ -166,6 +169,7 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
           </form>
         </div>
       </Panel>
+      <NotifySettings initialOff={notifyOff} />
     </div>
   );
 }

@@ -786,5 +786,17 @@
     "whoPaid": "Who paid",
     "splitHint": "Split equally among the {n} people in the group.",
     "bookedByMe": "You booked it — the cost is split among {n} automatically."
+  },
+  "notify": {
+    "title": "Bot notifications",
+    "pin": "Announcements",
+    "pinHint": "When the organizer pins an announcement",
+    "poll": "Polls",
+    "pollHint": "When the group opens a new poll",
+    "mine": "About me",
+    "mineHint": "Requests, approvals, plan suggestions, payments to you",
+    "chat": "Chat messages",
+    "chatHint": "At most once an hour: \"N new messages in the group\"",
+    "failed": "Couldn't save. Please try again."
   }
 }

@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/node";
 import { PgBoss } from "pg-boss";
 import { getDb } from "@/lib/db";
 import { createBot } from "./bot";
-import { deliverNotifications } from "./notify";
+import { deliverNotifications, queueDigests } from "./notify";
 import { SEED_ENVS, seedSamples } from "./seed";
 
 const url = process.env.DATABASE_URL;
@@ -55,10 +55,15 @@ else console.log("TELEGRAM_BOT_TOKEN not set: bot disabled");
 
 // Telegram notifications queued by the web app (join requested / approved), every 5 s.
 let delivering = false;
+let lastDigest = 0;
 const deliveryTimer = setInterval(async () => {
   if (!current || delivering) return;
   delivering = true;
   try {
+    if (Date.now() - lastDigest > 60_000) {
+      lastDigest = Date.now();
+      await queueDigests(getDb()); // chat: at most one "N ta yangi xabar" an hour per room
+    }
     await deliverNotifications(current.bot.api, getDb(), process.env.APP_URL ?? "");
   } catch (e) {
     console.error("notification delivery failed", e);

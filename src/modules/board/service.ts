@@ -14,6 +14,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { getDb } from "@/lib/db";
 import { emit } from "@/modules/chat/service";
 import { listMembers } from "@/modules/groups/service";
+import { notify } from "@/modules/notifications/service";
 import { setTicketDeadline } from "@/modules/trips/service";
 import { type BoardOp, toMinor } from "./schema";
 import { settle } from "./settle";
@@ -158,6 +159,8 @@ export async function applyOp(
           createdBy: userId,
           proposed: !isOrganizer,
         });
+        if (!isOrganizer && ctx.organizerId)
+          await notify(tx, ctx.organizerId, "plan_proposed", { tripId, memberId: userId, text: op.place });
         return true;
       case "plan.accept":
         if (!isOrganizer) return false;
@@ -309,6 +312,11 @@ export async function applyOp(
         await tx
           .insert(settlements)
           .values({ tripId, fromUser: userId, toUser: op.to, amountMinor: toMinor(op.amount) });
+        await notify(tx, op.to, "settle_received", {
+          tripId,
+          memberId: userId,
+          text: op.amount.toFixed(2).replace(/\.00$/, ""),
+        });
         return true;
       case "agency.request":
         await tx

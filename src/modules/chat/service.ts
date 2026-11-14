@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, inArray, isNull, lt, notInArray, sql } from 
 import { conversationMembers, conversations, messages, pollOptions, polls, pollVotes } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { getBlockedIds } from "@/modules/moderation/service";
+import { notifyRoom } from "@/modules/notifications/service";
 import { getDisplayNames } from "@/modules/profiles/service";
 
 export async function createTripConversation(tx: DbOrTx, tripId: string, organizerId: string) {
@@ -65,6 +66,24 @@ export async function getRoom(userId: string, tripId: string) {
       ),
     );
   return r ?? null;
+}
+
+async function tripOf(tx: DbOrTx, conversationId: string) {
+  const [c] = await tx
+    .select({ tripId: conversations.tripId })
+    .from(conversations)
+    .where(eq(conversations.id, conversationId));
+  return c?.tripId ?? "";
+}
+
+/** The member has seen the room up to now (page open / live stream alive): no chat digest for it. */
+export async function markRead(conversationId: string, userId: string) {
+  await getDb()
+    .update(conversationMembers)
+    .set({ lastReadAt: new Date() })
+    .where(
+      and(eq(conversationMembers.conversationId, conversationId), eq(conversationMembers.userId, userId)),
+    );
 }
 
 export async function roomMemberCount(conversationId: string) {
@@ -151,8 +170,13 @@ export async function sendMessage(conversationId: string, userId: string, body: 
   });
 }
 
-export async function setPinned(conversationId: string, text: string | null) {
+export async function setPinned(conversationId: string, text: string | null, byUserId: string) {
   await getDb().transaction(async (tx) => {
+    if (text)
+      await notifyRoom(tx, conversationId, byUserId, "room_pin", {
+        tripId: await tripOf(tx, conversationId),
+        text,
+      });
     await tx
       .update(conversations)
       .set({ pinnedText: text, pinnedAt: text ? new Date() : null })
@@ -184,6 +208,10 @@ export async function createPoll(
       .set({ lastMessageAt: new Date() })
       .where(eq(conversations.id, conversationId));
     await emit(tx, { t: "message", c: conversationId, id: m.id });
+    await notifyRoom(tx, conversationId, userId, "room_poll", {
+      tripId: await tripOf(tx, conversationId),
+      text: question,
+    });
     return p.id;
   });
 }

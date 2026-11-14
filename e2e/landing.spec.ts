@@ -7,9 +7,9 @@ test("root redirects to default locale /uz", async ({ page }) => {
 });
 
 for (const [locale, submit] of [
-  ["uz", "Yozilish"],
-  ["ru", "Записаться"],
-  ["en", "Join"],
+  ["uz", "Meni yozib qo'ying"],
+  ["ru", "Запишите меня"],
+  ["en", "Count me in"],
 ] as const) {
   test(`landing renders in ${locale} with waitlist form`, async ({ page }) => {
     await page.goto(`/${locale}`);
@@ -29,8 +29,7 @@ test("waitlist submit stores contact", async ({ page }) => {
   test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
   await page.goto("/en?utm_source=e2e");
   await page.fill("#contact", `@e2e_${Date.now()}`);
-  await page.getByText("Georgia", { exact: true }).click();
-  await page.getByRole("button", { name: "Join", exact: true }).click();
+  await page.getByRole("button", { name: "Count me in", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("You're on the list");
 });
 

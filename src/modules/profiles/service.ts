@@ -1,4 +1,5 @@
 import "server-only";
+import { getReliability } from "@/modules/reliability/service";
 import { eq, inArray } from "drizzle-orm";
 import { onboardingDrafts, travelerProfiles } from "@/db/schema";
 import { ageOn } from "@/lib/catalog";
@@ -55,7 +56,8 @@ export async function getPublicProfile(viewerId: string, userId: string) {
   if (viewerId !== userId && (await isBlockedBetween(viewerId, userId))) return null;
   const p = await getOwnProfile(userId);
   if (!p) return null;
-  const phone = (await getPhoneVerified([userId])).get(userId) ?? false;
+  const [phones, rel] = await Promise.all([getPhoneVerified([userId]), getReliability([userId])]);
+  const phone = phones.get(userId) ?? false;
   return {
     userId,
     displayName: p.displayName,
@@ -68,6 +70,7 @@ export async function getPublicProfile(viewerId: string, userId: string) {
     interests: p.interests,
     bio: p.bio,
     verified: { telegram: p.telegramVerified, phone, id: p.idVerified },
+    reliability: rel.get(userId) ?? null, // "N/N safarga bordi"
   };
 }
 

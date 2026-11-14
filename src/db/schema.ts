@@ -557,6 +557,18 @@ export const agencyRequests = pgTable(
   (t) => [uniqueIndex("agency_requests_trip").on(t.tripId)],
 );
 
+/** "N/N safarga bordi": one outcome per person per trip (went / no_show), written by the worker. */
+export const reliability = pgTable(
+  "reliability",
+  {
+    ...base,
+    userId: userRef("user_id"),
+    tripId: tripRef(),
+    outcome: text("outcome").notNull(), // went | no_show
+  },
+  (t) => [uniqueIndex("reliability_unique").on(t.userId, t.tripId)],
+);
+
 // ---------- trust & safety ----------
 export const reviews = pgTable(
   "reviews",

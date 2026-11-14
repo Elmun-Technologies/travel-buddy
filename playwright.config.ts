@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 3100;
+// Uncommon port: other local projects use 3000/3100. Never reuse a server we did not start —
+// it may be another project (it happened: a foreign app answered on 3100).
+const port = Number(process.env.E2E_PORT ?? 3917);
 export default defineConfig({
   testDir: "e2e",
   use: { baseURL: `http://localhost:${port}` },
@@ -9,7 +11,7 @@ export default defineConfig({
   webServer: {
     command: `pnpm start --port ${port}`,
     port,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: {
       APP_URL: `http://localhost:${port}`,
       TELEGRAM_BOT_TOKEN: process.env.E2E_BOT_TOKEN ?? "1:e2e-test-token",

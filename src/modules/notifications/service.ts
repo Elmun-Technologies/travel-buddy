@@ -10,7 +10,10 @@ export type NotificationType =
   | "room_poll"
   | "room_digest"
   | "plan_proposed"
-  | "settle_received";
+  | "settle_received"
+  | "ticket_reminder"
+  | "ticket_dropped"
+  | "spot_freed";
 
 /** What the user can turn off in the profile. Everything about them personally is "mine". */
 export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine"] as const;

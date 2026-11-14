@@ -548,7 +548,10 @@ function BookTab({ data, act, me, isOwner, trip, name, money }: TabProps) {
                   {trip.deadline ? t("changeDeadline") : t("setDeadline")}
                 </button>
               ))}
-            <p className="text-center text-sm text-muted-foreground">{t("flightNote")}</p>
+            <p className="text-center text-sm text-muted-foreground">
+              {trip.deadline && `${t("deadlineRule")} `}
+              {t("flightNote")}
+            </p>
           </Panel>
 
           <Panel className="flex flex-col gap-3">

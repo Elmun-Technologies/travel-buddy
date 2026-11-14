@@ -31,6 +31,16 @@ const T = {
       `<b>${m}</b> sizga $${amount} o'tkazganini belgiladi («${trip}»). Pul kelgan bo'lsa, hammasi joyida.`,
     roomBtn: "Xonani ochaman ↗",
     settings: "Bildirishnomalarni profilda sozlash mumkin.",
+    reminderHead: "CHIPTA MUDDATI",
+    reminder: (trip: string, n: string) =>
+      `«${trip}»: chipta olish muddatiga ${n === "0" ? "bugun oxirgi kun" : `${n} kun qoldi`}. Olgan bo'lsangiz, Yig'amiz'da "Chiptani oldim" ni bosing — aks holda joyingiz navbatdagiga beriladi.`,
+    droppedHead: "JOYINGIZ BO'SHATILDI",
+    dropped: (trip: string) =>
+      `«${trip}»: muddatgacha chipta belgilanmadi, joyingiz navbatdagiga berildi. Hali borishni xohlasangiz, qayta so'rov yuboring.`,
+    freedHead: "JOY BO'SHADI",
+    freed: (trip: string, n: string, waiting: string) =>
+      `«${trip}»: ${n} kishi muddatgacha chipta olmadi, joyi bo'shadi. Navbatda ${waiting} ta so'rov bor.`,
+    tripBtn: "Safarni ochaman ↗",
   },
   ru: {
     approvedHead: "ВАС ЖДУТ!",
@@ -53,6 +63,16 @@ const T = {
       `<b>${m}</b> отметил(а), что перевёл(а) вам $${amount} («${trip}»). Если деньги пришли — всё в порядке.`,
     roomBtn: "Открыть комнату ↗",
     settings: "Уведомления настраиваются в профиле.",
+    reminderHead: "СРОК ПОКУПКИ БИЛЕТОВ",
+    reminder: (trip: string, n: string) =>
+      `«${trip}»: ${n === "0" ? "сегодня последний день покупки билетов" : `до конца срока покупки билетов ${n} дн.`}. Если купили — нажмите «Я купил(а) билет» во вкладке «Собираемся», иначе место перейдёт следующему.`,
+    droppedHead: "ВАШЕ МЕСТО ОСВОБОЖДЕНО",
+    dropped: (trip: string) =>
+      `«${trip}»: билет не отмечен до срока, место передано следующему. Если всё ещё хотите поехать — отправьте заявку снова.`,
+    freedHead: "МЕСТО ОСВОБОДИЛОСЬ",
+    freed: (trip: string, n: string, waiting: string) =>
+      `«${trip}»: ${n} чел. не купили билет до срока, места освободились. Заявок в очереди: ${waiting}.`,
+    tripBtn: "Открыть поездку ↗",
   },
   en: {
     approvedHead: "THEY'RE WAITING FOR YOU!",
@@ -74,6 +94,16 @@ const T = {
       `<b>${m}</b> marked sending you $${amount} (“${trip}”). If it arrived, you're all set.`,
     roomBtn: "Open the room ↗",
     settings: "You can change notifications in your profile.",
+    reminderHead: "TICKET DEADLINE",
+    reminder: (trip: string, n: string) =>
+      `“${trip}”: ${n === "0" ? "today is the last day to buy tickets" : `${n} days left to buy tickets`}. If you have yours, tap "I've got my ticket" in the booking tab — otherwise your place goes to the next person.`,
+    droppedHead: "YOUR PLACE WAS RELEASED",
+    dropped: (trip: string) =>
+      `“${trip}”: no ticket was marked by the deadline, so your place went to the next person. Still want to go? Send a request again.`,
+    freedHead: "A PLACE OPENED UP",
+    freed: (trip: string, n: string, waiting: string) =>
+      `“${trip}”: ${n} didn't get a ticket by the deadline, so places opened up. Requests waiting: ${waiting}.`,
+    tripBtn: "Open the trip ↗",
   },
 } as const;
 
@@ -117,6 +147,12 @@ export function render(r: Pick<Row, "type" | "trip" | "organizer" | "member" | "
       return { head: t.proposedHead, body: t.proposed(member, trip, text), btn: t.roomBtn, path: "/room" };
     case "settle_received":
       return { head: t.settleHead, body: t.settle(member, trip, text), btn: t.roomBtn, path: "/room" };
+    case "ticket_reminder":
+      return { head: t.reminderHead, body: t.reminder(trip, r.n ?? "0"), btn: t.roomBtn, path: "/room" };
+    case "ticket_dropped":
+      return { head: t.droppedHead, body: t.dropped(trip), btn: t.tripBtn, path: "" };
+    case "spot_freed":
+      return { head: t.freedHead, body: t.freed(trip, r.n ?? "1", text || "0"), btn: t.tripBtn, path: "" };
     default:
       return null;
   }

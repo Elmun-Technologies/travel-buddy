@@ -122,7 +122,8 @@
     "statRating": "baho · hali sharh yo'q",
     "dreams": "Borishni xohlaydi",
     "findTrips": "Safar topamiz",
-    "language": "Til"
+    "language": "Til",
+    "went": "{went}/{total} safarga bordi"
   },
   "feed": {
     "title": "Safarlar",
@@ -225,7 +226,8 @@
     "statBudget": "Budjet",
     "statSpots": "Joylar",
     "spotsTaken": "{n}/{max} band",
-    "noBudget": "Kelishiladi"
+    "noBudget": "Kelishiladi",
+    "went": "{went}/{total} safarga bordi"
   },
   "intent": {
     "title": "Sherik izlayapman",
@@ -785,7 +787,8 @@
     "category": "Turi",
     "whoPaid": "Kim to'ladi",
     "splitHint": "Summa guruhdagi {n} kishiga teng bo'linadi.",
-    "bookedByMe": "Siz band qildingiz — xarajat avtomatik {n} ga bo'lindi."
+    "bookedByMe": "Siz band qildingiz — xarajat avtomatik {n} ga bo'lindi.",
+    "deadlineRule": "Muddatda belgilamaganlarning joyi navbatdagilarga beriladi."
   },
   "notify": {
     "title": "Botdan bildirishnomalar",

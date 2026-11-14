@@ -5,6 +5,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import Script from "next/script";
+import { SoundRoot } from "@/components/sound";
 import { TelegramInit } from "@/components/telegram-actions";
 import { UpdateBanner } from "@/components/update-banner";
 import { TG_SCRIPT } from "@/lib/telegram-webapp";
@@ -54,6 +55,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           {children}
           <UpdateBanner />
           <TelegramInit />
+          <SoundRoot />
         </NextIntlClientProvider>
       </body>
     </html>

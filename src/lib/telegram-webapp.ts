@@ -1,6 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { confetti } from "./confetti";
+import { sound } from "./sound";
 
 // Minimal typing of https://core.telegram.org/bots/webapps (only what we use).
 type TgButton = {
@@ -102,8 +104,24 @@ export function useTelegramChrome(): TgWebApp | null {
   );
 }
 
+/** Touch feedback: Telegram vibration plus the matching UI sound (src/lib/sound.ts). */
 export const haptic = {
-  select: () => tg()?.HapticFeedback?.selectionChanged(),
-  success: () => tg()?.HapticFeedback?.notificationOccurred("success"),
-  error: () => tg()?.HapticFeedback?.notificationOccurred("error"),
+  select: () => {
+    tg()?.HapticFeedback?.selectionChanged();
+    sound.pop();
+  },
+  success: () => {
+    tg()?.HapticFeedback?.notificationOccurred("success");
+    sound.success();
+  },
+  error: () => {
+    tg()?.HapticFeedback?.notificationOccurred("error");
+    sound.error();
+  },
+  /** Big moments: trip opened, joined a group. Vibration, arpeggio and confetti. */
+  celebrate: () => {
+    tg()?.HapticFeedback?.notificationOccurred("success");
+    sound.celebrate();
+    confetti();
+  },
 };

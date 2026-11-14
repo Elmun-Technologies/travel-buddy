@@ -142,7 +142,7 @@ async function Price({ params, searchParams }: PageProps<"/[locale]/price/[count
                   </div>
                   <div className="h-2.5 rounded-full bg-background">
                     <div
-                      className="h-full rounded-full bg-ink"
+                      className="grow-x h-full rounded-full bg-ink"
                       style={{ width: `${(i.amount / max) * 100}%` }}
                     />
                   </div>

@@ -8,6 +8,7 @@ import { ReportLink } from "@/components/report-link";
 import { BackAction } from "@/components/telegram-actions";
 import { InviteButton, type ShareLinks } from "@/components/trips/share";
 import { Link, useRouter } from "@/i18n/navigation";
+import { sound } from "@/lib/sound";
 import { haptic } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, PollView } from "@/modules/chat/service";
@@ -70,6 +71,7 @@ export function Room({
     const es = new EventSource(`/api/rooms/${tripId}/stream`);
     es.addEventListener("message", (e) => {
       const m = JSON.parse((e as MessageEvent).data) as Msg;
+      if (m.senderId !== me && document.visibilityState === "visible") sound.pop(); // someone wrote
       if (m.poll) setPolls((p) => ({ ...p, [m.poll!.id]: m.poll! }));
       setMsgs((list) => (list.some((x) => x.id === m.id) ? list : [...list, m]));
     });
@@ -82,7 +84,7 @@ export function Room({
     );
     es.addEventListener("board", () => setBoardVersion((v) => v + 1));
     return () => es.close();
-  }, [tripId]);
+  }, [tripId, me]);
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,6 +101,7 @@ export function Room({
       return;
     }
     setError(null);
+    sound.send();
     const { id } = (await res.json()) as { id: string };
     // Shown at once; the live event with the same id is then ignored.
     setMsgs((list) =>

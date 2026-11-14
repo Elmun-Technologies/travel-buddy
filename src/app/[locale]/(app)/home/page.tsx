@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { CheckIcon, Display, Panel } from "@/components/clay";
+import { SoundButton } from "@/components/sound";
 import { PageLoading } from "@/components/page-loading";
 import { Link } from "@/i18n/navigation";
 import { type Country, countryName, todayISO } from "@/lib/catalog";
@@ -61,6 +62,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
           <div className="text-[13px] text-muted-foreground">{greeting}</div>
           <Display className="mt-0.5 text-[30px]">{profile.displayName}</Display>
         </div>
+        <SoundButton className="ml-auto" />
         <Link href="/me" className="flex flex-col items-end gap-1.5">
           <span className="flex size-12 items-center justify-center rounded-full bg-[#c9d4e3] font-semibold">
             {profile.displayName.slice(0, 1)}
@@ -77,7 +79,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
       {next ? (
         <Link
           href={`/trips/${next.id}`}
-          className="press flex flex-col gap-3.5 rounded-panel bg-ink p-[18px] text-white"
+          className="press lift flex flex-col gap-3.5 rounded-panel bg-ink p-[18px] text-white"
         >
           <div className="flex items-center justify-between">
             <span className={`${label} text-[#c9c9c9]`}>{t("yourTrip")}</span>
@@ -187,7 +189,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
               </div>
               <div className="h-1.5 rounded-full bg-background">
                 <div
-                  className="h-full rounded-full bg-ink"
+                  className="grow-x h-full rounded-full bg-ink"
                   style={{ width: `${Math.round(g.fill * 100)}%` }}
                 />
               </div>

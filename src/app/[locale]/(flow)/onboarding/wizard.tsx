@@ -220,7 +220,7 @@ export function OnboardingWizard({
     setPending(false);
     if (res?.ok) {
       writeLocal(draftKey, null);
-      haptic.success();
+      haptic.celebrate(); // profile done — welcome in
       if (phone === "done") router.replace(next);
       else setStep(4);
       return;

@@ -103,7 +103,7 @@ test.describe("Mini App onboarding", () => {
     await expect(page.getByText("04 / 04")).toBeVisible();
     await expect(page.getByRole("button", { name: "Botda tasdiqlayman" })).toBeVisible();
     await page.getByRole("link", { name: "Keyinroq" }).click();
-    await expect(page).toHaveURL(/\/uz\/trips$/);
+    await expect(page).toHaveURL(/\/uz\/home$/);
 
     const [{ n }] =
       await sql`select count(*)::int as n from onboarding_drafts where user_id in (${userId()})`;

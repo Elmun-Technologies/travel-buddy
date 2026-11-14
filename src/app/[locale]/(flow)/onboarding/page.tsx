@@ -18,7 +18,7 @@ export default function OnboardingPage(props: PageProps<"/[locale]/onboarding">)
 async function Onboarding({ params, searchParams }: PageProps<"/[locale]/onboarding">) {
   const locale = asLocale((await params).locale);
   const user = await requireUser(locale);
-  if (await getOwnProfile(user.id)) redirect({ href: "/trips", locale });
+  if (await getOwnProfile(user.id)) redirect({ href: "/home", locale });
   const name = (await searchParams).name;
   return (
     <OnboardingWizard

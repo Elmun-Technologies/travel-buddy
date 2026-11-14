@@ -5,7 +5,13 @@
   },
   "nav": {
     "join": "Join the waitlist",
-    "language": "Language"
+    "language": "Language",
+    "label": "Sections",
+    "home": "Home",
+    "trips": "Trips",
+    "rooms": "Rooms",
+    "clubs": "Clubs",
+    "profile": "Profile"
   },
   "waitlist": {
     "title": "Join the waitlist",
@@ -110,7 +116,13 @@
     "draftSaving": "Saving…",
     "failNetwork": "Couldn't send that — looks like the connection dropped. Everything's saved, give it another go.",
     "failSession": "Your session ran out. Log in again — your answers are still here.",
-    "loginAgain": "Log in again"
+    "loginAgain": "Log in again",
+    "statTrips": "trips",
+    "statCountries": "countries",
+    "statRating": "rating · no reviews yet",
+    "dreams": "Wants to visit",
+    "findTrips": "Find a trip",
+    "language": "Language"
   },
   "feed": {
     "title": "Trips",
@@ -535,5 +547,44 @@
       "privacy": "Privacy",
       "safety": "Safety rules"
     }
+  },
+  "home": {
+    "morning": "Good morning,",
+    "day": "Good afternoon,",
+    "evening": "Good evening,",
+    "verified": "Verified",
+    "yourTrip": "Your trip",
+    "daysLeft": "{n, plural, one {# day to go} other {# days to go}}",
+    "members": "{n}/{max} people",
+    "noTripYet": "No trip yet — shall we start your first one?",
+    "forYou": "You might like",
+    "all": "All",
+    "sample": "Example",
+    "why": "Why it fits",
+    "whyCountry": "your chosen destination",
+    "whyBudget": "fits your budget",
+    "forming": "Groups filling up",
+    "spotsLeft": "{n, plural, one {# spot left} other {# spots left}}",
+    "clubs": "Clubs",
+    "clubsText": "Find your people",
+    "memories": "Memories",
+    "memoriesText": "Who came back from where",
+    "newTrip": "Start a trip"
+  },
+  "rooms": {
+    "title": "Rooms",
+    "empty": "Join a group and your trip room opens here.",
+    "find": "Find a trip",
+    "soon": "Chat, plan and costs in the room are coming very soon."
+  },
+  "clubs": {
+    "title": "Clubs",
+    "soon": "Clubs are coming soon: regular trips with your own people. For now, join an open group.",
+    "action": "See trips"
+  },
+  "memories": {
+    "title": "Memories",
+    "soon": "After a trip, the shared album and stories will live here.",
+    "action": "See trips"
   }
 }

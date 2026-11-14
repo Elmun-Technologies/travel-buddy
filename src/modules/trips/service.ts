@@ -119,6 +119,16 @@ export async function listFeed(viewerId: string | null, f: FeedFilter) {
   return { items: await withCounts(rows.slice(0, PAGE_SIZE)), hasMore: rows.length > PAGE_SIZE, total };
 }
 
+/** Open groups closest to being full (home: "Yig'ilayotgan guruhlar"). */
+export async function listForming(viewerId: string | null, limit = 3) {
+  const { items } = await listFeed(viewerId, { page: 1 });
+  return items
+    .filter((t) => t.status === "open" && t.groupSizeMax)
+    .map((t) => ({ ...t, fill: t.approvedCount / t.groupSizeMax! }))
+    .sort((a, b) => b.fill - a.fill)
+    .slice(0, limit);
+}
+
 /** Full trip for display, or null if hidden from this viewer. */
 export async function getTripView(tripId: string, viewerId: string | null) {
   const [t] = await getDb().select().from(trips).where(eq(trips.id, tripId));

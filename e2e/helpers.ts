@@ -31,7 +31,7 @@ export async function onboard(page: Page, name: string) {
   await page.getByRole("button", { name: "Davom etamiz · 1 ta tanlandi" }).click();
   await page.getByRole("button", { name: "Profilni saqlaymiz" }).click();
   await page.getByRole("link", { name: "Keyinroq" }).click();
-  await expect(page).toHaveURL(/\/uz\/trips$/);
+  await expect(page).toHaveURL(/\/uz\/home$/);
 }
 
 /** Onboarding step 1: Day | Month | Year selects. */

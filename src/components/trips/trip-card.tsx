@@ -26,7 +26,7 @@ export async function TripCard({ trip, badge }: { trip: Trip; badge?: string }) 
       <div className="relative h-[132px] bg-[#b9c7d6]">
         {/* eslint-disable-next-line @next/next/no-img-element -- pre-compressed WebP */}
         <img
-          src={countryPhoto(trip.destinationCountry)}
+          src={countryPhoto(trip.destinationCountry, 1200, trip.destinationCity)}
           alt={countryName(trip.destinationCountry, locale)}
           loading="lazy"
           className="size-full object-cover"

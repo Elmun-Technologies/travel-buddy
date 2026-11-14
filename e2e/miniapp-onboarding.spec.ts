@@ -117,8 +117,9 @@ test.describe("Mini App onboarding", () => {
     await pickBirthDate(page, 22, 2, 1995);
     await page.getByRole("button", { name: "ru", exact: true }).click();
     await expect(page).toHaveURL(/\/ru\/onboarding/);
-    await expect(page.getByText("22 февраля 1995")).toBeVisible();
-    await expect(page.getByText("Давайте знакомиться")).toBeVisible();
+    await expect(page.getByText("22 февраля 1995").locator("visible=true")).toBeVisible();
+    // The previous locale stays mounted but hidden for a moment: assert the visible heading only.
+    await expect(page.getByRole("heading", { name: "Давайте знакомиться" })).toBeVisible();
     await page.context().close();
   });
 

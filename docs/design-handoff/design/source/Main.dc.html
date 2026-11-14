@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Travel Buddy — landing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EDEDED}
+a{color:#0B0B0B}a:hover{color:#0A5CFF}
+.d{font-family:'Inter Tight',sans-serif;letter-spacing:-0.03em;line-height:1.02;font-weight:400;margin:0}
+.t{font-family:'Inter',sans-serif}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 20px;font:500 15px 'Inter',sans-serif;text-decoration:none;border:1px solid #0B0B0B;min-height:44px;box-sizing:border-box}
+.tag{display:inline-flex;align-items:center;border-radius:999px;padding:6px 12px;font:500 12px 'Inter',sans-serif;border:1px solid #CFCFCF;color:#0B0B0B;background:#fff}
+.arrow{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:999px;border:0;text-decoration:none}
+</style>
+</helmet>
+<div class="t" style="background:#EDEDED;color:#0B0B0B;min-height:100%;padding:16px;box-sizing:border-box">
+<div style="max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
+
+<!-- NAV -->
+<header style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:999px;padding:10px 10px 10px 24px">
+<a href="#top" style="text-decoration:none;display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:999px;background:#0B0B0B;display:inline-block"></span><span class="d" style="font-size:20px;font-weight:500">Travel Buddy</span></a>
+<nav style="display:flex;flex-wrap:wrap;gap:24px;font-size:15px">
+<a href="#how" style="text-decoration:none">Qanday ishlaydi</a>
+<a href="#room" style="text-decoration:none">Safar xonasi</a>
+<a href="#clubs" style="text-decoration:none">Klublar</a>
+<a href="#stories" style="text-decoration:none">Taassurotlar</a>
+</nav>
+<div style="display:flex;gap:8px;align-items:center">
+<a href="#" class="tag" style="text-decoration:none">UZ · RU · EN</a>
+<a href="#" class="pill" style="background:#0B0B0B;color:#fff">Boshlaymiz
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+</div>
+</header>
+
+<!-- HERO -->
+<section id="top" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:12px">
+<div style="background:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;justify-content:space-between;gap:48px;min-height:560px;box-sizing:border-box">
+<div style="display:flex;flex-wrap:wrap;gap:8px"><span class="tag" style="background:#E8F0FF;border-color:#E8F0FF;color:#0A3FB0">Tez orada · Toshkentdan boshlaymiz</span><span class="tag">18+</span></div>
+<h1 class="d" style="font-size:clamp(44px,6vw,84px)">Sayohatga sherik topamiz.<br>Guruh yig'amiz.<br>Birga yo'lga chiqamiz.</h1>
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="margin:0;font-size:18px;line-height:1.5;color:#5F5F5F;max-width:520px">Yolg'iz ketgingiz kelmayaptimi, do'stlaringizning esa vaqti to'g'ri kelmayaptimi? Qayerga, qachon va qancha pulga borishni ayting — qolganini birga hal qilamiz.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<a href="#" class="pill" style="background:#0B0B0B;color:#fff">Menga sherik toping</a>
+<a href="#how" class="pill" style="background:transparent;color:#0B0B0B">Qanday ishlaydi</a>
+</div>
+</div>
+</div>
+<div style="position:relative;border-radius:28px;overflow:hidden;min-height:560px;background:#B9C7D6">
+<div role="img" aria-label="Kazbegi tog'lari, Gruziya" style="position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.45)),url('../../assets/photos/kazbek.jpg');background-size:cover;background-position:center"></div>
+<div style="position:absolute;left:16px;right:16px;bottom:16px;background:#fff;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div><div class="d" style="font-size:28px">Tbilisi &amp; Kazbegi</div><div style="color:#5F5F5F;font-size:14px;margin-top:4px">20–27 noyabr · 7 kun · $550–650</div></div>
+<a href="#" class="arrow" aria-label="Safarni ochish" style="background:#F3EE1C;color:#0B0B0B"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+</div>
+<div style="display:flex;align-items:center;gap:12px">
+<div style="flex:1;height:8px;border-radius:999px;background:#EDEDED;overflow:hidden"><div style="width:70%;height:100%;background:#0A5CFF"></div></div>
+<span style="font-size:14px;font-weight:600">7/10 joy band</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="tag">Trekking</span><span class="tag">20–35 yosh</span><span class="tag">Aralash guruh</span></div>
+</div>
+</div>
+</section>
+
+<!-- BIG PILLS (deck style) -->
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+<div style="background:#0A5CFF;color:#fff;border-radius:999px;height:150px;display:flex;align-items:center;justify-content:center"><span class="d" style="font-size:64px;font-weight:500">sherik</span></div>
+<div style="background:#0B0B0B;color:#fff;border-radius:999px;height:150px;display:flex;align-items:center;justify-content:center"><span class="d" style="font-size:64px;font-weight:500">guruh</span></div>
+<div style="background:#fff;border-radius:999px;height:150px;display:flex;align-items:center;justify-content:center"><svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+<div style="background:#F3EE1C;border-radius:999px;height:150px;display:flex;align-items:center;justify-content:center"><span class="d" style="font-size:64px;font-weight:500">sayohat</span></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="background:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #DADADA;padding-bottom:24px">
+<h2 class="d" style="font-size:clamp(36px,4vw,56px)">Qanday ishlaydi</h2>
+<p style="margin:0;color:#5F5F5F;max-width:420px;font-size:16px;line-height:1.5">Uch qadam, xolos. Hech narsa o'rnatish shart emas — hammasi Telegram ichida.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px">
+<div style="background:#EDEDED;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:56px">
+<span class="d" style="font-size:44px">01.</span>
+<div><h3 class="d" style="font-size:28px">Qayerga borasiz?</h3><p style="margin:10px 0 0;color:#5F5F5F;line-height:1.5">Yo'nalish, sana va budjetni ayting. Sizga mos odamlarni topamiz — nega mosligini ham aytib beramiz.</p></div>
+</div>
+<div style="background:#EDEDED;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:56px">
+<span class="d" style="font-size:44px">02.</span>
+<div><h3 class="d" style="font-size:28px">Kim bilan borasiz?</h3><p style="margin:10px 0 0;color:#5F5F5F;line-height:1.5">Yoqqan guruhga "Men ham boraman" deysiz yoki o'zingiz safar ochasiz — havolani do'stlarga ham yuborasiz.</p></div>
+</div>
+<div style="background:#0B0B0B;color:#fff;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:56px">
+<span class="d" style="font-size:44px;color:#F3EE1C">03.</span>
+<div><h3 class="d" style="font-size:28px">Yo'lga chiqamiz!</h3><p style="margin:10px 0 0;color:#C9C9C9;line-height:1.5">Reja, chipta, xarajat va chat — bitta joyda. Qaytgach esa umumiy albom.</p></div>
+</div>
+</div>
+</section>
+
+<!-- COMPARE -->
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px">
+<div style="background:#2A2A2A;color:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;gap:24px;min-height:320px;box-sizing:border-box">
+<h3 class="d" style="font-size:44px">Ilgari</h3>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;color:#D6D6D6;line-height:1.5">
+<li>Telegram guruhlarda tarqoq e'lonlar, kimligi noma'lum odamlar</li>
+<li>Sherik topilsa ham, reja WhatsApp'da, xarajat daftarda</li>
+<li>Safardan keyin hech qanday iz qolmaydi</li>
+</ul>
+</div>
+<div style="background:#0A5CFF;color:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;gap:24px;min-height:320px;box-sizing:border-box">
+<h3 class="d" style="font-size:44px">Endi</h3>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;line-height:1.5">
+<li>Telegram va telefon orqali tasdiqlangan profillar, sharhlar</li>
+<li>Bitta Safar xonasi: chat, reja, ro'yxat, xarajat, so'rovnoma</li>
+<li>Taassurotlar albomi va ulashiladigan safar hikoyasi</li>
+</ul>
+</div>
+</section>
+
+<!-- TRIP ROOM -->
+<section id="room" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px">
+<div style="grid-column:1/-1;background:#fff;border-radius:28px;padding:40px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px">
+<div><span class="tag">Asosiy ustunlik</span><h2 class="d" style="font-size:clamp(36px,4vw,56px);margin-top:16px">Safar xonasi</h2></div>
+<p style="margin:0;color:#5F5F5F;max-width:460px;line-height:1.5">Guruh yig'ilishi bilan sizning xonangiz ochiladi. Telegram guruh, Excel va qog'ozdagi ro'yxat endi kerak emas.</p>
+</div>
+<div style="background:#fff;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between"><h3 class="d" style="font-size:24px">Chat va e'lonlar</h3><span class="tag">01</span></div>
+<div style="background:#0B0B0B;color:#fff;border-radius:16px;padding:14px;font-size:14px">E'lon · Uchrashuv: 20-noyabr, 06:00, aeroport, 2-terminal</div>
+<div style="align-self:flex-start;background:#EDEDED;border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:14px">Men pasportni oldim ✓</div>
+<div style="align-self:flex-end;background:#0A5CFF;color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:14px">Zo'r, chiptalarni ertaga olamiz</div>
+</div>
+<div style="background:#fff;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between"><h3 class="d" style="font-size:24px">Kunma-kun reja</h3><span class="tag">02</span></div>
+<div style="display:flex;gap:12px;align-items:center;border-bottom:1px solid #EDEDED;padding-bottom:10px"><span class="d" style="font-size:22px;width:40px">1</span><div><div style="font-weight:600">Tbilisi</div><div style="color:#5F5F5F;font-size:14px">Eski shahar, Narikala</div></div></div>
+<div style="display:flex;gap:12px;align-items:center;border-bottom:1px solid #EDEDED;padding-bottom:10px"><span class="d" style="font-size:22px;width:40px">2</span><div><div style="font-weight:600">Kazbegi</div><div style="color:#5F5F5F;font-size:14px">Gergeti, trekking 4 soat</div></div></div>
+<div style="display:flex;gap:12px;align-items:center"><span class="d" style="font-size:22px;width:40px">3</span><div><div style="font-weight:600">Gudauri</div><div style="color:#5F5F5F;font-size:14px">Paraplan (ixtiyoriy)</div></div></div>
+</div>
+<div style="background:#fff;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between"><h3 class="d" style="font-size:24px">Xarajatlar</h3><span class="tag">03</span></div>
+<div class="d" style="font-size:48px">$1 240</div>
+<div style="color:#5F5F5F;font-size:14px">Umumiy xarajat · 7 kishi</div>
+<div style="display:flex;justify-content:space-between;background:#EDEDED;border-radius:14px;padding:12px;font-size:14px"><span>Siz Akmalga</span><strong>$34</strong></div>
+<div style="color:#5F5F5F;font-size:12px">Biz faqat hisoblab beramiz — pul o'zingizda qoladi.</div>
+</div>
+</section>
+
+<!-- CLUBS -->
+<section id="book" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:12px">
+<div style="background:#fff;border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:16px;justify-content:space-between">
+<span style="font-size:13px;font-weight:600;letter-spacing:.06em;color:#5F5F5F">CHIPTA VA TUR-CHI?</span>
+<h2 class="d" style="font-size:clamp(40px,5vw,64px)">Odam topildi. Endi yo'lni birga yig'amiz.</h2>
+<p style="margin:0;color:#3F3F3F;font-size:17px;line-height:1.5">Ikki yo'l bor — guruh o'zi tanlaydi. Biz ikkalasida ham yoningizdamiz.</p>
+</div>
+<div style="display:grid;gap:12px">
+<div style="background:#fff;border-radius:28px;padding:28px;display:flex;flex-direction:column;gap:10px"><span class="d" style="font-size:40px">01</span><h3 class="d" style="font-size:30px">O'zimiz yig'amiz</h3><p style="margin:0;color:#5F5F5F;line-height:1.5">Reysni birga tanlaymiz, har kim chiptasini o'zi oladi — sanasi tayyor havola bilan. Joyni ovoz berib tanlaymiz, xarajat o'zi bo'linadi.</p></div>
+<div style="background:#0B0B0B;color:#fff;border-radius:28px;padding:28px;display:flex;flex-direction:column;gap:10px"><span class="d" style="font-size:40px;color:#F3EE1C">02</span><h3 class="d" style="font-size:30px;color:#fff">Tayyor tur so'raymiz</h3><p style="margin:0;color:#C9C9C9;line-height:1.5">Guruhingiz uchun tekshirilgan agentliklardan narx so'raymiz. Ular bir-biri bilan bellashadi — siz faqat solishtirib tanlaysiz.</p></div>
+</div>
+</section>
+
+<section id="clubs" style="background:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #DADADA;padding-bottom:24px">
+<h2 class="d" style="font-size:clamp(36px,4vw,56px)">Klublar</h2>
+<p style="margin:0;color:#5F5F5F;max-width:460px;line-height:1.5">Bir martalik e'lon emas — o'z odamlaringiz. Klubga qo'shilasiz yoki o'zingiz ochasiz: safarlar shu yerda tug'iladi.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px">
+<div style="border:1px solid #DADADA;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:20px"><span class="tag" style="align-self:flex-start">Namuna</span><div class="d" style="font-size:26px">Tog' sayohatchilari</div><div style="color:#5F5F5F;font-size:14px">Trekking · Chimgan, Kazbegi, Olmaota</div></div>
+<div style="border:1px solid #DADADA;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:20px"><span class="tag" style="align-self:flex-start">Namuna</span><div class="d" style="font-size:26px">Qizlar sayohat klubi</div><div style="color:#5F5F5F;font-size:14px">Faqat ayollar · tasdiqlangan profillar</div></div>
+<div style="border:1px solid #DADADA;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:20px"><span class="tag" style="align-self:flex-start">Namuna</span><div class="d" style="font-size:26px">Samarqand velo</div><div style="color:#5F5F5F;font-size:14px">Velosayohat · dam olish kunlari</div></div>
+<a href="#" style="background:#0B0B0B;color:#fff;border-radius:22px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;text-decoration:none"><div class="d" style="font-size:26px">Klub ochamiz</div><span class="arrow" style="background:#F3EE1C;color:#0B0B0B;align-self:flex-end"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></span></a>
+</div>
+</section>
+
+<!-- STORIES -->
+<section id="stories" style="background:#0B0B0B;color:#fff;border-radius:28px;padding:40px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #333;padding-bottom:24px">
+<h2 class="d" style="font-size:clamp(36px,4vw,56px)">Taassurotlar</h2>
+<p style="margin:0;color:#C9C9C9;max-width:460px;line-height:1.5">Qaytgach — umumiy albom, hikoyalar va bir-biringizga iliq so'zlar. Hamma rozi bo'lsa, chiroyli sahifa qilib do'stlarga ko'rsatamiz.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px">
+<div style="border-radius:22px;overflow:hidden;background:#1C1C1C"><div role="img" aria-label="guruh, Gergeti" style="height:220px;background-color:#B9C7D6;background-image:url('../../assets/photos/hike-group.jpg');background-size:cover;background-position:center"></div><div style="padding:20px"><div class="d" style="font-size:22px">Kazbegi, 7 kishi</div><div style="color:#BDBDBD;font-size:14px;margin-top:6px">Namuna · 48 foto · 6 hikoya</div></div></div>
+<div style="border-radius:22px;overflow:hidden;background:#1C1C1C"><div role="img" aria-label="Kapadokya" style="height:220px;background-color:#B9C7D6;background-image:url('../../assets/photos/cappadocia.jpg');background-size:cover;background-position:center"></div><div style="padding:20px"><div class="d" style="font-size:22px">Kapadokya, 5 kishi</div><div style="color:#BDBDBD;font-size:14px;margin-top:6px">Namuna · 31 foto · 5 hikoya</div></div></div>
+<div style="border-radius:22px;background:#F3EE1C;color:#0B0B0B;padding:24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px"><div class="d" style="font-size:30px">Har bir safar — keyingisiga taklifnoma</div><div style="font-size:14px;line-height:1.5">Ulashilgan sahifada "Men ham bormoqchiman" tugmasi bor.</div></div>
+</div>
+</section>
+
+<!-- TRUST + FACTS -->
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px">
+<div style="background:#fff;border-radius:22px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:40px"><span class="d" style="font-size:64px">0 so'm</span><span style="color:#5F5F5F;font-size:14px">Sherik topish va qo'shilish — bepul</span></div>
+<div style="background:#fff;border-radius:22px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:40px"><span class="d" style="font-size:64px">18+</span><span style="color:#5F5F5F;font-size:14px">Faqat kattalar, yosh tekshiriladi</span></div>
+<div style="background:#fff;border-radius:22px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:40px"><span class="d" style="font-size:64px">3 til</span><span style="color:#5F5F5F;font-size:14px">O'zbek, rus va ingliz</span></div>
+<div style="background:#fff;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:14px">
+<h3 class="d" style="font-size:24px">Ishonch</h3>
+<div style="display:flex;flex-direction:column;gap:8px;font-size:14px">
+<span>✓ Telegram orqali kirish</span><span>✓ Telefon tasdiqlangan</span><span>✓ Hujjat tekshiruvi (ixtiyoriy)</span><span>✓ Sharhlar, shikoyat va bloklash</span>
+</div>
+</div>
+</section>
+
+<!-- AGENCIES TEASER -->
+<section style="background:#fff;border-radius:28px;padding:40px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:24px">
+<div style="max-width:640px"><span class="tag">Tez orada</span><h2 class="d" style="font-size:clamp(28px,3vw,40px);margin-top:14px">Turagentlikmisiz? Tayyor guruhlarga taklif yuborasiz.</h2></div>
+<a href="#" class="pill" style="color:#0B0B0B">Ro'yxatga yozilish</a>
+</section>
+
+<!-- FINAL CTA -->
+<section style="background:#0A5CFF;color:#fff;border-radius:28px;padding:48px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:32px;align-items:end">
+<h2 class="d" style="font-size:clamp(44px,6vw,88px)">Birinchilar qatorida bo'ling.</h2>
+<form style="display:flex;flex-direction:column;gap:12px">
+<label for="wl" style="font-size:14px">Email yoki Telegram username</label>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<input id="wl" type="text" placeholder="siz@email.com yoki @username" style="flex:1 1 240px;min-height:52px;border-radius:999px;border:0;padding:0 20px;font:16px 'Inter',sans-serif;box-sizing:border-box">
+<button type="submit" class="pill" style="background:#0B0B0B;color:#fff;border-color:#0B0B0B;cursor:pointer">Meni yozib qo'ying</button>
+</div>
+<a href="#" style="color:#fff;font-size:14px">yoki hoziroq sherik qidiramiz ↗</a>
+</form>
+</section>
+
+<footer style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:24px 8px;color:#5F5F5F;font-size:14px">
+<span>© 2026 Travel Buddy · [Brend nomi tanlanadi]</span>
+<span style="display:flex;gap:16px"><a href="#">Foydalanish shartlari</a><a href="#">Maxfiylik</a><a href="#">Xavfsizlik qoidalari</a></span>
+</footer>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":5100}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -46,3 +46,6 @@ next-env.d.ts
 /playwright-report
 !.env.example
 .local/
+
+# design handoff archives
+*.zip

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Yaqinlar uchun sahifa (ota-ona ko'radi)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0B}
+.d{font-family:'Inter Tight',sans-serif;letter-spacing:-0.03em;line-height:1.02;font-weight:400;margin:0}
+.tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font:500 12px 'Inter',sans-serif;border:1px solid #CFCFCF;background:#fff;color:#0B0B0B}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font:500 11px 'Inter',sans-serif;color:#5F5F5F;text-decoration:none;min-width:56px;min-height:44px;justify-content:center}
+.seg{display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;padding:0 14px;font:500 13px 'Inter',sans-serif;text-decoration:none;white-space:nowrap}
+.card{background:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.lbl{font-size:12px;font-weight:600;letter-spacing:.04em;color:#5F5F5F}
+.in{border:1px solid #DADADA;border-radius:14px;min-height:48px;padding:0 14px;font:15px 'Inter',sans-serif;background:#fff;box-sizing:border-box;width:100%}
+</style>
+</helmet>
+<div style="width:390px;height:1180px;box-sizing:border-box;background:#EDEDED;font-family:'Inter',sans-serif;color:#0B0B0B;display:flex;flex-direction:column;position:relative;overflow:hidden">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px"><span style="font-weight:600">Travel Buddy</span><span style="font-size:12px;color:#5F5F5F">yaqinlar uchun sahifa</span></header>
+<main style="flex:1;padding:0 12px 24px;display:flex;flex-direction:column;gap:10px">
+<section style="position:relative;border-radius:22px;overflow:hidden;height:190px"><div role="img" aria-label="Tbilisi" style="background:#B9C7D6 url('../../assets/photos/tbilisi-city.jpg') center/cover no-repeat;position:absolute;inset:0;background-position:50% 65%"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.65))"></div><div style="position:absolute;left:16px;bottom:14px;color:#fff"><div style="font-size:13px">Dilnozaning safari</div><div class="d" style="font-size:32px;color:#fff">Gruziya · 20–27 noy</div></div></section>
+<section style="background:#E8F6EC;border-radius:22px;padding:14px 16px;display:flex;gap:12px;align-items:center"><span style="width:40px;height:40px;border-radius:999px;background:#16A34A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none">✓</span><div><div style="font-weight:600;color:#15803D">Hammasi joyida</div><div style="font-size:13px;color:#15803D">Tbilisi · bugun 18:20 da belgiladi</div></div></section>
+<section class="card" style="gap:10px">
+<div class="lbl">KIM BILAN</div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:999px;background:#C9D4E3;display:flex;align-items:center;justify-content:center;font-weight:600">A</span><div style="flex:1"><div style="font-weight:600">Akmal · tashkilotchi</div><div style="font-size:12px;color:#5F5F5F">✓ telefon · ✓ hujjat · 10/10 safarga bordi · ★ 4.9</div></div></div>
+<div style="display:flex;gap:8px"><div style="flex:1;background:#EDEDED;border-radius:14px;padding:10px"><div class="d" style="font-size:26px">7</div><div style="font-size:12px;color:#5F5F5F">kishi guruhda</div></div><div style="flex:1;background:#EDEDED;border-radius:14px;padding:10px"><div class="d" style="font-size:26px">4 / 3</div><div style="font-size:12px;color:#5F5F5F">ayol / erkak</div></div><div style="flex:1;background:#EDEDED;border-radius:14px;padding:10px"><div class="d" style="font-size:26px">7/7</div><div style="font-size:12px;color:#5F5F5F">tasdiqlangan</div></div></div>
+</section>
+<section class="card" style="gap:8px">
+<div class="lbl">QAYERDA VA QACHON</div>
+<div style="font-size:14px;line-height:1.6"><strong>20–21 noy</strong> · Tbilisi, mehmon uyi (manzil ilovada)<br><strong>22–25 noy</strong> · Kazbegi, tog' etagidagi mehmon uyi<br><strong>26–27 noy</strong> · Tbilisi, qaytish reysi 27-noy kechqurun</div>
+</section>
+<section style="background:#0B0B0B;color:#fff;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px">
+<div class="lbl" style="color:#BDBDBD">FAVQULODDA</div>
+<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px;border-bottom:1px solid #2A2A2A"><span>Gruziya, yagona raqam</span><span class="d" style="font-size:28px;color:#F3EE1C">112</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px"><span>O'zbekiston elchixonasi</span><a href="#" style="color:#fff;font-size:14px">Qo'ng'iroq ↗</a></div>
+</section>
+<a href="#" style="display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:999px;background:#0A5CFF;color:#fff;text-decoration:none;font-weight:600">Dilnozaga yozish</a>
+<div style="font-size:12px;color:#5F5F5F;text-align:center;line-height:1.45">Sahifani Dilnozaning o'zi ulashgan. Boshqa a'zolarning profillari ko'rsatilmaydi.</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

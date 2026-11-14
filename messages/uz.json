@@ -786,5 +786,17 @@
     "whoPaid": "Kim to'ladi",
     "splitHint": "Summa guruhdagi {n} kishiga teng bo'linadi.",
     "bookedByMe": "Siz band qildingiz — xarajat avtomatik {n} ga bo'lindi."
+  },
+  "notify": {
+    "title": "Botdan bildirishnomalar",
+    "pin": "E'lonlar",
+    "pinHint": "Tashkilotchi xonaga e'lon qadaganda",
+    "poll": "So'rovnomalar",
+    "pollHint": "Guruhda yangi so'rovnoma ochilganda",
+    "mine": "Menga tegishli",
+    "mineHint": "So'rov, qabul, rejaga taklif, sizga to'lov",
+    "chat": "Chat xabarlari",
+    "chatHint": "Soatiga ko'pi bilan bitta: \"Guruhda N ta yangi xabar\"",
+    "failed": "Saqlab bo'lmadi. Qayta urinib ko'ring."
   }
 }

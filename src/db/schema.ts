@@ -63,6 +63,8 @@ export const users = pgTable(
     phoneVerified: boolean("phone_verified").notNull().default(false),
     email: text("email"),
     deletedAt: ts("deleted_at"),
+    // Bot notification kinds the user turned off: pin | poll | chat | mine.
+    notifyOff: textArray("notify_off"),
   },
   // One verified phone = one account (anti-abuse).
   (t) => [
@@ -372,6 +374,8 @@ export const conversationMembers = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     lastReadAt: ts("last_read_at"),
+    // "Guruhda N ta yangi xabar" goes at most once an hour.
+    lastDigestAt: ts("last_digest_at"),
     leftAt: ts("left_at"),
   },
   (t) => [uniqueIndex("conv_members_unique").on(t.conversationId, t.userId)],

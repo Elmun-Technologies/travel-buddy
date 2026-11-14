@@ -54,3 +54,12 @@ export async function getLocale(userId: string) {
 export async function setLocale(userId: string, locale: string) {
   await getDb().update(users).set({ locale }).where(eq(users.id, userId));
 }
+
+export async function getNotifyOff(userId: string) {
+  const [u] = await getDb().select({ off: users.notifyOff }).from(users).where(eq(users.id, userId));
+  return u?.off ?? [];
+}
+
+export async function setNotifyOff(userId: string, off: string[]) {
+  await getDb().update(users).set({ notifyOff: off }).where(eq(users.id, userId));
+}

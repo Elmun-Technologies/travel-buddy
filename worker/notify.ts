@@ -18,6 +18,19 @@ const T = {
     requestedHead: "YANGI SO'ROV",
     requested: (m: string, trip: string) => `<b>${m}</b> «${trip}» safaringizga qo'shilmoqchi.`,
     requestedBtn: "Ko'rib chiqaman ↗",
+    pinHead: "YANGI E'LON",
+    pollHead: "YANGI SO'ROVNOMA",
+    roomText: (trip: string, text: string) => `«${trip}»: ${text}`,
+    pollBtn: "Ovoz beraman ↗",
+    digest: (trip: string, n: string) => `«${trip}» guruhida ${n} ta yangi xabar.`,
+    proposedHead: "REJAGA TAKLIF",
+    proposed: (m: string, trip: string, place: string) =>
+      `<b>${m}</b> «${trip}» rejasiga taklif qo'shdi: ${place}.`,
+    settleHead: "TO'LOV BELGILANDI",
+    settle: (m: string, trip: string, amount: string) =>
+      `<b>${m}</b> sizga $${amount} o'tkazganini belgiladi («${trip}»). Pul kelgan bo'lsa, hammasi joyida.`,
+    roomBtn: "Xonani ochaman ↗",
+    settings: "Bildirishnomalarni profilda sozlash mumkin.",
   },
   ru: {
     approvedHead: "ВАС ЖДУТ!",
@@ -27,6 +40,19 @@ const T = {
     requestedHead: "НОВАЯ ЗАЯВКА",
     requested: (m: string, trip: string) => `<b>${m}</b> хочет присоединиться к поездке «${trip}».`,
     requestedBtn: "Посмотреть ↗",
+    pinHead: "НОВОЕ ОБЪЯВЛЕНИЕ",
+    pollHead: "НОВЫЙ ОПРОС",
+    roomText: (trip: string, text: string) => `«${trip}»: ${text}`,
+    pollBtn: "Проголосовать ↗",
+    digest: (trip: string, n: string) => `В группе «${trip}» новых сообщений: ${n}.`,
+    proposedHead: "ПРЕДЛОЖЕНИЕ В ПЛАН",
+    proposed: (m: string, trip: string, place: string) =>
+      `<b>${m}</b> предлагает в план «${trip}»: ${place}.`,
+    settleHead: "ОТМЕЧЕН ПЕРЕВОД",
+    settle: (m: string, trip: string, amount: string) =>
+      `<b>${m}</b> отметил(а), что перевёл(а) вам $${amount} («${trip}»). Если деньги пришли — всё в порядке.`,
+    roomBtn: "Открыть комнату ↗",
+    settings: "Уведомления настраиваются в профиле.",
   },
   en: {
     approvedHead: "THEY'RE WAITING FOR YOU!",
@@ -35,6 +61,19 @@ const T = {
     requestedHead: "NEW REQUEST",
     requested: (m: string, trip: string) => `<b>${m}</b> wants to join your trip “${trip}”.`,
     requestedBtn: "Take a look ↗",
+    pinHead: "NEW ANNOUNCEMENT",
+    pollHead: "NEW POLL",
+    roomText: (trip: string, text: string) => `“${trip}”: ${text}`,
+    pollBtn: "Vote ↗",
+    digest: (trip: string, n: string) => `${n} new messages in “${trip}”.`,
+    proposedHead: "PLAN SUGGESTION",
+    proposed: (m: string, trip: string, place: string) =>
+      `<b>${m}</b> suggested for the “${trip}” plan: ${place}.`,
+    settleHead: "PAYMENT MARKED",
+    settle: (m: string, trip: string, amount: string) =>
+      `<b>${m}</b> marked sending you $${amount} (“${trip}”). If it arrived, you're all set.`,
+    roomBtn: "Open the room ↗",
+    settings: "You can change notifications in your profile.",
   },
 } as const;
 
@@ -47,7 +86,68 @@ type Row = {
   trip: string | null;
   organizer: string | null;
   member: string | null;
+  text: string | null;
+  n: string | null;
+  off: boolean;
 };
+
+/** Head (optional), body, button label and the path under /trips/<id> the button opens. */
+export function render(r: Pick<Row, "type" | "trip" | "organizer" | "member" | "text" | "n">, l: Lang) {
+  const t = T[l];
+  const trip = esc(r.trip ?? "");
+  const member = esc(r.member ?? "");
+  const text = esc(r.text ?? "");
+  switch (r.type) {
+    case "join_approved":
+      return {
+        head: t.approvedHead,
+        body: t.approved(esc(r.organizer ?? ""), trip),
+        btn: t.approvedBtn,
+        path: "/room",
+      };
+    case "join_requested":
+      return { head: t.requestedHead, body: t.requested(member, trip), btn: t.requestedBtn, path: "" };
+    case "room_pin":
+      return { head: t.pinHead, body: t.roomText(trip, text), btn: t.roomBtn, path: "/room" };
+    case "room_poll":
+      return { head: t.pollHead, body: t.roomText(trip, text), btn: t.pollBtn, path: "/room" };
+    case "room_digest":
+      return { head: null, body: t.digest(trip, r.n ?? "1"), btn: t.roomBtn, path: "/room" };
+    case "plan_proposed":
+      return { head: t.proposedHead, body: t.proposed(member, trip, text), btn: t.roomBtn, path: "/room" };
+    case "settle_received":
+      return { head: t.settleHead, body: t.settle(member, trip, text), btn: t.roomBtn, path: "/room" };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Plain chat messages are never sent one by one: at most once an hour per room, "N ta yangi xabar",
+ * counting what the member has not seen (an open room page keeps last_read_at fresh).
+ * Messages younger than 2 minutes wait, so people chatting live are not pinged.
+ */
+export async function queueDigests(db: Db) {
+  await db.execute(sql`
+    with due as (
+      select cm.id, cm.user_id, c.trip_id, count(m.id) as n
+      from conversation_members cm
+      join conversations c on c.id = cm.conversation_id and c.kind = 'trip_group'
+      join users u on u.id = cm.user_id and not ('chat' = any(u.notify_off))
+      join messages m on m.conversation_id = cm.conversation_id
+        and m.sender_id <> cm.user_id and m.kind = 'text' and m.hidden_at is null
+        and m.created_at > greatest(coalesce(cm.last_read_at, cm.created_at), coalesce(cm.last_digest_at, cm.created_at))
+        and m.created_at < now() - interval '2 minutes'
+        and not exists (select 1 from blocks b
+          where (b.blocker_id = cm.user_id and b.blocked_id = m.sender_id)
+             or (b.blocker_id = m.sender_id and b.blocked_id = cm.user_id))
+      where cm.left_at is null
+        and (cm.last_digest_at is null or cm.last_digest_at < now() - interval '1 hour')
+      group by cm.id, cm.user_id, c.trip_id),
+    marked as (update conversation_members set last_digest_at = now() where id in (select id from due))
+    insert into notifications (user_id, type, payload, channel)
+    select user_id, 'room_digest', jsonb_build_object('tripId', trip_id, 'n', n::text), 'telegram' from due`);
+}
 
 export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
   const rows = await db.execute<Row>(sql`
@@ -59,6 +159,9 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
         order by created_at limit 20 for update skip locked)
       returning id, user_id, type, payload)
     select c.id, c.type, c.payload->>'tripId' as trip_id,
+      c.payload->>'text' as text, c.payload->>'n' as n,
+      (case c.type when 'room_pin' then 'pin' when 'room_poll' then 'poll' when 'room_digest' then 'chat'
+        else 'mine' end) = any(u.notify_off) as off,
       a.provider_user_id as chat_id, u.locale, t.title as trip,
       op.display_name as organizer, mp.display_name as member
     from claimed c
@@ -69,18 +172,17 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
     left join traveler_profiles mp on mp.user_id = (c.payload->>'memberId')::uuid`);
 
   for (const r of rows) {
-    if (!r.chat_id || !r.trip) continue; // sample users (no Telegram) or deleted trip
+    if (!r.chat_id || !r.trip || r.off) continue; // no Telegram (sample users), deleted trip, or turned off
     const l = lang(r.locale);
-    // Approved → straight into the room; a new request → the trip page where the organizer decides.
-    const url = `${appUrl}/${l}/trips/${r.trip_id}${r.type === "join_approved" ? "/room" : ""}`;
-    const [head, body, btn] =
-      r.type === "join_approved"
-        ? [T[l].approvedHead, T[l].approved(esc(r.organizer ?? ""), esc(r.trip)), T[l].approvedBtn]
-        : [T[l].requestedHead, T[l].requested(esc(r.member ?? ""), esc(r.trip)), T[l].requestedBtn];
+    const m = render(r, l);
+    if (!m) continue;
+    const footer = r.type.startsWith("room_") ? `\n\n<i>${T[l].settings}</i>` : "";
     await api
-      .sendMessage(r.chat_id, `<b>${head}</b>\n${body}`, {
+      .sendMessage(r.chat_id, `${m.head ? `<b>${m.head}</b>\n` : ""}${m.body}${footer}`, {
         parse_mode: "HTML",
-        reply_markup: appUrl.startsWith("https://") ? new InlineKeyboard().webApp(btn, url) : undefined,
+        reply_markup: appUrl.startsWith("https://")
+          ? new InlineKeyboard().webApp(m.btn, `${appUrl}/${l}/trips/${r.trip_id}${m.path}`)
+          : undefined,
       })
       // 403 = the user blocked the bot: nothing to retry (an SMS fallback is a later, opt-in feature).
       .catch((e) => console.error(`notification ${r.id} failed`, e instanceof Error ? e.message : e));

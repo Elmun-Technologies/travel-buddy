@@ -14,6 +14,6 @@ export async function PUT(req: Request, { params }: RouteContext<"/api/rooms/[tr
   if (!trip?.isOwner) return json({ error: "forbidden" }, 403);
   const b = body.safeParse(r.body);
   if (!b.success) return json({ error: "invalid" }, 422);
-  await setPinned(r.room.id, b.data.text || null);
+  await setPinned(r.room.id, b.data.text || null, r.user.id);
   return json({ ok: true });
 }

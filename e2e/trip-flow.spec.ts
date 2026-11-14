@@ -149,6 +149,17 @@ test.describe("trip flow", () => {
     await traveler.getByRole("button", { name: "Ha, to'ladim" }).click();
     await owner.getByRole("tab", { name: "Xarajat" }).click();
     await expect(owner.getByText("Hammasi teng — hech kim qarz emas.")).toBeVisible();
+
+    // Bot notifications: each kind can be turned off in the profile, and it stays off.
+    await owner.goto("/uz/me");
+    await owner.waitForLoadState("networkidle");
+    const chat = owner.getByRole("switch", { name: "Chat xabarlari" });
+    await expect(chat).toHaveAttribute("aria-checked", "true");
+    await chat.click();
+    await expect(chat).toHaveAttribute("aria-checked", "false");
+    await owner.waitForLoadState("networkidle");
+    await owner.reload();
+    await expect(owner.getByRole("switch", { name: "Chat xabarlari" })).toHaveAttribute("aria-checked", "false");
   });
 
   test("bad signature does not log in", async ({ page }) => {

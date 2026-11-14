@@ -3,6 +3,10 @@ import { z } from "zod";
 import { PageLoading } from "@/components/page-loading";
 import { redirect } from "@/i18n/navigation";
 import { asLocale, requireProfile } from "@/lib/guard";
+import { flightSearchUrl } from "@/lib/aviasales";
+import { countryName, todayISO } from "@/lib/catalog";
+import { countryPhoto } from "@/lib/photos";
+import { formatDay } from "@/lib/format";
 import { shareLinks } from "@/lib/trip-share";
 import { getPolls, getRoom, listMessages } from "@/modules/chat/service";
 import { getTripView } from "@/modules/trips/service";
@@ -48,6 +52,17 @@ async function RoomLoader({ params }: PageProps<"/[locale]/trips/[id]/room">) {
           ? { tripId: trip.id, title: trip.title, ...shareLinks(trip.publicCode, locale) }
           : null
       }
+      board={{
+        destination: trip.destinationCity || countryName(trip.destinationCountry, locale),
+        startDate: trip.startDate,
+        startLabel: formatDay(trip.startDate, locale),
+        deadlineLabel: trip.ticketDeadline ? formatDay(trip.ticketDeadline, locale) : null,
+        today: todayISO(),
+        deadline: trip.ticketDeadline,
+        flightUrl: flightSearchUrl(trip),
+        photo: countryPhoto(trip.destinationCountry, 400, trip.destinationCity),
+        currency: trip.currency,
+      }}
     />
   );
 }

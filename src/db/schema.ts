@@ -222,6 +222,8 @@ export const trips = pgTable(
     publicCode: text("public_code").unique(),
     // "exact": real dates; "month": "Shu oy / Keyingi oy" — the group agrees on days later.
     datePrecision: text("date_precision").notNull().default("exact"),
+    // Yig'amiz: everyone marks "Oldim" before this day (set by the organizer).
+    ticketDeadline: date("ticket_deadline"),
   },
   (t) => [index("trips_dest_start_status").on(t.destinationCountry, t.startDate, t.status)],
 );
@@ -426,6 +428,129 @@ export const pollVotes = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (t) => [uniqueIndex("poll_votes_one").on(t.pollId, t.userId)],
+);
+
+// ---------- trip room board: plan, checklist, Yig'amiz, costs ----------
+
+const tripRef = () =>
+  uuid("trip_id")
+    .notNull()
+    .references(() => trips.id, { onDelete: "cascade" });
+const userRef = (name: string) =>
+  uuid(name)
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" });
+
+/** Day-by-day plan. Organizer's items are final; members' are proposals until accepted. */
+export const planItems = pgTable(
+  "plan_items",
+  {
+    ...base,
+    tripId: tripRef(),
+    day: integer("day").notNull(),
+    place: text("place").notNull(),
+    note: text("note"),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    proposed: boolean("proposed").notNull().default(false),
+  },
+  (t) => [index("plan_items_trip").on(t.tripId, t.day)],
+);
+
+/** Each member's own checklist. Labels "k:<key>" are default items translated in the UI. */
+export const checklistItems = pgTable(
+  "checklist_items",
+  {
+    ...base,
+    tripId: tripRef(),
+    userId: userRef("user_id"),
+    label: text("label").notNull(),
+    done: boolean("done").notNull().default(false),
+  },
+  (t) => [uniqueIndex("checklist_items_unique").on(t.tripId, t.userId, t.label)],
+);
+
+/** Options the group votes on: flight, stay, or a partner agency offer (entered by admin). */
+export const tripOptions = pgTable(
+  "trip_options",
+  {
+    ...base,
+    tripId: tripRef(),
+    kind: text("kind").notNull(), // flight | stay | offer
+    title: text("title").notNull(),
+    detail: text("detail"),
+    priceMinor: integer("price_minor"), // flight: per person; stay: per night; offer: per person
+    nights: integer("nights"),
+    url: text("url"),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    bookedBy: uuid("booked_by").references(() => users.id, { onDelete: "set null" }),
+  },
+  (t) => [index("trip_options_trip").on(t.tripId, t.kind)],
+);
+
+/** One vote per person per kind (flight / stay / offer) in a trip. */
+export const optionVotes = pgTable(
+  "option_votes",
+  {
+    ...base,
+    tripId: tripRef(),
+    kind: text("kind").notNull(),
+    optionId: uuid("option_id")
+      .notNull()
+      .references(() => tripOptions.id, { onDelete: "cascade" }),
+    userId: userRef("user_id"),
+  },
+  (t) => [uniqueIndex("option_votes_one").on(t.tripId, t.kind, t.userId)],
+);
+
+/** "Oldim": the member bought their ticket. */
+export const tripTickets = pgTable(
+  "trip_tickets",
+  { ...base, tripId: tripRef(), userId: userRef("user_id") },
+  (t) => [uniqueIndex("trip_tickets_unique").on(t.tripId, t.userId)],
+);
+
+/** Bookkeeping only: money never passes through the platform. Split equally among splitAmong. */
+export const expenses = pgTable(
+  "expenses",
+  {
+    ...base,
+    tripId: tripRef(),
+    paidBy: userRef("paid_by"),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    title: text("title").notNull(),
+    category: text("category").notNull(), // stay | transport | food | other
+    amountMinor: integer("amount_minor").notNull(),
+    currency: text("currency").notNull().default("USD"),
+    splitAmong: uuid("split_among").array().notNull(),
+    optionId: uuid("option_id").references(() => tripOptions.id, { onDelete: "set null" }),
+  },
+  (t) => [index("expenses_trip").on(t.tripId)],
+);
+
+/** "To'ladim": a repayment between two members. */
+export const settlements = pgTable(
+  "settlements",
+  {
+    ...base,
+    tripId: tripRef(),
+    fromUser: userRef("from_user"),
+    toUser: userRef("to_user"),
+    amountMinor: integer("amount_minor").notNull(),
+  },
+  (t) => [index("settlements_trip").on(t.tripId)],
+);
+
+/** "Tayyor tur so'raymiz": handled by hand in MVP — admin collects partner offers into trip_options. */
+export const agencyRequests = pgTable(
+  "agency_requests",
+  {
+    ...base,
+    tripId: tripRef(),
+    requestedBy: uuid("requested_by").references(() => users.id, { onDelete: "set null" }),
+    people: integer("people").notNull(),
+    status: text("status").notNull().default("new"), // new | sent | answered | closed
+  },
+  (t) => [uniqueIndex("agency_requests_trip").on(t.tripId)],
 );
 
 // ---------- trust & safety ----------

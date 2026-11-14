@@ -76,10 +76,13 @@ export async function roomMemberCount(conversationId: string) {
 }
 
 export type RoomEvent =
-  { t: "message"; c: string; id: string } | { t: "poll"; c: string; id: string } | { t: "pin"; c: string };
+  | { t: "message"; c: string; id: string }
+  | { t: "poll"; c: string; id: string }
+  | { t: "pin"; c: string }
+  | { t: "board"; c: string }; // plan / Yig'amiz / costs changed: pages refetch
 
 /** Fan out to every open room page (src/lib/room-events.ts listens on this channel). */
-async function emit(tx: DbOrTx, e: RoomEvent) {
+export async function emit(tx: DbOrTx, e: RoomEvent) {
   await tx.execute(sql`select pg_notify('room_events', ${JSON.stringify(e)})`);
 }
 

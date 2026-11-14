@@ -11,6 +11,7 @@ import { useRouter } from "@/i18n/navigation";
 import { haptic } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, PollView } from "@/modules/chat/service";
+import { Board, type BoardTrip, toneOf } from "./board";
 
 type Msg = ChatMessage & { poll?: PollView };
 type Tab = "chat" | "plan" | "book" | "costs";
@@ -22,8 +23,6 @@ const post = (url: string, body: unknown, method = "POST") =>
 
 const time = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-const tones = ["bg-[#cfdae6]", "bg-[#e8dccb]", "bg-[#d6e6d3]", "bg-[#ead3e0]", "bg-[#d3e8e6]"];
-const toneOf = (id: string | null) => tones[(id?.charCodeAt(0) ?? 0) % tones.length];
 
 /** App-Room-Chat: tabs, invite bar, pinned announcement, live chat with polls, composer. */
 export function Room({
@@ -37,6 +36,7 @@ export function Room({
   polls: pollsInitial,
   spots,
   share,
+  board,
 }: {
   tripId: string;
   title: string;
@@ -48,6 +48,7 @@ export function Room({
   polls: Record<string, PollView>;
   spots: { n: number; max: number } | null;
   share: ShareLinks | null;
+  board: BoardTrip;
 }) {
   const t = useTranslations("room");
   const router = useRouter();
@@ -61,6 +62,7 @@ export function Room({
   const [sheet, setSheet] = useState<"poll" | "pin" | null>(null);
   const [focus, setFocus] = useState<string | null>(null); // message whose author menu is open
   const [error, setError] = useState<string | null>(null);
+  const [boardVersion, setBoardVersion] = useState(0); // bumped by live "board" events: tabs refetch
   const bottom = useRef<HTMLDivElement>(null);
 
   // Live updates (SSE). EventSource reconnects by itself after network drops.
@@ -78,6 +80,7 @@ export function Room({
     es.addEventListener("pin", (e) =>
       setPinned((JSON.parse((e as MessageEvent).data) as { text: string | null }).text),
     );
+    es.addEventListener("board", () => setBoardVersion((v) => v + 1));
     return () => es.close();
   }, [tripId]);
 
@@ -156,12 +159,7 @@ export function Room({
       </div>
 
       {tab !== "chat" ? (
-        <Panel className="flex flex-col gap-2">
-          <Display as="h2" className="text-[26px]">
-            {t(`tab_${tab}`)}
-          </Display>
-          <p className="text-muted-foreground">{t("soon")}</p>
-        </Panel>
+        <Board tab={tab} tripId={tripId} me={me} isOwner={isOwner} version={boardVersion} trip={board} />
       ) : (
         <>
           {spots && spots.n < spots.max && share && (

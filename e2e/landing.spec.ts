@@ -33,3 +33,10 @@ test("waitlist submit stores contact", async ({ page }) => {
   await page.getByRole("button", { name: "Join", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("You're on the list");
 });
+
+for (const locale of ["uz", "ru", "en"]) {
+  test(`Telegram login widget uses page language (${locale})`, async ({ page }) => {
+    await page.goto(`/${locale}/login`);
+    await expect(page.locator('script[src*="telegram-widget.js"]')).toHaveAttribute("data-lang", locale);
+  });
+}

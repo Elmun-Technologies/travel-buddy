@@ -36,7 +36,7 @@ async function Login({ params, searchParams }: PageProps<"/[locale]/login">) {
       )}
       {bot ? (
         <>
-          <TelegramLoginButton bot={bot} authUrl={authUrl} />
+          <TelegramLoginButton bot={bot} authUrl={authUrl} lang={locale} />
           <div className="border-t pt-6">
             <p className="mb-3 text-sm text-muted-foreground">{t("orBot")}</p>
             <a

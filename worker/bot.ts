@@ -44,8 +44,9 @@ const T = {
 
 const lang = (code?: string): Lang => (code === "ru" || code === "en" ? code : "uz");
 
-export function createBot(token: string, appUrl: string) {
-  const bot = new Bot(token);
+// apiRoot: only for tests (fake Bot API server); production uses api.telegram.org.
+export function createBot(token: string, appUrl: string, apiRoot?: string) {
+  const bot = new Bot(token, apiRoot ? { client: { apiRoot } } : undefined);
   const https = appUrl.startsWith("https://");
   const openButton = (l: Lang) =>
     https ? new InlineKeyboard().webApp(T[l].open, `${appUrl}/${l}/tg`) : undefined;

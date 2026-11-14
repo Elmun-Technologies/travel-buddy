@@ -181,6 +181,10 @@ export async function closeTrip(userId: string, tripId: string) {
     .where(and(eq(trips.id, tripId), eq(trips.ownerUserId, userId)));
 }
 
+export async function setTicketDeadline(tx: DbOrTx, tripId: string, day: string | null) {
+  await tx.update(trips).set({ ticketDeadline: day }).where(eq(trips.id, tripId));
+}
+
 // ---- used by groups (inside its transactions) ----
 
 export async function lockTripForJoin(tx: DbOrTx, tripId: string) {

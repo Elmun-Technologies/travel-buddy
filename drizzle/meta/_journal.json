@@ -43,6 +43,13 @@
       "when": 1794673247492,
       "tag": "0005_room_polls_pin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794675451346,
+      "tag": "0006_room_board",
+      "breakpoints": true
     }
   ]
 }

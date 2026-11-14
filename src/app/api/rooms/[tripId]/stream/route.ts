@@ -31,6 +31,7 @@ export async function GET(req: Request, { params }: RouteContext<"/api/rooms/[tr
           const poll = m.pollId ? (await getPolls(room.id, [m.pollId], user.id))[m.pollId] : undefined;
           send("message", { ...m, poll });
         } else if (e.t === "poll") send("poll", (await getPolls(room.id, [e.id], user.id))[e.id]);
+        else if (e.t === "board") send("board", {});
         else send("pin", { text: (await getRoom(user.id, tripId.data))?.pinnedText ?? null });
       };
       const unsubscribe = subscribeRoom(room.id, (e) => void onEvent(e).catch(() => {}));

@@ -113,6 +113,42 @@ test.describe("trip flow", () => {
     await owner.getByRole("button", { name: "Saqlash" }).click();
     await traveler.getByRole("button", { name: /Mehmon uyi/ }).click();
     await expect(owner.getByText("1 ovoz")).toBeVisible();
+
+    // Reja: a member's suggestion waits for the organizer.
+    await owner.getByRole("tab", { name: "Reja" }).click();
+    await traveler.getByRole("tab", { name: "Reja" }).click();
+    await traveler.getByRole("button", { name: "+ Taklif" }).click();
+    await traveler.getByLabel(/^Joy/).fill("Kazbegi");
+    await traveler.getByRole("button", { name: "Saqlash" }).click();
+    await expect(owner.getByText("Kazbegi")).toBeVisible(); // live
+    await owner.getByRole("button", { name: "Qabul qilish" }).click();
+    await expect(traveler.getByText("Taklif", { exact: true })).toBeHidden();
+
+    // Yig'amiz: a stay option, a vote, the organizer books it -> the cost is split in Xarajat.
+    await owner.getByRole("tab", { name: "Yig'amiz" }).click();
+    await traveler.getByRole("tab", { name: "Yig'amiz" }).click();
+    await expect(traveler.getByRole("link", { name: "Shu reysni qidiraman" })).toHaveAttribute(
+      "href",
+      /aviasales\.uz\/search\/TAS\d{4}TBS\d{4}1/,
+    );
+    await traveler.getByRole("button", { name: "+ Variant qo'shish" }).nth(1).click();
+    await traveler.getByLabel(/^Nomi/).fill("Tog' mehmon uyi");
+    await traveler.getByLabel("Necha kecha").fill("3");
+    await traveler.getByLabel(/^Bir kecha narxi/).fill("25");
+    await traveler.getByRole("button", { name: "Saqlash" }).click();
+    await owner.getByRole("button", { name: /Tog' mehmon uyi/ }).click();
+    await expect(traveler.getByRole("button", { name: /Tog' mehmon uyi/ })).toHaveText(/1$/); // live
+    await owner.getByRole("button", { name: "Men band qilaman" }).click();
+    await expect(owner.getByLabel("Jami summa, $")).toHaveValue("75");
+    await owner.getByRole("button", { name: "Saqlash" }).click();
+    await expect(traveler.getByText("Tanlandi")).toBeVisible();
+
+    await traveler.getByRole("tab", { name: "Xarajat" }).click();
+    await expect(traveler.getByText("$37.50").first()).toBeVisible();
+    await traveler.getByRole("button", { name: "To'ladim" }).click();
+    await traveler.getByRole("button", { name: "Ha, to'ladim" }).click();
+    await owner.getByRole("tab", { name: "Xarajat" }).click();
+    await expect(owner.getByText("Hammasi teng — hech kim qarz emas.")).toBeVisible();
   });
 
   test("bad signature does not log in", async ({ page }) => {

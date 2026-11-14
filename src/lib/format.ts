@@ -2,6 +2,10 @@ export function flag(country: string) {
   return String.fromCodePoint(...[...country.toUpperCase()].map((c) => 127397 + c.charCodeAt(0)));
 }
 
+/** "20-noy" — on the server: browsers (Telegram's WebView too) often lack Uzbek month names. */
+export const formatDay = (iso: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
+
 export function formatDateRange(start: string, end: string, locale: string) {
   const f = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" });
   return `${f.format(new Date(start))} – ${f.format(new Date(end))}`;

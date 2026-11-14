@@ -22,3 +22,12 @@ export function formatBudget(min: number | null, max: number | null, currency: s
 }
 
 export const botUsername = () => process.env.TELEGRAM_BOT_USERNAME ?? "";
+
+/** Trip dates: "26-noy – 2-dek", or just the month ("dekabr") when the group fixes days later. */
+export function formatTripDates(
+  t: { startDate: string; endDate: string; datePrecision?: string | null },
+  locale: string,
+) {
+  if (t.datePrecision !== "month") return formatDateRange(t.startDate, t.endDate, locale);
+  return new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(new Date(t.startDate));
+}

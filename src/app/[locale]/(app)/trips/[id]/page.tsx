@@ -1,17 +1,22 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { CheckIcon, Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
 import { MainAction } from "@/components/telegram-actions";
+import { ReportLink } from "@/components/report-link";
 import { JoinAction } from "@/components/trips/join-action";
+import { ShareFriendCard, ShareIcon } from "@/components/trips/share";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { countryName, todayISO } from "@/lib/catalog";
-import { formatBudget, formatDateRange } from "@/lib/format";
+import { formatBudget, formatTripDates } from "@/lib/format";
 import { asLocale } from "@/lib/guard";
+import { isSampleTrip } from "@/lib/sample";
 import { countryPhoto } from "@/lib/photos";
 import { getSessionUser, type SessionUser } from "@/lib/session";
+import { shareLinks } from "@/lib/trip-share";
 import { cn } from "@/lib/utils";
 import { joinDenied } from "@/modules/groups/rules";
 import { getMyMembership, listMembers } from "@/modules/groups/service";
@@ -26,6 +31,13 @@ const label = "text-xs font-semibold tracking-[.06em] text-muted-foreground uppe
 const tag =
   "inline-flex items-center rounded-full border border-input bg-card px-2.5 py-1 text-xs font-medium";
 const avatarTones = ["bg-[#cfdae6]", "bg-[#e8dccb]", "bg-[#d6e6d3]", "bg-[#ead3e0]", "bg-[#d3e8e6]"];
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/trips/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const ok = z.uuid().safeParse(id);
+  const trip = ok.success ? await getTripView(ok.data, null) : null;
+  return trip ? { title: trip.title, openGraph: { title: trip.title } } : {};
+}
 
 export default function TripPage(props: PageProps<"/[locale]/trips/[id]">) {
   return (
@@ -52,6 +64,9 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
   const budget = formatBudget(trip.budgetMin, trip.budgetMax, trip.currency);
   const left = trip.groupSizeMax ? Math.max(0, trip.groupSizeMax - trip.approvedCount) : null;
   const approved = members?.filter((m) => m.status === "approved") ?? null;
+  const links = trip.publicCode
+    ? { tripId: trip.id, title: trip.title, ...shareLinks(trip.publicCode, locale) }
+    : null;
 
   return (
     <div className="mx-auto flex w-full max-w-[560px] flex-col gap-2">
@@ -63,9 +78,14 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
           className="size-full object-cover"
           fetchPriority="high"
         />
-        {trip.isTest && (
+        {isSampleTrip(trip.id) && (
           <span className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold">
             {t("sample")}
+          </span>
+        )}
+        {links && (
+          <span className="absolute top-3 right-3">
+            <ShareIcon {...links} />
           </span>
         )}
       </div>
@@ -76,11 +96,6 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
           {trip.destinationCity && ` · ${trip.destinationCity}`}
         </p>
         <Display className="text-[32px]">{trip.title}</Display>
-        <p className="text-[15px]">
-          {formatDateRange(trip.startDate, trip.endDate, locale)}
-          {trip.dateFlexDays ? ` (${t("flex", { n: trip.dateFlexDays })})` : ""}
-          {budget && <span className="text-muted-foreground"> · {budget}</span>}
-        </p>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {trip.womenOnly && (
             <span className={cn(tag, "border-ink bg-ink text-white")}>{t("womenOnlyBadge")}</span>
@@ -96,6 +111,24 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
           {trip.status !== "open" && <span className={tag}>{t(`status.${trip.status}`)}</span>}
         </div>
       </Panel>
+
+      <div className="grid grid-cols-3 gap-2">
+        <Stat
+          label={t("statDates")}
+          value={formatTripDates(trip, locale)}
+          note={trip.dateFlexDays ? t("flex", { n: trip.dateFlexDays }) : null}
+        />
+        <Stat label={t("statBudget")} value={budget ?? t("noBudget")} />
+        <Stat
+          label={t("statSpots")}
+          value={
+            trip.groupSizeMax
+              ? t("spotsTaken", { n: trip.approvedCount, max: trip.groupSizeMax })
+              : String(trip.approvedCount)
+          }
+          tone={left != null && left <= 3 ? "signal" : undefined}
+        />
+      </div>
 
       {organizer && (
         <Panel className="flex flex-col gap-3">
@@ -145,12 +178,22 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         {!approved && <p className="text-[13px] text-muted-foreground">{t("membersNote")}</p>}
       </Panel>
 
+      {links && trip.status === "open" && <ShareFriendCard {...links} />}
+
       {trip.description && (
         <Panel className="flex flex-col gap-2">
           <span className={label}>{t("planLabel")}</span>
           <p className="whitespace-pre-line">{trip.description}</p>
         </Panel>
       )}
+
+      <Panel tone="dark" className="flex flex-col gap-3">
+        <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
+          {t("rulesLabel")}
+        </span>
+        <p className="text-[17px] leading-relaxed">{t("rules")}</p>
+        {user && !trip.isOwner && <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />}
+      </Panel>
 
       <JoinArea
         trip={trip}
@@ -159,6 +202,31 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         members={members}
         organizer={organizer?.displayName ?? null}
       />
+    </div>
+  );
+}
+
+function Stat({
+  label: l,
+  value,
+  note,
+  tone,
+}: {
+  label: string;
+  value: string;
+  note?: string | null;
+  tone?: "signal";
+}) {
+  return (
+    <div
+      className={cn(
+        "flex min-h-[96px] flex-col justify-between gap-2 rounded-[18px] p-3.5",
+        tone ? "bg-signal" : "bg-card",
+      )}
+    >
+      <span className="text-xs text-muted-foreground">{l}</span>
+      <span className="font-display text-[19px] leading-tight">{value}</span>
+      {note && <span className="text-[11px] text-muted-foreground">{note}</span>}
     </div>
   );
 }
@@ -220,7 +288,7 @@ async function JoinArea({
     getJoinProfile(user.id),
     getMyMembership(user.id, trip.id),
   ]);
-  if (!profile) return <MainAction label={t("profileToJoin")} href="/onboarding" />;
+  if (!profile) return <MainAction label={t("profileToJoin")} href={`/welcome?next=/trips/${trip.id}`} />;
 
   if (trip.isOwner) {
     const requests = members?.filter((m) => m.status === "requested") ?? [];

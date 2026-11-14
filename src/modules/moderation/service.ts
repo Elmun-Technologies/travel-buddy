@@ -1,6 +1,6 @@
 import "server-only";
 import { and, eq, or } from "drizzle-orm";
-import { blocks } from "@/db/schema";
+import { blocks, reports } from "@/db/schema";
 import { getDb } from "@/lib/db";
 
 /** Users hidden from `userId` everywhere: blocked by them or blocking them. */
@@ -24,4 +24,23 @@ export async function isBlockedBetween(a: string, b: string) {
       ),
     );
   return !!row;
+}
+
+export const REPORT_REASONS = ["fake", "dating", "unsafe", "other"] as const;
+
+/** One open report per reporter and target is enough (repeat taps are ignored). */
+export async function createReport(
+  reporterId: string,
+  targetType: "user" | "trip" | "message",
+  targetId: string,
+  reason: (typeof REPORT_REASONS)[number],
+) {
+  const db = getDb();
+  const [dup] = await db
+    .select({ id: reports.id })
+    .from(reports)
+    .where(
+      and(eq(reports.reporterId, reporterId), eq(reports.targetId, targetId), eq(reports.status, "open")),
+    );
+  if (!dup) await db.insert(reports).values({ reporterId, targetType, targetId, reason });
 }

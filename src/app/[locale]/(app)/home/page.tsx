@@ -5,8 +5,9 @@ import { CheckIcon, Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
 import { Link } from "@/i18n/navigation";
 import { type Country, countryName, todayISO } from "@/lib/catalog";
-import { formatBudget, formatDateRange } from "@/lib/format";
+import { formatBudget, formatTripDates } from "@/lib/format";
 import { asLocale, requireProfile } from "@/lib/guard";
+import { isSampleTrip } from "@/lib/sample";
 import { countryPhoto } from "@/lib/photos";
 import { getOwnProfile } from "@/modules/profiles/service";
 import { listFeed, listForming, listMyTrips } from "@/modules/trips/service";
@@ -88,7 +89,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
             {next.title}
           </Display>
           <div className="flex gap-4 text-[13px] text-[#d6d6d6]">
-            <span>{formatDateRange(next.startDate, next.endDate, locale)}</span>
+            <span>{formatTripDates(next, locale)}</span>
             {next.groupSizeMax && (
               <span>{t("members", { n: next.approvedCount, max: next.groupSizeMax })}</span>
             )}
@@ -143,7 +144,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
                       loading="lazy"
                       className="size-full object-cover"
                     />
-                    {trip.isTest && (
+                    {isSampleTrip(trip.id) && (
                       <span className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold">
                         {t("sample")}
                       </span>
@@ -154,8 +155,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
                       {trip.title}
                     </Display>
                     <div className="text-[13px] text-muted-foreground">
-                      {countryName(trip.destinationCountry, locale)} ·{" "}
-                      {formatDateRange(trip.startDate, trip.endDate, locale)}
+                      {countryName(trip.destinationCountry, locale)} · {formatTripDates(trip, locale)}
                       {trip.budgetMin != null &&
                         ` · ${formatBudget(trip.budgetMin, trip.budgetMax, trip.currency)}`}
                     </div>
@@ -192,8 +192,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
                 />
               </div>
               <div className="text-xs text-muted-foreground">
-                {formatDateRange(g.startDate, g.endDate, locale)} ·{" "}
-                {t("spotsLeft", { n: g.groupSizeMax! - g.approvedCount })}
+                {formatTripDates(g, locale)} · {t("spotsLeft", { n: g.groupSizeMax! - g.approvedCount })}
               </div>
             </Link>
           ))}

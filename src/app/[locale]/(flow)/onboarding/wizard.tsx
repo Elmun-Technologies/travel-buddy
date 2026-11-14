@@ -81,6 +81,7 @@ export function OnboardingWizard({
   bot,
   name,
   locale,
+  next,
   languages,
   destinations,
 }: {
@@ -90,6 +91,7 @@ export function OnboardingWizard({
   bot: string;
   name: string;
   locale: string;
+  next: string;
   languages: Option[];
   destinations: Option[];
 }) {
@@ -219,7 +221,7 @@ export function OnboardingWizard({
     if (res?.ok) {
       writeLocal(draftKey, null);
       haptic.success();
-      if (phone === "done") router.replace("/home");
+      if (phone === "done") router.replace(next);
       else setStep(4);
       return;
     }
@@ -472,7 +474,7 @@ export function OnboardingWizard({
           )}
           {phone === "declined" && <p className="text-sm text-muted-foreground">{t("notShared")}</p>}
           {phone !== "done" && (
-            <Link href="/home" className="min-h-11 self-start py-2.5 text-sm font-medium text-blue">
+            <Link href={next} className="min-h-11 self-start py-2.5 text-sm font-medium text-blue">
               {t("later")}
             </Link>
           )}
@@ -505,7 +507,7 @@ export function OnboardingWizard({
       {step === 4 && (
         <MainAction
           label={phone === "done" ? t("finish") : tg()?.requestContact ? t("share") : t("openBot")}
-          onClick={() => (phone === "done" ? router.replace("/home") : sharePhone())}
+          onClick={() => (phone === "done" ? router.replace(next) : sharePhone())}
           loading={phone === "waiting"}
         />
       )}

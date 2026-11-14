@@ -10,11 +10,12 @@ const tgId = Math.floor(Math.random() * 1e9) + 4e9;
 const UA =
   "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36 Telegram-Android/11.4.2";
 
-function initData(id: number, name: string) {
+function initData(id: number, name: string, startParam?: string) {
   const p = new URLSearchParams({
     auth_date: String(Math.floor(Date.now() / 1000)),
     query_id: "AAE2e",
     user: JSON.stringify({ id, first_name: name, language_code: "uz" }),
+    ...(startParam ? { start_param: startParam } : {}),
   });
   const check = [...p.entries()]
     .map(([k, v]) => `${k}=${v}`)
@@ -49,7 +50,7 @@ test.describe("Mini App onboarding", () => {
   const sql = dbUrl ? postgres(dbUrl, { max: 1, onnotice: () => {} }) : null!;
   const userId = () =>
     sql`select user_id from auth_accounts where provider='telegram'
-      and provider_user_id in (${String(tgId)}, ${String(tgId + 1)}, ${String(tgId + 2)})`;
+      and provider_user_id in (${String(tgId)}, ${String(tgId + 1)}, ${String(tgId + 2)}, ${String(tgId + 3)})`;
 
   test.afterAll(async () => {
     await sql`delete from users where id in (${userId()})`;
@@ -182,6 +183,25 @@ test.describe("Mini App onboarding", () => {
     await pressWhen("Men ham boraman!");
     await expect(page.getByText("So'rovingiz yuborildi", { exact: false })).toBeVisible();
     await expect.poll(async () => (await main()).visible).toBe(false);
+    await ctx.close();
+  });
+
+  // Shared link t.me/<bot>?startapp=trip_<code>: a newcomer sees the trip first, signs up after.
+  test("startapp link opens the trip before onboarding", async ({ browser }) => {
+    const ctx = await browser.newContext({ userAgent: UA });
+    const data = initData(tgId + 3, "Lola", "trip_NAMUNA0");
+    await ctx.route("https://telegram.org/js/telegram-web-app.js*", (r) =>
+      r.fulfill({
+        contentType: "text/javascript",
+        body: `window.Telegram={WebApp:{initData:${JSON.stringify(data)},ready(){},expand(){}}};`,
+      }),
+    );
+    const page = await ctx.newPage();
+    await page.goto("/uz/tg");
+    await expect(page).toHaveURL(/\/uz\/trips\/00000000-0000-4000-8000-000000000200$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Tbilisi va Kazbegi" })).toBeVisible();
+    await page.getByRole("link", { name: "Qo'shilish uchun profilni to'ldiring" }).click();
+    await expect(page).toHaveURL(/\/uz\/welcome\?next=/);
     await ctx.close();
   });
 

@@ -7,8 +7,8 @@ import { asLocale } from "@/lib/guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { destroySession, getSessionUser } from "@/lib/session";
 import { decideRequest, leaveTrip } from "@/modules/groups/service";
-import { intentFromForm, intentSchema, tripFromForm, tripSchema } from "@/modules/trips/schema";
-import { closeIntent, closeTrip, createIntent, createTrip } from "@/modules/trips/service";
+import { intentFromForm, intentSchema } from "@/modules/trips/schema";
+import { closeIntent, closeTrip, createIntent } from "@/modules/trips/service";
 
 // Every action re-reads the session: never trust the client.
 async function authed(f: FormData) {
@@ -24,19 +24,6 @@ export async function logoutAction(f: FormData) {
   const locale = asLocale(f.get("locale"));
   await destroySession();
   redirect({ href: "/", locale });
-}
-
-export async function createTripAction(_: FormState, f: FormData): Promise<FormState> {
-  const { locale, user } = await authed(f);
-  const raw = tripFromForm(f);
-  const parsed = tripSchema.safeParse(raw);
-  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values: raw };
-  if (!(await rateLimit(`trip:user:${user.id}`, 10, 86_400)))
-    return { ...formError("rate_limited")!, values: raw };
-  const res = await createTrip(user.id, parsed.data);
-  if (!res.ok) return { ...formError(res.error)!, values: raw };
-  redirect({ href: `/trips/${res.id}`, locale });
-  return null;
 }
 
 export async function createIntentAction(_: FormState, f: FormData): Promise<FormState> {

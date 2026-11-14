@@ -5,11 +5,12 @@ import { sql } from "drizzle-orm";
 import { travelerProfiles, tripMembers, trips, users } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import type { Db } from "@/lib/db";
+import { SAMPLE_TRIP_PREFIX } from "@/lib/sample";
 
 export const SEED_ENVS = ["staging", "development"];
 
 const uid = (n: number) => `00000000-0000-4000-8000-0000000001${String(n).padStart(2, "0")}`;
-const tid = (n: number) => `00000000-0000-4000-8000-0000000002${String(n).padStart(2, "0")}`;
+const tid = (n: number) => `${SAMPLE_TRIP_PREFIX}${String(n).padStart(2, "0")}`;
 
 const people = [
   ["Akmal", "male", "1997-04-12", ["mountains", "city"]],
@@ -97,6 +98,7 @@ export async function seedSamples(db: Db, env = process.env.APP_ENV) {
         description: `Namunaviy safar (staging). ${days} kun, ${city}. Reja va kelishuvlar guruh bilan birga tuziladi.`,
         status: "open" as const,
         isTest: true,
+        publicCode: `NAMUNA${n}`,
       };
       await tx
         .insert(trips)

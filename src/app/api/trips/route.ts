@@ -1,0 +1,61 @@
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
+import { authedJson, json } from "@/lib/api";
+import { countryName } from "@/lib/catalog";
+import { fieldErrors } from "@/lib/form";
+import { formatBudget, formatTripDates } from "@/lib/format";
+import { rateLimit } from "@/lib/rate-limit";
+import { bandToBudget, createTripBody, datesFor, tripSchema } from "@/modules/trips/schema";
+import { createTrip } from "@/modules/trips/service";
+
+const DAY = 86_400_000;
+
+// "Safarni ochamiz" (App-CreateTrip-2). Title, dates and budget are derived here so a trip opens in ~60 s.
+export async function POST(req: Request) {
+  const r = await authedJson(req, 4_096);
+  if (!r.ok) return r.res;
+  const { user, body } = r.value;
+  const parsed = createTripBody.safeParse(body);
+  if (!parsed.success) return json({ errors: fieldErrors(parsed.error) }, 422);
+  const b = parsed.data;
+  const raw = (body as { locale?: unknown }).locale;
+  const locale = routing.locales.find((l) => l === raw) ?? routing.defaultLocale;
+  if (!(await rateLimit(`trip:user:${user.id}`, 10, 86_400))) return json({ error: "rate_limited" }, 429);
+
+  const t = await getTranslations({ locale, namespace: "create" });
+  const dates = datesFor(b);
+  const place = b.city || countryName(b.country, locale);
+  const days = Math.round((Date.parse(dates.endDate) - Date.parse(dates.startDate)) / DAY) + 1;
+  const title =
+    dates.datePrecision === "month"
+      ? t("titleMonth", { place, month: formatTripDates(dates, locale) })
+      : t("titleDays", { place, n: days });
+  const [min, max] = bandToBudget(b.band);
+
+  const input = tripSchema.safeParse({
+    title,
+    destinationCountry: b.country,
+    destinationCity: b.city ?? "",
+    ...dates,
+    dateFlexDays: b.flex ? 2 : 0,
+    budgetMin: min,
+    budgetMax: max,
+    currency: "USD",
+    travelStyles: b.styles,
+    groupSizeMax: b.size,
+    ageMin: null,
+    ageMax: null,
+    womenOnly: b.womenOnly,
+    accommodationPref: "any",
+    description: b.note ?? "",
+  });
+  if (!input.success) return json({ errors: fieldErrors(input.error) }, 422);
+  const res = await createTrip(user.id, input.data);
+  if (!res.ok) return json({ error: res.error }, 409);
+  const ts = await getTranslations({ locale, namespace: "share" });
+  const budget = formatBudget(min == null ? null : min * 100, max == null ? null : max * 100, "USD");
+  const meta = [formatTripDates(dates, locale), budget, ts("spots", { n: 1, max: b.size })]
+    .filter(Boolean)
+    .join(" · ");
+  return json({ id: res.id, code: res.code, title, meta });
+}

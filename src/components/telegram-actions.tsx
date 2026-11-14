@@ -58,7 +58,8 @@ export function MainAction({
 
   if (app) return null;
   return (
-    <div className="sticky bottom-0 z-20 -mx-3 mt-auto bg-background/95 px-3 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] backdrop-blur">
+    // --main-action-bottom: lifted above the app tab bar (set by the (app) layout), 0 elsewhere.
+    <div className="sticky bottom-[var(--main-action-bottom,0px)] z-20 -mx-3 mt-auto bg-background/95 px-3 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] backdrop-blur">
       {href ? (
         <Link href={href} className={bigButtonClass}>
           {label}

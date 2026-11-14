@@ -53,22 +53,22 @@ export function FeedChips({
   const router = useRouter();
   const [open, setOpen] = useState<Panel>(null);
   const [pending, start] = useTransition();
-  const navigated = useRef(false);
+  const wasPending = useRef(false);
 
+  // A filter navigation just finished → glide to the results heading.
   useEffect(() => {
-    if (pending || !navigated.current) return;
-    navigated.current = false;
-    document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (wasPending.current && !pending)
+      document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    wasPending.current = pending;
   }, [pending]);
 
-  const go = (e: React.MouseEvent, to: string, keepOpen = false) => {
+  const go = (e: React.MouseEvent, to: string) => {
     e.preventDefault();
-    if (!keepOpen) setOpen(null);
-    navigated.current = true;
+    setOpen(null); // owner: close the list after a pick
     start(() => router.push(to, { scroll: false }));
   };
-  const opt = (label: string, to: string, active: boolean, keepOpen = false) => (
-    <Link key={label} href={to} onClick={(e) => go(e, to, keepOpen)} className={cn(chip, active ? on : off)}>
+  const opt = (label: string, to: string, active: boolean) => (
+    <Link key={label} href={to} onClick={(e) => go(e, to)} className={cn(chip, active ? on : off)}>
       {label}
     </Link>
   );
@@ -131,7 +131,6 @@ export function FeedChips({
                 c.label,
                 href({ ...q, country: toggle(q.country, c.value) }),
                 !!q.country?.includes(c.value),
-                true,
               ),
             )}
           {open === "when" && (
@@ -178,12 +177,7 @@ export function FeedChips({
               .concat(opt(t("anyBudget"), href({ ...q, budget: undefined }), !q.budget))}
           {open === "style" &&
             styles.map((s) =>
-              opt(
-                s.label,
-                href({ ...q, style: toggle(q.style, s.value) }),
-                !!q.style?.includes(s.value),
-                true,
-              ),
+              opt(s.label, href({ ...q, style: toggle(q.style, s.value) }), !!q.style?.includes(s.value)),
             )}
         </div>
       )}

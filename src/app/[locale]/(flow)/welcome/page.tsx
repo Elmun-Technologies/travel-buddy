@@ -79,7 +79,10 @@ async function Start({
   label: string;
   searchParams: PageProps<"/[locale]/welcome">["searchParams"];
 }) {
-  const name = (await searchParams).name;
-  const q = typeof name === "string" && name ? `?${new URLSearchParams({ name: name.slice(0, 50) })}` : "";
+  const sp = await searchParams;
+  const p = new URLSearchParams();
+  if (typeof sp.name === "string" && sp.name) p.set("name", sp.name.slice(0, 50));
+  if (typeof sp.next === "string" && /^\/trips\/[0-9a-f-]{36}$/.test(sp.next)) p.set("next", sp.next);
+  const q = p.size ? `?${p}` : "";
   return <MainAction label={label} href={`/onboarding${q}`} />;
 }

@@ -25,11 +25,18 @@ export async function onboard(page: Page, name: string) {
   await expect(page).toHaveURL(/\/uz\/onboarding/);
   await page.waitForLoadState("networkidle"); // hydrated: typing before that is not seen by React
   await expect(page.locator("#displayName")).toHaveValue(name);
-  await page.fill("#birthDate", "1997-06-15");
+  await pickBirthDate(page, 15, 6, 1997);
   await page.getByRole("button", { name: "Davom etamiz", exact: true }).click();
   await page.getByRole("button", { name: "Tog' va trekking" }).click();
   await page.getByRole("button", { name: "Davom etamiz · 1 ta tanlandi" }).click();
   await page.getByRole("button", { name: "Profilni saqlaymiz" }).click();
   await page.getByRole("link", { name: "Keyinroq" }).click();
   await expect(page).toHaveURL(/\/uz\/trips$/);
+}
+
+/** Onboarding step 1: Day | Month | Year selects. */
+export async function pickBirthDate(page: Page, day: number, month: number, year: number) {
+  await page.selectOption("#birthDay", String(day));
+  await page.selectOption("#birthMonth", String(month));
+  await page.selectOption("#birthYear", String(year));
 }

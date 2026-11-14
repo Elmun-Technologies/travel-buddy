@@ -53,7 +53,7 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
       </div>
 
       {/* Plain GET form: filters live in the URL, shareable, no JS needed */}
-      <form className="grid grid-cols-2 gap-3 rounded-2xl border p-4 sm:grid-cols-5 sm:items-end">
+      <form noValidate className="grid grid-cols-2 gap-3 rounded-2xl border p-4 sm:grid-cols-5 sm:items-end">
         <label className="flex flex-col gap-1 text-sm">
           {t("country")}
           <select name="country" defaultValue={filter.country ?? ""} className={inputClass}>
@@ -78,14 +78,16 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
         </label>
         <label className="flex flex-col gap-1 text-sm">
           {t("budget")}
-          <input
-            name="budget"
-            type="number"
-            min={1}
-            inputMode="numeric"
-            defaultValue={filter.budget ?? ""}
-            className={inputClass}
-          />
+          {/* A fixed choice, not a number field: an invalid number silently blocked the submit
+              inside Telegram's WebView (it shows no validation bubble). */}
+          <select name="budget" defaultValue={filter.budget ?? ""} className={inputClass}>
+            <option value="">{tc("any")}</option>
+            {[300, 600, 1000].map((b) => (
+              <option key={b} value={b}>
+                {t("budgetUpTo", { n: b })}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           {t("style")}

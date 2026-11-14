@@ -169,13 +169,14 @@
     "subtitle": "Shakllanayotgan guruhlar va sayohatlar",
     "country": "Davlat",
     "month": "Oy",
-    "budget": "Budjet (gacha, USD)",
+    "budget": "Budjet (kishi boshiga)",
     "style": "Uslub",
     "apply": "Saralash",
     "reset": "Tozalash",
     "empty": "Hozircha mos safar yo'q. O'zingiz oching yoki sherik izlash e'lonini qoldiring!",
     "prev": "Oldingi",
-    "next": "Keyingi"
+    "next": "Keyingi",
+    "budgetUpTo": "${n} gacha"
   },
   "trip": {
     "newTitle": "Safar ochish",
@@ -387,6 +388,48 @@
     "failNetwork": "Yuborib bo'lmadi — internet uzilgan bo'lishi mumkin. Hammasi saqlangan.",
     "retryHint": "Pastdagi tugmani yana bir bor bosing.",
     "failSession": "Kirish muddati tugabdi. Qayta kiring — kiritganlaringiz joyida qoladi.",
-    "loginAgain": "Qayta kirish"
+    "loginAgain": "Qayta kirish",
+    "day": "Kun",
+    "month": "Oy",
+    "year": "Yil",
+    "birthSummary": "{day}-{month}, {year}",
+    "months": [
+      "Yanvar",
+      "Fevral",
+      "Mart",
+      "Aprel",
+      "May",
+      "Iyun",
+      "Iyul",
+      "Avgust",
+      "Sentabr",
+      "Oktabr",
+      "Noyabr",
+      "Dekabr"
+    ],
+    "monthsOf": [
+      "yanvar",
+      "fevral",
+      "mart",
+      "aprel",
+      "may",
+      "iyun",
+      "iyul",
+      "avgust",
+      "sentabr",
+      "oktabr",
+      "noyabr",
+      "dekabr"
+    ]
+  },
+  "styleHints": {
+    "mountains": "Kuniga 3–6 soat piyoda, tog'da tunash mumkin",
+    "beach": "Dengiz, quyosh va shoshilmasdan dam olish",
+    "city": "Eski shahar, muzeylar, kafelar va sayr",
+    "food": "Mahalliy taomlar, bozorlar va restoranlar",
+    "photo": "Eng chiroyli joylar, tong va shom suratlari",
+    "extreme": "Rafting, paraplan, sho'ng'ish",
+    "budget": "Hostel, jamoat transporti, tejab sayohat",
+    "shopping": "Bozorlar, savdo markazlari, outletlar"
   }
 }

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { ArrowBadge, CheckIcon, Display, Panel, Tag } from "@/components/clay";
+import { LocaleSwitch } from "@/components/locale-switch";
 import { MainAction } from "@/components/telegram-actions";
 
 // First Mini App screen (App-Welcome.png): what this is, three steps, why it is safe, one action.
@@ -8,6 +9,7 @@ export default async function WelcomePage({ searchParams }: PageProps<"/[locale]
   const t = await getTranslations("welcome");
   return (
     <>
+      <LocaleSwitch />
       <Panel className="flex flex-col gap-[18px] p-[22px]">
         <Tag tone="soft" className="self-start px-3 py-1.5 text-sm">
           {t("badge")}

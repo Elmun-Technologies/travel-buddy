@@ -14,8 +14,11 @@ import {
 } from "@/components/clay";
 import { BackAction, MainAction } from "@/components/telegram-actions";
 import { Link, useRouter } from "@/i18n/navigation";
-import { ageOn, BUDGET_BANDS, type Option, TRAVEL_STYLES } from "@/lib/catalog";
+import { LocaleSwitch } from "@/components/locale-switch";
+import { ageOn, BUDGET_BANDS, type Option } from "@/lib/catalog";
 import { haptic, tg } from "@/lib/telegram-webapp";
+import { BirthDate } from "./birth-date";
+import { StyleCards } from "./style-cards";
 
 // Onboarding in 4 steps (App-Onboarding.png): 01 about you · 02 style & group · 03 where & budget · 04 phone.
 // Every change is saved to this device and to the server, so closing Telegram never loses answers.
@@ -92,7 +95,6 @@ export function OnboardingWizard({
 }) {
   const t = useTranslations("onboarding");
   const te = useTranslations("errors");
-  const ts = useTranslations("styles");
   const router = useRouter();
 
   const initial: Values = {
@@ -141,6 +143,14 @@ export function OnboardingWizard({
     document.addEventListener("visibilitychange", check);
     return () => document.removeEventListener("visibilitychange", check);
   }, [step, phone]);
+
+  /** Save now (before switching language: the next page reads the server draft). */
+  async function flush() {
+    clearTimeout(timer.current);
+    const data = { ...v, step };
+    writeLocal(draftKey, { data, savedAt: Date.now() });
+    await putDraft(data).catch(() => {});
+  }
 
   function persist(next: Values, nextStep = step) {
     const data = { ...next, step: nextStep };
@@ -253,6 +263,7 @@ export function OnboardingWizard({
   return (
     <>
       {step > 1 && step < 4 && <BackAction label={t("back")} onClick={() => go(step - 1)} />}
+      {step === 1 && <LocaleSwitch beforeSwitch={flush} />}
 
       <Panel className="flex flex-col gap-3.5 p-5">
         <StepHeader step={step} total={TOTAL} status={status} />
@@ -279,14 +290,11 @@ export function OnboardingWizard({
                 aria-invalid={!!errors.displayName}
               />
             </FieldBlock>
-            <FieldBlock label={t("birth")} htmlFor="birthDate" hint={t("birthHint")} error={err("birthDate")}>
-              <input
-                id="birthDate"
-                type="date"
+            <FieldBlock label={t("birth")} htmlFor="birthDay" hint={t("birthHint")} error={err("birthDate")}>
+              <BirthDate
                 value={v.birthDate}
-                onChange={(e) => set("birthDate", e.target.value)}
-                className={clayInput}
-                aria-invalid={!!errors.birthDate}
+                onChange={(iso) => set("birthDate", iso)}
+                invalid={!!errors.birthDate}
               />
             </FieldBlock>
             <FieldBlock label={t("gender")} hint={t("genderHint")}>
@@ -351,20 +359,13 @@ export function OnboardingWizard({
         <>
           <Panel className="flex flex-col gap-2.5">
             <div className="text-[13px] font-semibold">{t("styleLabel")}</div>
-            <div className="flex flex-wrap gap-2">
-              {TRAVEL_STYLES.map((s) => (
-                <Chip
-                  key={s}
-                  on={v.travelStyles.includes(s)}
-                  onClick={() => {
-                    haptic.select();
-                    set("travelStyles", toggle(v.travelStyles, s));
-                  }}
-                >
-                  {ts(s)}
-                </Chip>
-              ))}
-            </div>
+            <StyleCards
+              selected={v.travelStyles}
+              onToggle={(st) => {
+                haptic.select();
+                set("travelStyles", toggle(v.travelStyles, st));
+              }}
+            />
           </Panel>
           <Panel className="flex flex-col gap-2.5">
             <div className="text-[13px] font-semibold">{t("groupLabel")}</div>

@@ -93,14 +93,20 @@
     "any": "Any",
     "days": "{n} days",
     "years": "{n} y.o.",
-    "people": "{n} people"
+    "people": "{n} people",
+    "retry": "Try again"
   },
   "app": {
     "trips": "Trips",
     "newTrip": "Start a trip",
     "profile": "Profile",
     "login": "Log in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "updateAvailable": "A new version of the app is out.",
+    "updateNow": "Refresh",
+    "errorTitle": "Something went sideways",
+    "errorText": "Refresh the page — everything you entered is saved.",
+    "retry": "Try again"
   },
   "auth": {
     "title": "Log in",
@@ -151,7 +157,12 @@
     "noTrips": "No trips yet.",
     "noIntents": "No active posts.",
     "addIntent": "Post \"looking for a buddy\"",
-    "notFound": "Profile not found."
+    "notFound": "Profile not found.",
+    "draftSaved": "Saved ✓",
+    "draftSaving": "Saving…",
+    "failNetwork": "Couldn't send that — looks like the connection dropped. Everything's saved, give it another go.",
+    "failSession": "Your session ran out. Log in again — your answers are still here.",
+    "loginAgain": "Log in again"
   },
   "feed": {
     "title": "Trips",

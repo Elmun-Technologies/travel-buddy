@@ -122,6 +122,15 @@ export const travelerProfiles = pgTable("traveler_profiles", {
   idVerified: boolean("id_verified").notNull().default(false),
 });
 
+// Unfinished onboarding, saved on every change so nothing is lost if the Mini App closes. Deleted on submit.
+export const onboardingDrafts = pgTable("onboarding_drafts", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  data: jsonb("data").notNull(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
 export const idVerifications = pgTable("id_verifications", {
   ...base,
   userId: uuid("user_id")

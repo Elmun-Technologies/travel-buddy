@@ -14,10 +14,12 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx worker/migrate.ts",
     "worker:dev": "tsx watch --conditions=react-server worker/index.ts",
-    "worker:build": "esbuild worker/index.ts worker/migrate.ts --bundle --keep-names --platform=node --target=node22 --format=esm --conditions=react-server --outdir=dist --out-extension:.js=.mjs --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\""
+    "worker:build": "esbuild worker/index.ts worker/migrate.ts --bundle --keep-names --platform=node --target=node22 --format=esm --conditions=react-server --outdir=dist --out-extension:.js=.mjs --banner:js=\"import{createRequire as __cjsRequire}from'module';const require=__cjsRequire(import.meta.url);\""
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
+    "@sentry/nextjs": "11.9.0",
+    "@sentry/node": "11.9.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
     "drizzle-orm": "^0.45.4",

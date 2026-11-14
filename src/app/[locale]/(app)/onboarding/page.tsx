@@ -5,7 +5,7 @@ import { countryOptions, languageOptions } from "@/lib/catalog";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { redirect } from "@/i18n/navigation";
 import { asLocale, requireUser } from "@/lib/guard";
-import { getOwnProfile } from "@/modules/profiles/service";
+import { getDraft, getOwnProfile } from "@/modules/profiles/service";
 
 export default function OnboardingPage(props: PageProps<"/[locale]/onboarding">) {
   return (
@@ -20,6 +20,7 @@ async function Onboarding({ params, searchParams }: PageProps<"/[locale]/onboard
   const user = await requireUser(locale);
   if (await getOwnProfile(user.id)) redirect({ href: "/trips", locale });
   const name = (await searchParams).name;
+  const server = await getDraft(user.id);
   const t = await getTranslations("profile");
   return (
     <div className="mx-auto max-w-2xl">
@@ -27,6 +28,7 @@ async function Onboarding({ params, searchParams }: PageProps<"/[locale]/onboard
       <p className="mt-2 mb-8 text-muted-foreground">{t("onboardingSubtitle")}</p>
       <ProfileForm
         next="trips"
+        draft={{ key: `tb:onboarding:${user.id}`, server }}
         countries={countryOptions(locale)}
         languages={languageOptions(locale)}
         initial={{

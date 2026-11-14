@@ -93,14 +93,20 @@
     "any": "Farqi yo'q",
     "days": "{n} kun",
     "years": "{n} yosh",
-    "people": "{n} kishi"
+    "people": "{n} kishi",
+    "retry": "Qayta urinish"
   },
   "app": {
     "trips": "Safarlar",
     "newTrip": "Safar ochish",
     "profile": "Profil",
     "login": "Kirish",
-    "logout": "Chiqish"
+    "logout": "Chiqish",
+    "updateAvailable": "Ilovaning yangi versiyasi chiqdi.",
+    "updateNow": "Yangilash",
+    "errorTitle": "Nimadir chalkashib ketdi",
+    "errorText": "Sahifani yangilab ko'ring — kiritganlaringiz saqlangan.",
+    "retry": "Qayta urinish"
   },
   "auth": {
     "title": "Kirish",
@@ -151,7 +157,12 @@
     "noTrips": "Hali safar yo'q.",
     "noIntents": "Faol e'lon yo'q.",
     "addIntent": "Sherik izlash e'loni",
-    "notFound": "Profil topilmadi."
+    "notFound": "Profil topilmadi.",
+    "draftSaved": "Saqlandi ✓",
+    "draftSaving": "Saqlanmoqda…",
+    "failNetwork": "Yuborib bo'lmadi — internet uzilgan bo'lishi mumkin. Hammasi saqlangan, qayta urinib ko'ring.",
+    "failSession": "Kirish muddati tugabdi. Qayta kiring — kiritganlaringiz joyida qoladi.",
+    "loginAgain": "Qayta kirish"
   },
   "feed": {
     "title": "Safarlar",

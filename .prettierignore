@@ -5,4 +5,5 @@ dist/
 .next/
 test-results/
 playwright-report/
+/.local/
 docs/design-handoff/

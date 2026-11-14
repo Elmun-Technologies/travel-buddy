@@ -36,6 +36,11 @@ export async function ProfileCard({ p, actions }: { p: P; actions?: React.ReactN
         {p.verified.telegram && ok("Telegram")}
         {p.verified.phone && ok(t("verified.phone"))}
         {p.verified.id && ok(t("verified.id"))}
+        {p.reliability && (
+          <span className={`${chip} border-input`}>
+            {t("went", { went: p.reliability.went, total: p.reliability.total })}
+          </span>
+        )}
         {actions}
       </div>
       {p.bio && <p className="text-[15px] whitespace-pre-line">{p.bio}</p>}

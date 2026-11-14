@@ -122,7 +122,8 @@
     "statRating": "rating · no reviews yet",
     "dreams": "Wants to visit",
     "findTrips": "Find a trip",
-    "language": "Language"
+    "language": "Language",
+    "went": "Went on {went}/{total} trips"
   },
   "feed": {
     "title": "Trips",
@@ -225,7 +226,8 @@
     "statBudget": "Budget",
     "statSpots": "Spots",
     "spotsTaken": "{n}/{max} taken",
-    "noBudget": "To agree"
+    "noBudget": "To agree",
+    "went": "Went on {went}/{total} trips"
   },
   "intent": {
     "title": "Looking for a buddy",
@@ -785,7 +787,8 @@
     "category": "Type",
     "whoPaid": "Who paid",
     "splitHint": "Split equally among the {n} people in the group.",
-    "bookedByMe": "You booked it — the cost is split among {n} automatically."
+    "bookedByMe": "You booked it — the cost is split among {n} automatically.",
+    "deadlineRule": "Anyone who hasn't marked a ticket by then gives their place to the next person."
   },
   "notify": {
     "title": "Bot notifications",

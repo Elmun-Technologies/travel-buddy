@@ -29,6 +29,7 @@ test.describe("trip flow", () => {
   });
 
   test("organizer creates a trip, traveler requests, organizer approves", async ({ browser }) => {
+    test.setTimeout(90_000); // the whole journey: create, share, join, room, plan, booking, costs
     const owner = await loginAndOnboard(browser, base + 1, "Malika");
 
     // Unverified phone → the creation flow asks for the phone first.

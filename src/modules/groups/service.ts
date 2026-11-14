@@ -1,11 +1,13 @@
 import "server-only";
 import { and, count, eq, inArray } from "drizzle-orm";
 import { tripMembers } from "@/db/schema";
+import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { addTripChatMember, removeTripChatMember } from "@/modules/chat/service";
 import { isBlockedBetween } from "@/modules/moderation/service";
 import { notify } from "@/modules/notifications/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
+import { getReliability, recordNoShow } from "@/modules/reliability/service";
 import { lockTripForJoin, setTripStatus } from "@/modules/trips/service";
 import { getUserState } from "@/modules/users/service";
 import { type JoinDenied, joinDenied } from "./rules";
@@ -141,6 +143,8 @@ export async function leaveTrip(userId: string, tripId: string) {
       )
       .returning({ was: tripMembers.status });
     if (!r.length) return;
+    if (r[0].was === "approved" && trip.ticketDeadline && trip.ticketDeadline < todayISO())
+      await recordNoShow(tx, userId, tripId);
     await removeTripChatMember(tx, tripId, userId);
     if (trip.status === "full") await setTripStatus(tx, tripId, "open");
   });
@@ -160,9 +164,24 @@ export async function listMembers(organizerOrMemberId: string, tripId: string) {
   // Only organizer and approved members see the list.
   const me = rows.find((r) => r.userId === organizerOrMemberId);
   if (!me || me.status !== "approved") return null;
-  const names = await getDisplayNames(rows.map((r) => r.userId));
   const isOrganizer = me.role === "organizer";
+  const [names, rel] = await Promise.all([
+    getDisplayNames(rows.map((r) => r.userId)),
+    isOrganizer
+      ? getReliability(rows.map((r) => r.userId))
+      : new Map<string, { went: number; total: number }>(),
+  ]);
+  const noShows = (id: string) => {
+    const x = rel.get(id);
+    return x ? x.total - x.went : 0;
+  };
   return rows
     .filter((r) => isOrganizer || r.status === "approved")
-    .map((r) => ({ ...r, name: names.get(r.userId) ?? "—", message: isOrganizer ? r.message : null }));
+    .sort((a, b) => noShows(a.userId) - noShows(b.userId)) // people who didn't show up go lower
+    .map((r) => ({
+      ...r,
+      name: names.get(r.userId) ?? "—",
+      message: isOrganizer ? r.message : null,
+      reliability: rel.get(r.userId) ?? null,
+    }));
 }

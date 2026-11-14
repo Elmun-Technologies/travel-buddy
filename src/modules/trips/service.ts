@@ -197,6 +197,7 @@ export async function lockTripForJoin(tx: DbOrTx, tripId: string) {
       ageMin: trips.ageMin,
       ageMax: trips.ageMax,
       womenOnly: trips.womenOnly,
+      ticketDeadline: trips.ticketDeadline,
     })
     .from(trips)
     .where(eq(trips.id, tripId))

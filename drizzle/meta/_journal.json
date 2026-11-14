@@ -57,6 +57,13 @@
       "when": 1794678284546,
       "tag": "0007_notify_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794679296726,
+      "tag": "0008_reliability",
+      "breakpoints": true
     }
   ]
 }

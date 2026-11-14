@@ -150,6 +150,11 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
                 {organizer.verified.telegram && <Check>Telegram</Check>}
                 {organizer.verified.phone && <Check>{t("phoneOk")}</Check>}
                 {organizer.verified.id && <Check>{t("idOk")}</Check>}
+                {organizer.reliability && (
+                  <span>
+                    {t("went", { went: organizer.reliability.went, total: organizer.reliability.total })}
+                  </span>
+                )}
               </div>
             </div>
             {user && (
@@ -307,6 +312,11 @@ async function JoinArea({
               <Link href={`/u/${r.userId}`} className="font-semibold underline-offset-4 hover:underline">
                 {r.name}
               </Link>
+              {r.reliability && (
+                <span className="text-sm text-muted-foreground">
+                  {t("went", { went: r.reliability.went, total: r.reliability.total })}
+                </span>
+              )}
               {r.message && <p className="text-sm whitespace-pre-line text-muted-foreground">{r.message}</p>}
               <div className="flex gap-2">
                 {(["approve", "reject"] as const).map((d) => (

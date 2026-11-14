@@ -7,54 +7,12 @@
     "join": "Ro'yxatga yozilish",
     "language": "Til"
   },
-  "hero": {
-    "badge": "Tez orada · Toshkentdan boshlaymiz",
-    "title": "Sayohatga sherik toping. Guruhga qo'shiling. Yo'lga chiqing.",
-    "subtitle": "Yolg'iz borishni istamaysizmi yoki do'stlaringiz bilan sana to'g'ri kelmayaptimi? Yo'nalishi, sanasi va budjeti sizga mos sayohatchilarni topamiz.",
-    "cta": "Birinchilardan bo'ling",
-    "note": "Bepul. Ishga tushganda birinchi bo'lib xabar beramiz."
-  },
-  "how": {
-    "title": "Qanday ishlaydi",
-    "s1": {
-      "title": "Odam toping",
-      "text": "Yo'nalish, sana, budjet, uslub va yosh bo'yicha sizga mos sayohatchilar."
-    },
-    "s2": {
-      "title": "Guruhga qo'shiling",
-      "text": "Sayohatchilar yoki tasdiqlangan agentliklar ochgan guruhlarga so'rov yuboring."
-    },
-    "s3": {
-      "title": "Bron qiling",
-      "text": "Agentlik turiga ariza qoldiring — agentlik o'zi bog'lanadi va joyni tasdiqlaydi."
-    }
-  },
-  "trust": {
-    "title": "Xavfsizlik — birinchi o'rinda",
-    "t1": {
-      "title": "Tasdiqlangan profillar",
-      "text": "Telegram, telefon va hujjat orqali tasdiqlash belgilari."
-    },
-    "t2": {
-      "title": "Raqamingiz yashirin",
-      "text": "Telefon raqami hech qachon ochiq ko'rsatilmaydi."
-    },
-    "t3": {
-      "title": "Faqat ayollar uchun guruhlar",
-      "text": "Tashkilotchi xohlasa, guruhga faqat ayollar qo'shila oladi."
-    },
-    "t4": {
-      "title": "Shikoyat va bloklash",
-      "text": "Har bir profil va xabarda. Bloklangan odam sizni boshqa ko'rmaydi."
-    }
-  },
   "waitlist": {
     "title": "Ro'yxatga yoziling",
     "subtitle": "Email yoki Telegram'ingizni qoldiring. Qaysi yo'nalish qiziq — belgilang.",
     "contactLabel": "Email yoki Telegram username",
     "contactPlaceholder": "siz@email.com yoki @username",
-    "destinationsLabel": "Qayerga bormoqchisiz? (ixtiyoriy)",
-    "submit": "Yozilish",
+    "submit": "Meni yozib qo'ying",
     "submitting": "Yuborilmoqda...",
     "success": "Rahmat! Ro'yxatdasiz. Ishga tushganda xabar beramiz.",
     "errors": {
@@ -63,16 +21,6 @@
       "server": "Xatolik yuz berdi. Keyinroq qayta urinib ko'ring."
     },
     "consent": "Yozilish orqali siz faqat ishga tushish haqidagi xabarni olishga rozilik bildirasiz."
-  },
-  "destinations": {
-    "GE": "Gruziya",
-    "TR": "Turkiya",
-    "KZ": "Qozog'iston",
-    "TH": "Tailand",
-    "AE": "BAA (Dubay)",
-    "MY": "Malayziya",
-    "EG": "Misr",
-    "KG": "Qirg'iziston"
   },
   "footer": {
     "rights": "© {app}. Barcha huquqlar himoyalangan."
@@ -431,5 +379,138 @@
     "extreme": "Rafting, paraplan, sho'ng'ish",
     "budget": "Hostel, jamoat transporti, tejab sayohat",
     "shopping": "Bozorlar, savdo markazlari, outletlar"
+  },
+  "landing": {
+    "nav": {
+      "how": "Qanday ishlaydi",
+      "room": "Safar xonasi",
+      "clubs": "Klublar",
+      "stories": "Taassurotlar",
+      "start": "Boshlaymiz"
+    },
+    "hero": {
+      "soon": "Tez orada · Toshkentdan boshlaymiz",
+      "title1": "Sayohatga sherik topamiz.",
+      "title2": "Guruh yig'amiz.",
+      "title3": "Birga yo'lga chiqamiz.",
+      "lead": "Yolg'iz ketgingiz kelmayaptimi, do'stlaringizning esa vaqti to'g'ri kelmayaptimi? Qayerga, qachon va qancha pulga borishni ayting — qolganini birga hal qilamiz.",
+      "cta": "Menga sherik toping",
+      "how": "Qanday ishlaydi",
+      "photoAlt": "Kazbegi tog'lari, Gruziya",
+      "sample": "Namuna",
+      "cardTitle": "Tbilisi & Kazbegi",
+      "cardMeta": "20–27 noyabr · 7 kun · $550–650",
+      "cardSpots": "7/10 joy band",
+      "cardOpen": "Safarni ochish",
+      "tag1": "Trekking",
+      "tag2": "20–35 yosh",
+      "tag3": "Aralash guruh"
+    },
+    "pills": {
+      "buddy": "sherik",
+      "group": "guruh",
+      "trip": "sayohat"
+    },
+    "how": {
+      "title": "Qanday ishlaydi",
+      "lead": "Uch qadam, xolos. Hech narsa o'rnatish shart emas — hammasi Telegram ichida.",
+      "s1": "Qayerga borasiz?",
+      "s1t": "Yo'nalish, sana va budjetni ayting. Sizga mos odamlarni topamiz — nega mosligini ham aytib beramiz.",
+      "s2": "Kim bilan borasiz?",
+      "s2t": "Yoqqan guruhga \"Men ham boraman\" deysiz yoki o'zingiz safar ochasiz — havolani do'stlarga ham yuborasiz.",
+      "s3": "Yo'lga chiqamiz!",
+      "s3t": "Reja, chipta, xarajat va chat — bitta joyda. Qaytgach esa umumiy albom."
+    },
+    "compare": {
+      "before": "Ilgari",
+      "b1": "Telegram guruhlarda tarqoq e'lonlar, kimligi noma'lum odamlar",
+      "b2": "Sherik topilsa ham, reja WhatsApp'da, xarajat daftarda",
+      "b3": "Safardan keyin hech qanday iz qolmaydi",
+      "now": "Endi",
+      "n1": "Telegram va telefon orqali tasdiqlangan profillar, sharhlar",
+      "n2": "Bitta Safar xonasi: chat, reja, ro'yxat, xarajat, so'rovnoma",
+      "n3": "Taassurotlar albomi va ulashiladigan safar hikoyasi"
+    },
+    "room": {
+      "badge": "Asosiy ustunlik",
+      "title": "Safar xonasi",
+      "lead": "Guruh yig'ilishi bilan sizning xonangiz ochiladi. Telegram guruh, Excel va qog'ozdagi ro'yxat endi kerak emas.",
+      "chat": "Chat va e'lonlar",
+      "announce": "E'lon · Uchrashuv: 20-noyabr, 06:00, aeroport, 2-terminal",
+      "msg1": "Men pasportni oldim ✓",
+      "msg2": "Zo'r, chiptalarni ertaga olamiz",
+      "plan": "Kunma-kun reja",
+      "d1": "Tbilisi",
+      "d1t": "Eski shahar, Narikala",
+      "d2": "Kazbegi",
+      "d2t": "Gergeti, trekking 4 soat",
+      "d3": "Gudauri",
+      "d3t": "Paraplan (ixtiyoriy)",
+      "costs": "Xarajatlar",
+      "total": "Umumiy xarajat · 7 kishi",
+      "owe": "Siz Akmalga",
+      "costsNote": "Biz faqat hisoblab beramiz — pul o'zingizda qoladi."
+    },
+    "book": {
+      "kicker": "CHIPTA VA TUR-CHI?",
+      "title": "Odam topildi. Endi yo'lni birga yig'amiz.",
+      "lead": "Ikki yo'l bor — guruh o'zi tanlaydi. Biz ikkalasida ham yoningizdamiz.",
+      "o1": "O'zimiz yig'amiz",
+      "o1t": "Reysni birga tanlaymiz, har kim chiptasini o'zi oladi — sanasi tayyor havola bilan. Joyni ovoz berib tanlaymiz, xarajat o'zi bo'linadi.",
+      "o2": "Tayyor tur so'raymiz",
+      "o2t": "Guruhingiz uchun tekshirilgan agentliklardan narx so'raymiz. Ular bir-biri bilan bellashadi — siz faqat solishtirib tanlaysiz."
+    },
+    "clubs": {
+      "title": "Klublar",
+      "lead": "Bir martalik e'lon emas — o'z odamlaringiz. Klubga qo'shilasiz yoki o'zingiz ochasiz: safarlar shu yerda tug'iladi.",
+      "sample": "Namuna",
+      "c1": "Tog' sayohatchilari",
+      "c1t": "Trekking · Chimgan, Kazbegi, Olmaota",
+      "c2": "Qizlar sayohat klubi",
+      "c2t": "Faqat ayollar · tasdiqlangan profillar",
+      "c3": "Samarqand velo",
+      "c3t": "Velosayohat · dam olish kunlari",
+      "open": "Klub ochamiz"
+    },
+    "stories": {
+      "title": "Taassurotlar",
+      "lead": "Qaytgach — umumiy albom, hikoyalar va bir-biringizga iliq so'zlar. Hamma rozi bo'lsa, chiroyli sahifa qilib do'stlarga ko'rsatamiz.",
+      "s1": "Kazbegi, 7 kishi",
+      "s1t": "Namuna · 48 foto · 6 hikoya",
+      "s1alt": "Tog'dagi sayohatchilar guruhi",
+      "s2": "Kapadokya, 5 kishi",
+      "s2t": "Namuna · 31 foto · 5 hikoya",
+      "s2alt": "Kapadokya ustidagi havo sharlari",
+      "invite": "Har bir safar — keyingisiga taklifnoma",
+      "invitet": "Ulashilgan sahifada \"Men ham bormoqchiman\" tugmasi bor."
+    },
+    "facts": {
+      "free": "0 so'm",
+      "freet": "Sherik topish va qo'shilish — bepul",
+      "age": "18+",
+      "aget": "Faqat kattalar, yosh tekshiriladi",
+      "langs": "3 til",
+      "langst": "O'zbek, rus va ingliz",
+      "trust": "Ishonch",
+      "t1": "Telegram orqali kirish",
+      "t2": "Telefon tasdiqlangan",
+      "t3": "Hujjat tekshiruvi (ixtiyoriy)",
+      "t4": "Sharhlar, shikoyat va bloklash"
+    },
+    "agencies": {
+      "soon": "Tez orada",
+      "title": "Turagentlikmisiz? Tayyor guruhlarga taklif yuborasiz.",
+      "cta": "Ro'yxatga yozilish"
+    },
+    "final": {
+      "title": "Birinchilar qatorida bo'ling.",
+      "now": "yoki hoziroq sherik qidiramiz ↗"
+    },
+    "footer": {
+      "brand": "© 2026 {app}",
+      "terms": "Foydalanish shartlari",
+      "privacy": "Maxfiylik",
+      "safety": "Xavfsizlik qoidalari"
+    }
   }
 }

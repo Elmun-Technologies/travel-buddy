@@ -612,6 +612,59 @@ export const safetyEvents = pgTable(
   (t) => [index("safety_events_trip").on(t.tripId, t.userId, t.createdAt)],
 );
 
+// ---------- destinations: visa and real price (entered in admin; samples only on staging) ----------
+
+/** For an Uzbekistan passport (first market). One row per destination country. */
+export const visaRules = pgTable(
+  "visa_rules",
+  {
+    ...base,
+    passportCountry: text("passport_country").notNull().default("UZ"),
+    destination: text("destination").notNull(),
+    status: text("status").notNull(), // visa_free | evisa | visa_required
+    maxStayDays: integer("max_stay_days"),
+    visaName: text("visa_name"), // "Shengen vizasi"
+    documents: textArray("documents"),
+    notes: text("notes"),
+    checkedAt: date("checked_at").notNull(),
+    sourceUrl: text("source_url"),
+    isSample: boolean("is_sample").notNull().default(false),
+  },
+  (t) => [uniqueIndex("visa_rules_pair").on(t.passportCountry, t.destination)],
+);
+
+/** Partner visa agencies. Sorted by rating only — never paid placement. */
+export const visaAgencies = pgTable("visa_agencies", {
+  ...base,
+  name: text("name").notNull(),
+  countries: textArray("countries"),
+  rating: real("rating"),
+  priceMinor: integer("price_minor"),
+  note: text("note"),
+  contactUrl: text("contact_url"),
+  isSample: boolean("is_sample").notNull().default(false),
+});
+
+/** "Haqiqiy narx" per person: editor estimate until enough groups' costs exist. */
+export const priceStats = pgTable(
+  "price_stats",
+  {
+    ...base,
+    destination: text("destination").notNull(),
+    days: integer("days").notNull(),
+    roomType: text("room_type").notNull(), // quad | double | single
+    p25: integer("p25").notNull(),
+    median: integer("median").notNull(),
+    p75: integer("p75").notNull(),
+    sampleSize: integer("sample_size").notNull().default(0), // 0 = editor estimate ("taxminiy")
+    items: jsonb("items")
+      .notNull()
+      .default(sql`'[]'::jsonb`), // [{ key: "flight"|"stay"|..., amount }]
+    isSample: boolean("is_sample").notNull().default(false),
+  },
+  (t) => [uniqueIndex("price_stats_key").on(t.destination, t.days, t.roomType)],
+);
+
 // ---------- trust & safety ----------
 export const reviews = pgTable(
   "reviews",

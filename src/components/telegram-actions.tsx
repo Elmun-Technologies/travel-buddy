@@ -117,3 +117,9 @@ export function TelegramInit() {
   }, [app]);
   return null;
 }
+
+/** BackAction for server pages: goes to a fixed place. */
+export function BackTo({ label, href }: { label: string; href: string }) {
+  const router = useRouter();
+  return <BackAction label={label} onClick={() => router.push(href)} />;
+}

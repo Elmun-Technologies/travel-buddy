@@ -19,6 +19,7 @@ import { travelIntents, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { createTripConversation } from "@/modules/chat/service";
+import { visaFreeCountries } from "@/modules/destinations/service";
 import { addOrganizer, countApproved, getMemberships } from "@/modules/groups/service";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
@@ -126,6 +127,8 @@ export async function listFeed(viewerId: string | null, f: FeedFilter) {
   // ponytail: budget filter ignores currency; add FX conversion when non-USD trips are common.
   if (f.budget) conds.push(or(isNull(trips.budgetMin), lte(trips.budgetMin, f.budget * 100))!);
   if (f.style?.length) conds.push(arrayOverlaps(trips.travelStyles, f.style));
+  if (f.visa === "free")
+    conds.push(inArray(trips.destinationCountry, [...(await visaFreeCountries()), "__none__"]));
   if (blocked.length) conds.push(or(isNull(trips.ownerUserId), notInArray(trips.ownerUserId, blocked))!);
 
   const where = and(...conds);

@@ -9,6 +9,7 @@ import { countryPhoto } from "@/lib/photos";
 import { formatDay } from "@/lib/format";
 import { shareLinks } from "@/lib/trip-share";
 import { getPolls, getRoom, listMessages } from "@/modules/chat/service";
+import { getPrices } from "@/modules/destinations/service";
 import { getFamilyToken } from "@/modules/safety/service";
 import { getTripView } from "@/modules/trips/service";
 import { Room } from "./room";
@@ -31,7 +32,12 @@ async function RoomLoader({ params }: PageProps<"/[locale]/trips/[id]/room">) {
   const trip = room ? await getTripView(tripId.data!, user.id) : null;
   if (!room || !trip) return redirect({ href: tripId.success ? `/trips/${id}` : "/rooms", locale });
 
-  const initial = await listMessages(room.id, user.id);
+  const days = Math.round((Date.parse(trip.endDate) - Date.parse(trip.startDate)) / 864e5) + 1;
+  const [initial, familyToken, [price]] = await Promise.all([
+    listMessages(room.id, user.id),
+    getFamilyToken(user.id, trip.id),
+    getPrices(trip.destinationCountry, days),
+  ]);
   const polls = await getPolls(
     room.id,
     initial.flatMap((m) => (m.pollId ? [m.pollId] : [])),
@@ -64,7 +70,8 @@ async function RoomLoader({ params }: PageProps<"/[locale]/trips/[id]/room">) {
         photo: countryPhoto(trip.destinationCountry, 400, trip.destinationCity),
         currency: trip.currency,
         tripId: trip.id,
-        familyToken: await getFamilyToken(user.id, trip.id),
+        familyToken,
+        price: price ? { country: trip.destinationCountry, days, median: price.median } : null,
       }}
     />
   );

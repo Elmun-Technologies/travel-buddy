@@ -109,3 +109,25 @@
     }
   }
 }
+
+/* SOS: the ring fills while the button is held for 3 seconds. */
+@keyframes sos-fill {
+  from {
+    opacity: 0.15;
+    transform: scale(0.78);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes sos-fill {
+    from {
+      opacity: 0.4;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

@@ -13,7 +13,10 @@ export type NotificationType =
   | "settle_received"
   | "ticket_reminder"
   | "ticket_dropped"
-  | "spot_freed";
+  | "spot_freed"
+  | "sos"
+  | "sos_contact"
+  | "checkin_contact";
 
 /** What the user can turn off in the profile. Everything about them personally is "mine". */
 export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine"] as const;

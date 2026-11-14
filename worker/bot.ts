@@ -2,6 +2,7 @@
 // No emoji (product-decisions §1): symbols only where the design has them (↗, ·).
 import { Bot, InlineKeyboard, Keyboard } from "grammy";
 import { getTelegramLocale, setTelegramLocale, verifyPhoneFromTelegram } from "@/modules/auth/service";
+import { acceptContact } from "@/modules/safety/service";
 
 type Lang = "uz" | "ru" | "en";
 const LANGS: Lang[] = ["uz", "ru", "en"];
@@ -28,6 +29,9 @@ const T = {
     ok: "Telefon tasdiqlandi. Endi safar ochishingiz mumkin.",
     notYours: "Iltimos, faqat o'zingizning raqamingizni ulashing.",
     noUser: "Avval ilovaga kiring, keyin raqamni tasdiqlang.",
+    trusted:
+      'Siz <b>{n}</b>ning ishonchli odamisiz. Safar paytida favqulodda holat bo\'lsa yoki "Hammasi joyida" deb belgilasa, shu yerga xabar keladi.',
+    trustedBad: "Havola eskirgan yoki o'chirilgan. Yangi havolani so'rang.",
     taken: "Bu raqam boshqa akkauntga bog'langan. Qo'llab-quvvatlash xizmatiga yozing.",
     invalid: "Raqamni tanib bo'lmadi. Qaytadan urinib ko'ring.",
   },
@@ -51,6 +55,9 @@ const T = {
     ok: "Телефон подтверждён. Теперь можно создавать поездки.",
     notYours: "Пожалуйста, отправьте только свой номер.",
     noUser: "Сначала откройте приложение, затем подтвердите номер.",
+    trusted:
+      "Вы — доверенный контакт <b>{n}</b>. Если в поездке что-то случится или придёт отметка «Всё в порядке», сообщение придёт сюда.",
+    trustedBad: "Ссылка устарела или отключена. Попросите новую.",
     taken: "Этот номер привязан к другому аккаунту. Напишите в поддержку.",
     invalid: "Не удалось распознать номер. Попробуйте ещё раз.",
   },
@@ -74,6 +81,9 @@ const T = {
     ok: "Phone verified. You can now start trips.",
     notYours: "Please share only your own number.",
     noUser: "Open the app first, then verify your number.",
+    trusted:
+      "You're <b>{n}</b>'s trusted contact. If something happens on the trip, or they mark \"All good\", you'll get a message here.",
+    trustedBad: "This link has expired or was switched off. Ask for a new one.",
     taken: "This number is linked to another account. Please contact support.",
     invalid: "Couldn't read the number. Please try again.",
   },
@@ -108,6 +118,14 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
 
   bot.command("start", async (ctx) => {
     const l = await langOf(ctx.from);
+    if (ctx.match.startsWith("trust_")) {
+      const name = await acceptContact(ctx.match.slice(6), String(ctx.chat.id));
+      const esc = (x: string) => x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      await ctx.reply(name === null ? T[l].trustedBad : T[l].trusted.replace("{n}", esc(name)), {
+        parse_mode: "HTML",
+      });
+      return;
+    }
     if (ctx.match === "phone") {
       await ctx.reply(T[l].askPhone, {
         reply_markup: new Keyboard().requestContact(T[l].share).resized().oneTime(),

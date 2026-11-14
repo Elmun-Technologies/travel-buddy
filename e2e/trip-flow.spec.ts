@@ -151,6 +151,26 @@ test.describe("trip flow", () => {
     await owner.getByRole("tab", { name: "Xarajat" }).click();
     await expect(owner.getByText("Hammasi teng — hech kim qarz emas.")).toBeVisible();
 
+    // Safety: SOS page from the room header, "Hammasi joyida", then the family page without login.
+    await traveler.getByRole("link", { name: "Xavfsizlik va SOS" }).click();
+    await expect(traveler).toHaveURL(/\/sos$/);
+    await traveler.getByRole("button", { name: "Hammasi joyida — belgilash" }).click();
+    await expect(traveler.getByRole("button", { name: /Hammasi joyida · .* da belgilandi/ })).toBeVisible();
+    await expect(traveler.getByText("Politsiya, tez yordam, o't o'chirish")).toBeVisible(); // Gruziya: 112
+    const token = await traveler.evaluate(async (tripId) => {
+      const r = await fetch("/api/safety", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ op: "family.create", tripId }),
+      });
+      return ((await r.json()) as { token: string }).token;
+    }, tripId);
+    const family = await (await browser.newContext()).newPage();
+    await family.goto(`/uz/f/${token}`);
+    await expect(family.getByText("Hammasi joyida", { exact: true })).toBeVisible();
+    await expect(family.getByText("Malika · tashkilotchi")).toBeVisible();
+    await expect(family.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+
     // Bot notifications: each kind can be turned off in the profile, and it stays off.
     await owner.goto("/uz/me");
     await owner.waitForLoadState("networkidle");
@@ -160,7 +180,10 @@ test.describe("trip flow", () => {
     await expect(chat).toHaveAttribute("aria-checked", "false");
     await owner.waitForLoadState("networkidle");
     await owner.reload();
-    await expect(owner.getByRole("switch", { name: "Chat xabarlari" })).toHaveAttribute("aria-checked", "false");
+    await expect(owner.getByRole("switch", { name: "Chat xabarlari" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
   test("bad signature does not log in", async ({ page }) => {

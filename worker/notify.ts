@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import type { Api } from "grammy";
 import { InlineKeyboard } from "grammy";
 import type { Db } from "@/lib/db";
+import { mainNumber } from "@/lib/emergency";
 
 type Lang = "uz" | "ru" | "en";
 const lang = (l?: string | null): Lang => (l === "ru" || l === "en" ? l : "uz");
@@ -30,6 +31,13 @@ const T = {
     settle: (m: string, trip: string, amount: string) =>
       `<b>${m}</b> sizga $${amount} o'tkazganini belgiladi («${trip}»). Pul kelgan bo'lsa, hammasi joyida.`,
     roomBtn: "Xonani ochaman ↗",
+    sosHead: "SOS — YORDAM KERAK",
+    sos: (m: string, trip: string) => `<b>${m}</b> «${trip}» safarida yordam so'ramoqda.`,
+    where: "Joylashuv",
+    localNumber: "Mahalliy favqulodda raqam",
+    mapBtn: "Xaritada ko'rish ↗",
+    checkinHead: "HAMMASI JOYIDA",
+    checkin: (m: string, trip: string) => `<b>${m}</b> «${trip}» safarida hammasi joyida ekanini belgiladi.`,
     settings: "Bildirishnomalarni profilda sozlash mumkin.",
     reminderHead: "CHIPTA MUDDATI",
     reminder: (trip: string, n: string) =>
@@ -62,6 +70,13 @@ const T = {
     settle: (m: string, trip: string, amount: string) =>
       `<b>${m}</b> отметил(а), что перевёл(а) вам $${amount} («${trip}»). Если деньги пришли — всё в порядке.`,
     roomBtn: "Открыть комнату ↗",
+    sosHead: "SOS — НУЖНА ПОМОЩЬ",
+    sos: (m: string, trip: string) => `<b>${m}</b> просит о помощи в поездке «${trip}».`,
+    where: "Местоположение",
+    localNumber: "Местный экстренный номер",
+    mapBtn: "Открыть на карте ↗",
+    checkinHead: "ВСЁ В ПОРЯДКЕ",
+    checkin: (m: string, trip: string) => `<b>${m}</b> отметил(а), что в поездке «${trip}» всё в порядке.`,
     settings: "Уведомления настраиваются в профиле.",
     reminderHead: "СРОК ПОКУПКИ БИЛЕТОВ",
     reminder: (trip: string, n: string) =>
@@ -93,6 +108,13 @@ const T = {
     settle: (m: string, trip: string, amount: string) =>
       `<b>${m}</b> marked sending you $${amount} (“${trip}”). If it arrived, you're all set.`,
     roomBtn: "Open the room ↗",
+    sosHead: "SOS — HELP NEEDED",
+    sos: (m: string, trip: string) => `<b>${m}</b> is asking for help on the “${trip}” trip.`,
+    where: "Location",
+    localNumber: "Local emergency number",
+    mapBtn: "Open the map ↗",
+    checkinHead: "ALL GOOD",
+    checkin: (m: string, trip: string) => `<b>${m}</b> marked that all is well on the “${trip}” trip.`,
     settings: "You can change notifications in your profile.",
     reminderHead: "TICKET DEADLINE",
     reminder: (trip: string, n: string) =>
@@ -119,10 +141,18 @@ type Row = {
   text: string | null;
   n: string | null;
   off: boolean;
+  to_chat: string | null; // a trusted contact's chat instead of the user's own
+  lat: string | null;
+  lng: string | null;
+  country: string | null;
 };
 
 /** Head (optional), body, button label and the path under /trips/<id> the button opens. */
-export function render(r: Pick<Row, "type" | "trip" | "organizer" | "member" | "text" | "n">, l: Lang) {
+export function render(
+  r: Pick<Row, "type" | "trip" | "organizer" | "member" | "text" | "n"> &
+    Partial<Pick<Row, "lat" | "lng" | "country">>,
+  l: Lang,
+) {
   const t = T[l];
   const trip = esc(r.trip ?? "");
   const member = esc(r.member ?? "");
@@ -153,6 +183,21 @@ export function render(r: Pick<Row, "type" | "trip" | "organizer" | "member" | "
       return { head: t.droppedHead, body: t.dropped(trip), btn: t.tripBtn, path: "" };
     case "spot_freed":
       return { head: t.freedHead, body: t.freed(trip, r.n ?? "1", text || "0"), btn: t.tripBtn, path: "" };
+    case "sos":
+    case "sos_contact": {
+      const map = r.lat && r.lng ? `https://maps.google.com/?q=${r.lat},${r.lng}` : null;
+      const num = r.country ? mainNumber(r.country) : null;
+      const body = [
+        t.sos(member, trip),
+        map && `${t.where}: ${map}`,
+        num && `${t.localNumber}: <b>${num}</b>`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+      return { head: t.sosHead, body, btn: t.roomBtn, path: "/room", map };
+    }
+    case "checkin_contact":
+      return { head: t.checkinHead, body: t.checkin(member, trip), btn: null, path: "" };
     default:
       return null;
   }
@@ -195,9 +240,12 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
         order by created_at limit 20 for update skip locked)
       returning id, user_id, type, payload)
     select c.id, c.type, c.payload->>'tripId' as trip_id,
-      c.payload->>'text' as text, c.payload->>'n' as n,
-      (case c.type when 'room_pin' then 'pin' when 'room_poll' then 'poll' when 'room_digest' then 'chat'
-        else 'mine' end) = any(u.notify_off) as off,
+      c.payload->>'text' as text, c.payload->>'n' as n, c.payload->>'chatId' as to_chat,
+      c.payload->>'lat' as lat, c.payload->>'lng' as lng, t.destination_country as country,
+      -- SOS and messages to trusted contacts can never be turned off
+      (case when c.type in ('sos', 'sos_contact', 'checkin_contact') then 'always'
+        when c.type = 'room_pin' then 'pin' when c.type = 'room_poll' then 'poll'
+        when c.type = 'room_digest' then 'chat' else 'mine' end) = any(u.notify_off) as off,
       a.provider_user_id as chat_id, u.locale, t.title as trip,
       op.display_name as organizer, mp.display_name as member
     from claimed c
@@ -208,17 +256,25 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
     left join traveler_profiles mp on mp.user_id = (c.payload->>'memberId')::uuid`);
 
   for (const r of rows) {
-    if (!r.chat_id || !r.trip || r.off) continue; // no Telegram (sample users), deleted trip, or turned off
+    const chat = r.to_chat ?? r.chat_id;
+    if (!chat || !r.trip || r.off) continue; // no Telegram (sample users), deleted trip, or turned off
     const l = lang(r.locale);
     const m = render(r, l);
     if (!m) continue;
     const footer = r.type.startsWith("room_") ? `\n\n<i>${T[l].settings}</i>` : "";
+    // Trusted contacts are not in the app: they get a map link, not a Mini App button.
+    const kb = r.to_chat
+      ? "map" in m && m.map
+        ? new InlineKeyboard().url(T[l].mapBtn, m.map)
+        : undefined
+      : m.btn && appUrl.startsWith("https://")
+        ? new InlineKeyboard().webApp(m.btn, `${appUrl}/${l}/trips/${r.trip_id}${m.path}`)
+        : undefined;
     await api
-      .sendMessage(r.chat_id, `${m.head ? `<b>${m.head}</b>\n` : ""}${m.body}${footer}`, {
+      .sendMessage(chat, `${m.head ? `<b>${m.head}</b>\n` : ""}${m.body}${footer}`, {
         parse_mode: "HTML",
-        reply_markup: appUrl.startsWith("https://")
-          ? new InlineKeyboard().webApp(m.btn, `${appUrl}/${l}/trips/${r.trip_id}${m.path}`)
-          : undefined,
+        reply_markup: kb,
+        link_preview_options: { is_disabled: true },
       })
       // 403 = the user blocked the bot: nothing to retry (an SMS fallback is a later, opt-in feature).
       .catch((e) => console.error(`notification ${r.id} failed`, e instanceof Error ? e.message : e));

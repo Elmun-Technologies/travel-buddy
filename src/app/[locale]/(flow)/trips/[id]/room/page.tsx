@@ -9,6 +9,7 @@ import { countryPhoto } from "@/lib/photos";
 import { formatDay } from "@/lib/format";
 import { shareLinks } from "@/lib/trip-share";
 import { getPolls, getRoom, listMessages } from "@/modules/chat/service";
+import { getFamilyToken } from "@/modules/safety/service";
 import { getTripView } from "@/modules/trips/service";
 import { Room } from "./room";
 
@@ -62,6 +63,8 @@ async function RoomLoader({ params }: PageProps<"/[locale]/trips/[id]/room">) {
         flightUrl: flightSearchUrl(trip),
         photo: countryPhoto(trip.destinationCountry, 400, trip.destinationCity),
         currency: trip.currency,
+        tripId: trip.id,
+        familyToken: await getFamilyToken(user.id, trip.id),
       }}
     />
   );

@@ -76,4 +76,21 @@ it.runIf(run)("chat digest: once an hour, unread only, respects blocks and the o
     "uz",
   );
   expect(m?.body).toBe("«Gruziya &lt;3&gt;» guruhida 5 ta yangi xabar.");
+
+  const sos = render(
+    {
+      type: "sos_contact",
+      trip: "Gruziya",
+      organizer: null,
+      member: "Dilnoza",
+      text: null,
+      n: null,
+      lat: "41.7",
+      lng: "44.8",
+      country: "GE",
+    },
+    "uz",
+  );
+  expect(sos?.body).toContain("https://maps.google.com/?q=41.7,44.8");
+  expect(sos?.body).toContain("<b>112</b>");
 });

@@ -40,6 +40,15 @@ export async function hasTelegram(userId: string) {
   return !!row;
 }
 
+/** Telegram user id, for a tg://user link the traveler chose to share (family page). */
+export async function getTelegramId(userId: string) {
+  const [row] = await getDb()
+    .select({ id: authAccounts.providerUserId })
+    .from(authAccounts)
+    .where(and(eq(authAccounts.userId, userId), eq(authAccounts.provider, "telegram")));
+  return row?.id ?? null;
+}
+
 /** Called by the bot after request_contact; the contact must belong to the sender. */
 export async function verifyPhoneFromTelegram(
   telegramId: number,

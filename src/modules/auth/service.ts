@@ -2,7 +2,14 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import { authAccounts } from "@/db/schema";
 import { getDb } from "@/lib/db";
-import { createUser, getUserState, markPhoneVerified, type PhoneResult } from "@/modules/users/service";
+import {
+  createUser,
+  getLocale,
+  getUserState,
+  markPhoneVerified,
+  type PhoneResult,
+  setLocale,
+} from "@/modules/users/service";
 import type { TelegramUser } from "./telegram";
 
 export type LoginResult = { ok: true; userId: string; isNew: boolean } | { ok: false; error: "suspended" };
@@ -44,4 +51,24 @@ export async function verifyPhoneFromTelegram(
     .where(and(eq(authAccounts.provider, "telegram"), eq(authAccounts.providerUserId, String(telegramId))));
   if (!acc) return "no_user";
   return markPhoneVerified(acc.userId, phone);
+}
+
+async function userIdByTelegram(telegramId: number) {
+  const [acc] = await getDb()
+    .select({ userId: authAccounts.userId })
+    .from(authAccounts)
+    .where(and(eq(authAccounts.provider, "telegram"), eq(authAccounts.providerUserId, String(telegramId))));
+  return acc?.userId ?? null;
+}
+
+/** App language of the person behind a Telegram account (null if they never opened the app). */
+export async function getTelegramLocale(telegramId: number) {
+  const userId = await userIdByTelegram(telegramId);
+  return userId ? getLocale(userId) : null;
+}
+
+/** Language chosen in the bot ("Tilni tanlash"); the app uses it too for that account. */
+export async function setTelegramLocale(telegramId: number, locale: string) {
+  const userId = await userIdByTelegram(telegramId);
+  if (userId) await setLocale(userId, locale);
 }

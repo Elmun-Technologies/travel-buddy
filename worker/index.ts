@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/node";
 import { PgBoss } from "pg-boss";
 import { getDb } from "@/lib/db";
 import { createBot } from "./bot";
+import { deliverNotifications } from "./notify";
 import { SEED_ENVS, seedSamples } from "./seed";
 
 const url = process.env.DATABASE_URL;
@@ -52,10 +53,26 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 if (token) void runBot(token);
 else console.log("TELEGRAM_BOT_TOKEN not set: bot disabled");
 
+// Telegram notifications queued by the web app (join requested / approved), every 5 s.
+let delivering = false;
+const deliveryTimer = setInterval(async () => {
+  if (!current || delivering) return;
+  delivering = true;
+  try {
+    await deliverNotifications(current.bot.api, getDb(), process.env.APP_URL ?? "");
+  } catch (e) {
+    console.error("notification delivery failed", e);
+    Sentry.captureException(e);
+  } finally {
+    delivering = false;
+  }
+}, 5_000);
+
 for (const sig of ["SIGTERM", "SIGINT"] as const) {
   process.on(sig, async () => {
     console.log(`${sig}: stopping worker`);
     stopping = true;
+    clearInterval(deliveryTimer);
     await current?.bot.stop().catch(() => {});
     await boss.stop({ graceful: true, timeout: 20_000 });
     await Sentry.flush(2_000);

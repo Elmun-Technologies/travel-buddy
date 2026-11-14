@@ -27,5 +27,5 @@ export async function completeTelegramLogin(tg: TelegramUser, locale: Locale) {
   await createSession(res.userId, meta);
   const hasProfile = !!(await getOwnProfile(res.userId));
   const name = encodeURIComponent((tg.first_name ?? "").slice(0, 50));
-  return { ok: true as const, next: hasProfile ? `/${locale}/trips` : `/${locale}/welcome?name=${name}` };
+  return { ok: true as const, next: hasProfile ? `/${locale}/home` : `/${locale}/welcome?name=${name}` };
 }

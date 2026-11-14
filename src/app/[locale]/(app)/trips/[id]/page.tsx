@@ -58,7 +58,7 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
       <div className="relative h-[270px] overflow-hidden rounded-[22px] bg-[#b9c7d6]">
         {/* eslint-disable-next-line @next/next/no-img-element -- pre-compressed WebP */}
         <img
-          src={countryPhoto(trip.destinationCountry)}
+          src={countryPhoto(trip.destinationCountry, 1200, trip.destinationCity)}
           alt={countryName(trip.destinationCountry, locale)}
           className="size-full object-cover"
           fetchPriority="high"

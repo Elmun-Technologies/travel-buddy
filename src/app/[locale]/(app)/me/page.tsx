@@ -1,14 +1,14 @@
 import { Suspense } from "react";
-import { ExternalLink } from "@/components/external-link";
-import { BadgeCheck, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Panel } from "@/components/clay";
+import { ExternalLink } from "@/components/external-link";
+import { LocaleSwitch } from "@/components/locale-switch";
 import { PageLoading } from "@/components/page-loading";
-import { ProfileCard } from "@/components/profile/profile-card";
+import { ProfileCard, profileChip } from "@/components/profile/profile-card";
 import { TripCard } from "@/components/trips/trip-card";
-import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { countryName } from "@/lib/catalog";
-import { botUsername, flag, formatDateRange } from "@/lib/format";
+import { type Country, countryName } from "@/lib/catalog";
+import { botUsername, formatDateRange } from "@/lib/format";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { getPublicProfile } from "@/modules/profiles/service";
 import { listMyIntents, listMyTrips } from "@/modules/trips/service";
@@ -22,10 +22,15 @@ export default function MePage(props: PageProps<"/[locale]/me">) {
   );
 }
 
+const label = "text-xs font-semibold tracking-[.06em] text-muted-foreground uppercase";
+const tag = "inline-flex min-h-9 items-center rounded-full border border-input px-3 text-[13px] font-medium";
+const row = "flex min-h-14 items-center justify-between gap-3 border-b border-line py-3 last:border-b-0";
+
+// App-Profile.png. Real numbers only: trips and countries from memberships; rating once reviews exist.
 async function Me({ params }: PageProps<"/[locale]/me">) {
   const locale = asLocale((await params).locale);
-  const { user } = await requireProfile(locale);
-  const [p, trips, intents, t, tt, tc, ta] = await Promise.all([
+  const { user, profile } = await requireProfile(locale);
+  const [p, trips, intents, t, tt, tc, ta, ts] = await Promise.all([
     getPublicProfile(user.id, user.id),
     listMyTrips(user.id),
     listMyIntents(user.id),
@@ -33,51 +38,73 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
     getTranslations("trip"),
     getTranslations("common"),
     getTranslations("app"),
+    getTranslations("styles"),
   ]);
   const bot = botUsername();
+  const joined = trips.filter((x) => x.myStatus.status === "approved");
+  const countries = new Set(joined.map((x) => x.destinationCountry));
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="sr-only">{t("title")}</h1>
-        <Link href="/profile/edit" className={buttonVariants({ variant: "outline" })}>
-          {tc("edit")}
-        </Link>
-        <form action={logoutAction}>
-          <input type="hidden" name="locale" value={locale} />
-          <button className="text-sm text-muted-foreground underline-offset-4 hover:underline">
-            {ta("logout")}
-          </button>
-        </form>
-      </div>
-
-      {p && <ProfileCard p={p} />}
-
-      {user.phoneVerified ? (
-        <p className="flex items-center gap-2 text-sm text-primary">
-          <BadgeCheck className="size-4" aria-hidden /> {t("phoneDone")}
-        </p>
-      ) : (
-        <section className="flex flex-col gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-5">
-          <h2 className="flex items-center gap-2 font-semibold">
-            <Phone className="size-4" aria-hidden /> {t("phoneTitle")}
-          </h2>
-          <p className="text-sm text-muted-foreground">{t("phoneText")}</p>
-          {bot && (
-            <ExternalLink
-              href={`https://t.me/${bot}?start=phone`}
-              className={buttonVariants({ className: "h-10 self-start px-4" })}
-            >
-              {t("phoneButton")}
-            </ExternalLink>
-          )}
-        </section>
+    <div className="flex flex-col gap-2">
+      <h1 className="sr-only">{t("title")}</h1>
+      {p && (
+        <ProfileCard
+          p={p}
+          actions={
+            <>
+              {!user.phoneVerified && bot && (
+                <ExternalLink
+                  href={`https://t.me/${bot}?start=phone`}
+                  className={`${profileChip} border-ink`}
+                >
+                  {t("phoneButton")}
+                </ExternalLink>
+              )}
+              <Link href="/profile/edit" className={`${profileChip} border-input`}>
+                {t("editTitle")}
+              </Link>
+            </>
+          }
+        />
       )}
 
-      <section>
-        <h2 className="mb-4 text-xl font-semibold">{t("myTrips")}</h2>
+      <div className="grid grid-cols-3 gap-2">
+        <Stat n={String(joined.length)} label={t("statTrips")} />
+        <Stat n={String(countries.size)} label={t("statCountries")} />
+        <Stat n="—" label={t("statRating")} tone="signal" />
+      </div>
+
+      <Panel className="flex flex-col gap-3">
+        <span className={label}>{t("travelStyles")}</span>
+        <div className="flex flex-wrap gap-1.5">
+          {profile.travelStyles.length ? (
+            profile.travelStyles.map((s) => (
+              <span key={s} className={tag}>
+                {ts(s)}
+              </span>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">—</span>
+          )}
+        </div>
+        {profile.dreamDestinations.length > 0 && (
+          <>
+            <span className={`${label} mt-2`}>{t("dreams")}</span>
+            <div className="flex flex-wrap gap-1.5">
+              {(profile.dreamDestinations as Country[]).map((c) => (
+                <span key={c} className={tag}>
+                  {countryName(c, locale)}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </Panel>
+
+      <section className="flex flex-col gap-2 pt-2">
+        <h2 className="px-1 text-[15px] font-semibold">{t("myTrips")}</h2>
         {trips.length ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             {trips.map((trip) => (
               <TripCard
                 key={trip.id}
@@ -93,43 +120,63 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">{t("noTrips")}</p>
+          <Panel className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground">{t("noTrips")}</span>
+            <Link href="/trips" className="min-h-11 py-3 text-sm font-medium text-blue">
+              {t("findTrips")}
+            </Link>
+          </Panel>
         )}
       </section>
 
-      <section>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">{t("myIntents")}</h2>
-          <Link href="/intents/new" className={buttonVariants({ variant: "outline", size: "sm" })}>
+      <Panel className="flex flex-col">
+        <div className={row}>
+          <span className="font-medium">{t("myIntents")}</span>
+          <Link href="/intents/new" className="min-h-11 py-3 text-sm font-medium text-blue">
             + {t("addIntent")}
           </Link>
         </div>
-        {intents.length ? (
-          <ul className="flex flex-col gap-3">
-            {intents.map((i) => (
-              <li key={i.id} className="flex items-center justify-between gap-3 rounded-xl border p-4">
-                <span>
-                  {flag(i.destinationCountry)} {countryName(i.destinationCountry, locale)}
-                  {i.destinationCity && `, ${i.destinationCity}`}
-                  <span className="text-muted-foreground">
-                    {" "}
-                    · {formatDateRange(i.startDate, i.endDate, locale)}
-                  </span>
-                </span>
-                <form action={closeIntentAction}>
-                  <input type="hidden" name="locale" value={locale} />
-                  <input type="hidden" name="intentId" value={i.id} />
-                  <button className="text-sm text-muted-foreground hover:text-foreground">
-                    {tc("close")}
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-muted-foreground">{t("noIntents")}</p>
-        )}
-      </section>
+        {intents.map((i) => (
+          <div key={i.id} className={row}>
+            <span className="text-sm">
+              {countryName(i.destinationCountry, locale)}
+              {i.destinationCity && `, ${i.destinationCity}`}
+              <span className="text-muted-foreground">
+                {" "}
+                · {formatDateRange(i.startDate, i.endDate, locale)}
+              </span>
+            </span>
+            <form action={closeIntentAction}>
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="intentId" value={i.id} />
+              <button className="min-h-11 text-sm text-muted-foreground hover:text-foreground">
+                {tc("close")}
+              </button>
+            </form>
+          </div>
+        ))}
+        <div className={row}>
+          <span className="font-medium">{t("language")}</span>
+          <LocaleSwitch />
+        </div>
+        <div className={row}>
+          <form action={logoutAction}>
+            <input type="hidden" name="locale" value={locale} />
+            <button className="min-h-11 text-[15px] font-medium text-danger">{ta("logout")}</button>
+          </form>
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function Stat({ n, label, tone }: { n: string; label: string; tone?: "signal" }) {
+  return (
+    <div
+      className={`flex min-h-[120px] flex-col justify-between rounded-[22px] p-4 ${tone ? "bg-signal" : "bg-card"}`}
+    >
+      <span className="font-display text-[44px]">{n}</span>
+      <span className="text-[13px] text-muted-foreground">{label}</span>
     </div>
   );
 }

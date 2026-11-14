@@ -219,7 +219,7 @@ export function OnboardingWizard({
     if (res?.ok) {
       writeLocal(draftKey, null);
       haptic.success();
-      if (phone === "done") router.replace("/trips");
+      if (phone === "done") router.replace("/home");
       else setStep(4);
       return;
     }
@@ -472,7 +472,7 @@ export function OnboardingWizard({
           )}
           {phone === "declined" && <p className="text-sm text-muted-foreground">{t("notShared")}</p>}
           {phone !== "done" && (
-            <Link href="/trips" className="min-h-11 self-start py-2.5 text-sm font-medium text-blue">
+            <Link href="/home" className="min-h-11 self-start py-2.5 text-sm font-medium text-blue">
               {t("later")}
             </Link>
           )}
@@ -505,7 +505,7 @@ export function OnboardingWizard({
       {step === 4 && (
         <MainAction
           label={phone === "done" ? t("finish") : tg()?.requestContact ? t("share") : t("openBot")}
-          onClick={() => (phone === "done" ? router.replace("/trips") : sharePhone())}
+          onClick={() => (phone === "done" ? router.replace("/home") : sharePhone())}
           loading={phone === "waiting"}
         />
       )}

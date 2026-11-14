@@ -5,7 +5,13 @@
   },
   "nav": {
     "join": "Ro'yxatga yozilish",
-    "language": "Til"
+    "language": "Til",
+    "label": "Bo'limlar",
+    "home": "Asosiy",
+    "trips": "Safarlar",
+    "rooms": "Xonalar",
+    "clubs": "Klublar",
+    "profile": "Profil"
   },
   "waitlist": {
     "title": "Ro'yxatga yoziling",
@@ -110,7 +116,13 @@
     "draftSaving": "Saqlanmoqda…",
     "failNetwork": "Yuborib bo'lmadi — internet uzilgan bo'lishi mumkin. Hammasi saqlangan, qayta urinib ko'ring.",
     "failSession": "Kirish muddati tugabdi. Qayta kiring — kiritganlaringiz joyida qoladi.",
-    "loginAgain": "Qayta kirish"
+    "loginAgain": "Qayta kirish",
+    "statTrips": "safar",
+    "statCountries": "davlat",
+    "statRating": "baho · hali sharh yo'q",
+    "dreams": "Borishni xohlaydi",
+    "findTrips": "Safar topamiz",
+    "language": "Til"
   },
   "feed": {
     "title": "Safarlar",
@@ -535,5 +547,44 @@
       "privacy": "Maxfiylik",
       "safety": "Xavfsizlik qoidalari"
     }
+  },
+  "home": {
+    "morning": "Xayrli tong,",
+    "day": "Xayrli kun,",
+    "evening": "Xayrli kech,",
+    "verified": "Tasdiqlangan",
+    "yourTrip": "Sizning safaringiz",
+    "daysLeft": "{n} kun qoldi",
+    "members": "{n}/{max} kishi",
+    "noTripYet": "Hali safaringiz yo'q — birinchisini ochamizmi?",
+    "forYou": "Sizga yoqishi mumkin",
+    "all": "Hammasi",
+    "sample": "Namuna",
+    "why": "Nega mos",
+    "whyCountry": "siz tanlagan yo'nalish",
+    "whyBudget": "budjetingizga to'g'ri keladi",
+    "forming": "Yig'ilayotgan guruhlar",
+    "spotsLeft": "{n} joy qoldi",
+    "clubs": "Klublar",
+    "clubsText": "O'z odamlaringizni toping",
+    "memories": "Taassurotlar",
+    "memoriesText": "Kim qayerdan qaytdi",
+    "newTrip": "Safar ochaman"
+  },
+  "rooms": {
+    "title": "Xonalar",
+    "empty": "Guruhga qo'shilsangiz, safar xonangiz shu yerda ochiladi.",
+    "find": "Safar topamiz",
+    "soon": "Chat, reja va xarajatlar xonada tez orada ochiladi."
+  },
+  "clubs": {
+    "title": "Klublar",
+    "soon": "Klublar tez orada: o'z odamlaringiz bilan doimiy safarlar. Hozircha ochiq guruhlarga qo'shiling.",
+    "action": "Safarlarni ko'ramiz"
+  },
+  "memories": {
+    "title": "Taassurotlar",
+    "soon": "Safardan qaytgach — umumiy albom va hikoyalar shu yerda bo'ladi.",
+    "action": "Safarlarni ko'ramiz"
   }
 }

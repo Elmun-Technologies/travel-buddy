@@ -13,7 +13,7 @@ const tag =
 const days = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000) + 1;
 
 /** Feed card (App-Trips.png): destination photo, title, dates · budget, fill bar, tags. */
-export async function TripCard({ trip, badge }: { trip: Trip; badge?: string }) {
+export async function TripCard({ trip, badge, href }: { trip: Trip; badge?: string; href?: string }) {
   const [t, ts, locale] = await Promise.all([
     getTranslations("trip"),
     getTranslations("styles"),
@@ -25,7 +25,7 @@ export async function TripCard({ trip, badge }: { trip: Trip; badge?: string }) 
     : 0;
   return (
     <Link
-      href={`/trips/${trip.id}`}
+      href={href ?? `/trips/${trip.id}`}
       className="press relative flex flex-col overflow-hidden rounded-[22px] bg-card"
     >
       <LinkPending />

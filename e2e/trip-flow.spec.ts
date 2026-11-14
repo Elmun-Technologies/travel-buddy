@@ -51,9 +51,11 @@ test.describe("trip flow", () => {
     await expect(owner.getByRole("button", { name: /Havolani nusxalash/ })).toBeVisible();
     const title = "Gruziya · 6 kun";
     await owner.getByRole("link", { name: "Guruh xonasiga o'tamiz" }).click();
+    await expect(owner).toHaveURL(/\/uz\/trips\/[0-9a-f-]{36}\/room$/);
+    const tripUrl = owner.url().replace(/\/room$/, "");
+    await owner.goto(tripUrl);
     await expect(owner.getByRole("heading", { level: 1, name: title })).toBeVisible();
     await expect(owner.getByText("Yangi so'rov yo'q.")).toBeVisible();
-    const tripUrl = owner.url();
     const tripId = tripUrl.split("/").pop()!;
 
     // Short link, OG picture and story picture.
@@ -86,6 +88,31 @@ test.describe("trip flow", () => {
     await traveler.reload();
     await expect(traveler.getByText("Siz guruhdasiz!")).toBeVisible();
     await expect(traveler.getByText("Ishtirokchilar · 2/3")).toBeVisible();
+
+    // Trip room: live chat (SSE), pinned notice, poll — both sides see updates without reloading.
+    await owner.goto(`${tripUrl}/room`);
+    await owner.waitForLoadState("networkidle");
+    await traveler.getByRole("link", { name: "Guruh xonasiga kirish" }).click();
+    await expect(traveler).toHaveURL(/\/room$/);
+    await traveler.waitForLoadState("networkidle");
+    await traveler.getByLabel("Guruhga yozing").fill("Salom, men ham shu yerdaman");
+    await traveler.getByRole("button", { name: "Yuborish" }).click();
+    await expect(owner.getByText("Salom, men ham shu yerdaman")).toBeVisible();
+
+    await owner.getByRole("button", { name: "Yana" }).click();
+    await owner.getByRole("button", { name: "E'lon qadash" }).click();
+    await owner.getByLabel("E'lon qadash").fill("Uchrashuv 06:00, aeroport");
+    await owner.getByRole("button", { name: "Saqlash" }).click();
+    await expect(traveler.getByText("Uchrashuv 06:00, aeroport")).toBeVisible();
+
+    await owner.getByRole("button", { name: "Yana" }).click();
+    await owner.getByRole("button", { name: "So'rovnoma" }).click();
+    await owner.getByLabel(/^Savol/).fill("Qayerda qolamiz?");
+    await owner.getByLabel("1-variant").fill("Mehmon uyi");
+    await owner.getByLabel("2-variant").fill("Mehmonxona");
+    await owner.getByRole("button", { name: "Saqlash" }).click();
+    await traveler.getByRole("button", { name: /Mehmon uyi/ }).click();
+    await expect(owner.getByText("1 ovoz")).toBeVisible();
   });
 
   test("bad signature does not log in", async ({ page }) => {

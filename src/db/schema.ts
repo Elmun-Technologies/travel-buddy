@@ -354,6 +354,9 @@ export const conversations = pgTable("conversations", {
   tripId: uuid("trip_id").references(() => trips.id, { onDelete: "cascade" }),
   leadId: uuid("lead_id").references(() => leads.id, { onDelete: "cascade" }),
   lastMessageAt: ts("last_message_at"),
+  // Organizer's announcement pinned on top of the room chat ("E'LON · Uchrashuv: 06:00, aeroport").
+  pinnedText: text("pinned_text"),
+  pinnedAt: ts("pinned_at"),
 });
 
 export const conversationMembers = pgTable(
@@ -381,9 +384,48 @@ export const messages = pgTable(
       .references(() => conversations.id, { onDelete: "cascade" }),
     senderId: uuid("sender_id").references(() => users.id, { onDelete: "set null" }),
     body: text("body").notNull(),
+    kind: text("kind").notNull().default("text"), // text | poll
+    pollId: uuid("poll_id"),
     hiddenAt: ts("hidden_at"),
   },
   (t) => [index("messages_conv_created").on(t.conversationId, t.createdAt)],
+);
+
+// Polls live inside the room chat (one vote per person; changing the vote is allowed).
+export const polls = pgTable("polls", {
+  ...base,
+  conversationId: uuid("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  question: text("question").notNull(),
+  closedAt: ts("closed_at"),
+});
+
+export const pollOptions = pgTable("poll_options", {
+  ...base,
+  pollId: uuid("poll_id")
+    .notNull()
+    .references(() => polls.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  position: integer("position").notNull(),
+});
+
+export const pollVotes = pgTable(
+  "poll_votes",
+  {
+    ...base,
+    pollId: uuid("poll_id")
+      .notNull()
+      .references(() => polls.id, { onDelete: "cascade" }),
+    optionId: uuid("option_id")
+      .notNull()
+      .references(() => pollOptions.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (t) => [uniqueIndex("poll_votes_one").on(t.pollId, t.userId)],
 );
 
 // ---------- trust & safety ----------

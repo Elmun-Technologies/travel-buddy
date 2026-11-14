@@ -44,3 +44,8 @@ export async function createReport(
     );
   if (!dup) await db.insert(reports).values({ reporterId, targetType, targetId, reason });
 }
+
+export async function block(blockerId: string, blockedId: string) {
+  if (blockerId === blockedId) return;
+  await getDb().insert(blocks).values({ blockerId, blockedId }).onConflictDoNothing();
+}

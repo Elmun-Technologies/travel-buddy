@@ -36,6 +36,13 @@
       "when": 1794669729953,
       "tag": "0004_trip_share_code",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794673247492,
+      "tag": "0005_room_polls_pin",
+      "breakpoints": true
     }
   ]
 }

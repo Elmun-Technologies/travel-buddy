@@ -122,3 +122,18 @@ export function ShareIcon(s: ShareLinks) {
     </button>
   );
 }
+
+/** Room invite bar button ("Chaqirish"). */
+export function InviteButton({ label, ...s }: ShareLinks & { label: string }) {
+  const sh = useShare(s);
+  return (
+    <button
+      type="button"
+      onClick={sh.telegram}
+      className="flex min-h-11 flex-none items-center gap-1.5 text-[17px] font-semibold text-blue"
+    >
+      <Send className="size-5" strokeWidth={1.8} aria-hidden="true" />
+      {label}
+    </button>
+  );
+}

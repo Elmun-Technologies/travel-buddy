@@ -434,7 +434,7 @@ export function CreateWizard({
           <Panel tone="soft" className="text-[15px]">
             {t("weHelp", { place: place.label })}
           </Panel>
-          <MainAction label={t("toRoom")} href={`/trips/${created.id}`} />
+          <MainAction label={t("toRoom")} href={`/trips/${created.id}/room`} />
         </>
       )}
     </>

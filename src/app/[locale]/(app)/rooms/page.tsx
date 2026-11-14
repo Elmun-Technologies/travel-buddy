@@ -25,10 +25,9 @@ async function Rooms({ params }: PageProps<"/[locale]/rooms">) {
   return (
     <div className="flex flex-col gap-2">
       <Display className="px-1 py-2 text-[32px]">{t("title")}</Display>
-      <p className="px-1 text-sm text-muted-foreground">{t("soon")}</p>
       <div className="grid gap-2 sm:grid-cols-2">
         {rooms.map((trip) => (
-          <TripCard key={trip.id} trip={trip} />
+          <TripCard key={trip.id} trip={trip} href={`/trips/${trip.id}/room`} />
         ))}
       </div>
     </div>

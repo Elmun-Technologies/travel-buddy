@@ -71,7 +71,8 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
   for (const r of rows) {
     if (!r.chat_id || !r.trip) continue; // sample users (no Telegram) or deleted trip
     const l = lang(r.locale);
-    const url = `${appUrl}/${l}/trips/${r.trip_id}`;
+    // Approved → straight into the room; a new request → the trip page where the organizer decides.
+    const url = `${appUrl}/${l}/trips/${r.trip_id}${r.type === "join_approved" ? "/room" : ""}`;
     const [head, body, btn] =
       r.type === "join_approved"
         ? [T[l].approvedHead, T[l].approved(esc(r.organizer ?? ""), esc(r.trip)), T[l].approvedBtn]

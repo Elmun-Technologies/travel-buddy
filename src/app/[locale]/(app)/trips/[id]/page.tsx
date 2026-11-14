@@ -280,6 +280,7 @@ async function JoinArea({
 }) {
   const t = await getTranslations("trip");
   const te = await getTranslations("errors");
+  const tr = await getTranslations("room");
   const hidden = (name: string, value: string) => <input type="hidden" name={name} value={value} />;
   const small = "min-h-11 self-start py-2.5 text-sm text-muted-foreground underline-offset-4 hover:underline";
 
@@ -293,46 +294,49 @@ async function JoinArea({
   if (trip.isOwner) {
     const requests = members?.filter((m) => m.status === "requested") ?? [];
     return (
-      <Panel className="flex flex-col gap-3">
-        <span className={label}>{t("requests")}</span>
-        {requests.length === 0 && <p className="text-sm text-muted-foreground">{t("noRequests")}</p>}
-        {requests.map((r) => (
-          <div
-            key={r.userId}
-            className="flex flex-col gap-2 border-t border-line pt-3 first:border-t-0 first:pt-0"
-          >
-            <Link href={`/u/${r.userId}`} className="font-semibold underline-offset-4 hover:underline">
-              {r.name}
-            </Link>
-            {r.message && <p className="text-sm whitespace-pre-line text-muted-foreground">{r.message}</p>}
-            <div className="flex gap-2">
-              {(["approve", "reject"] as const).map((d) => (
-                <form key={d} action={decideAction}>
-                  {hidden("locale", locale)}
-                  {hidden("tripId", trip.id)}
-                  {hidden("userId", r.userId)}
-                  {hidden("decision", d)}
-                  <button
-                    className={cn(
-                      "press min-h-11 rounded-full px-5 text-sm font-medium",
-                      d === "approve" ? "bg-ink text-white" : "border border-input",
-                    )}
-                  >
-                    {t(d)}
-                  </button>
-                </form>
-              ))}
+      <>
+        <MainAction label={tr("enter")} href={`/trips/${trip.id}/room`} />
+        <Panel className="flex flex-col gap-3">
+          <span className={label}>{t("requests")}</span>
+          {requests.length === 0 && <p className="text-sm text-muted-foreground">{t("noRequests")}</p>}
+          {requests.map((r) => (
+            <div
+              key={r.userId}
+              className="flex flex-col gap-2 border-t border-line pt-3 first:border-t-0 first:pt-0"
+            >
+              <Link href={`/u/${r.userId}`} className="font-semibold underline-offset-4 hover:underline">
+                {r.name}
+              </Link>
+              {r.message && <p className="text-sm whitespace-pre-line text-muted-foreground">{r.message}</p>}
+              <div className="flex gap-2">
+                {(["approve", "reject"] as const).map((d) => (
+                  <form key={d} action={decideAction}>
+                    {hidden("locale", locale)}
+                    {hidden("tripId", trip.id)}
+                    {hidden("userId", r.userId)}
+                    {hidden("decision", d)}
+                    <button
+                      className={cn(
+                        "press min-h-11 rounded-full px-5 text-sm font-medium",
+                        d === "approve" ? "bg-ink text-white" : "border border-input",
+                      )}
+                    >
+                      {t(d)}
+                    </button>
+                  </form>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-        {(trip.status === "open" || trip.status === "full") && (
-          <form action={closeTripAction}>
-            {hidden("locale", locale)}
-            {hidden("tripId", trip.id)}
-            <button className={small}>{t("closeTrip")}</button>
-          </form>
-        )}
-      </Panel>
+          ))}
+          {(trip.status === "open" || trip.status === "full") && (
+            <form action={closeTripAction}>
+              {hidden("locale", locale)}
+              {hidden("tripId", trip.id)}
+              <button className={small}>{t("closeTrip")}</button>
+            </form>
+          )}
+        </Panel>
+      </>
     );
   }
 
@@ -346,11 +350,13 @@ async function JoinArea({
 
   if (membership?.status === "approved")
     return (
-      <Panel tone="soft" className="flex flex-col gap-1">
-        <p className="text-lg font-semibold">{t("approved")}</p>
-        <p className="text-sm">{t("chatSoon")}</p>
-        {leaveForm(t("leave"))}
-      </Panel>
+      <>
+        <Panel tone="soft" className="flex flex-col gap-1">
+          <p className="text-lg font-semibold">{t("approved")}</p>
+          {leaveForm(t("leave"))}
+        </Panel>
+        <MainAction label={tr("enter")} href={`/trips/${trip.id}/room`} />
+      </>
     );
   if (membership?.status === "requested")
     return (

@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import { type Browser, expect, test } from "@playwright/test";
 import postgres from "postgres";
-import { TOKEN } from "./helpers";
+import { pickBirthDate, TOKEN } from "./helpers";
 
 // Onboarding inside the Telegram Mini App: signed initData, Telegram WebView UA, interrupted session,
 // failed submit, and a page that outlived a deploy. Phase 3 bug: submit silently lost everything.
@@ -26,9 +26,9 @@ function initData(id: number, name: string) {
 }
 
 /** A fresh "Mini App launch": new WebView (empty storage), Telegram's script stubbed with signed initData. */
-async function openMiniApp(browser: Browser) {
+async function openMiniApp(browser: Browser, id = tgId) {
   const ctx = await browser.newContext({ userAgent: UA });
-  const data = initData(tgId, "Nodira");
+  const data = initData(id, "Nodira");
   await ctx.route("https://telegram.org/js/telegram-web-app.js*", (r) =>
     r.fulfill({
       contentType: "text/javascript",
@@ -48,7 +48,8 @@ test.describe("Mini App onboarding", () => {
   test.skip(!dbUrl, "needs DATABASE_URL");
   const sql = dbUrl ? postgres(dbUrl, { max: 1, onnotice: () => {} }) : null!;
   const userId = () =>
-    sql`select user_id from auth_accounts where provider='telegram' and provider_user_id=${String(tgId)}`;
+    sql`select user_id from auth_accounts where provider='telegram'
+      and provider_user_id in (${String(tgId)}, ${String(tgId + 1)})`;
 
   test.afterAll(async () => {
     await sql`delete from users where id in (${userId()})`;
@@ -59,7 +60,8 @@ test.describe("Mini App onboarding", () => {
     // 1. Step 1 → step 2, pick a style, then the user closes Telegram.
     const first = await openMiniApp(browser);
     await expect(first.locator("#displayName")).toHaveValue("Nodira");
-    await first.fill("#birthDate", "1998-03-21");
+    await pickBirthDate(first, 21, 3, 1998);
+    await expect(first.getByText("21-mart, 1998")).toBeVisible();
     await first.getByRole("radio", { name: "Ayol" }).click();
     await first.getByRole("button", { name: "Davom etamiz", exact: true }).click();
     await first.getByRole("button", { name: "Tog' va trekking" }).click();
@@ -76,7 +78,7 @@ test.describe("Mini App onboarding", () => {
     );
     await expect(page.getByRole("radio", { name: "Faqat ayollar" })).toHaveAttribute("aria-checked", "true");
     await page.getByRole("button", { name: "Orqaga" }).click();
-    await expect(page.locator("#birthDate")).toHaveValue("1998-03-21");
+    await expect(page.getByText("21-mart, 1998")).toBeVisible();
     await page.getByRole("button", { name: "Davom etamiz", exact: true }).click();
     await page.getByRole("button", { name: "Davom etamiz · 1 ta tanlandi" }).click();
 
@@ -108,6 +110,16 @@ test.describe("Mini App onboarding", () => {
       await sql`select birth_date::text as b, travel_styles as s, group_pref as g, dream_destinations as d
       from traveler_profiles where user_id in (${userId()})`;
     expect(p).toMatchObject({ b: "1998-03-21", s: ["mountains"], g: "women_only", d: ["GE"] });
+  });
+
+  test("language can be switched on step 1 without losing answers", async ({ browser }) => {
+    const page = await openMiniApp(browser, tgId + 1);
+    await pickBirthDate(page, 22, 2, 1995);
+    await page.getByRole("button", { name: "ru", exact: true }).click();
+    await expect(page).toHaveURL(/\/ru\/onboarding/);
+    await expect(page.getByText("22 февраля 1995")).toBeVisible();
+    await expect(page.getByText("Давайте знакомиться")).toBeVisible();
+    await page.context().close();
   });
 
   test("profile API rejects cross-site posts", async ({ request }) => {

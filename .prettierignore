@@ -7,3 +7,4 @@ test-results/
 playwright-report/
 /.local/
 docs/design-handoff/
+public/photos/CREDITS.md

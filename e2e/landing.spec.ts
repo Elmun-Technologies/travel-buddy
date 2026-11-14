@@ -40,3 +40,13 @@ for (const locale of ["uz", "ru", "en"]) {
     await expect(page.locator('script[src*="telegram-widget.js"]')).toHaveAttribute("data-lang", locale);
   });
 }
+
+// Owner bug (4.1): "Показать" did nothing in Telegram — an invalid number in the budget field blocked
+// the native form submit silently. Budget is now a fixed choice and the form has noValidate.
+test("feed filter submits from the Russian page", async ({ page }) => {
+  await page.goto("/ru/trips");
+  await page.selectOption('select[name="country"]', "GE");
+  await page.selectOption('select[name="budget"]', "600");
+  await page.getByRole("button", { name: "Показать" }).click();
+  await expect(page).toHaveURL(/country=GE.*budget=600/);
+});

@@ -49,7 +49,7 @@ test.describe("Mini App onboarding", () => {
   const sql = dbUrl ? postgres(dbUrl, { max: 1, onnotice: () => {} }) : null!;
   const userId = () =>
     sql`select user_id from auth_accounts where provider='telegram'
-      and provider_user_id in (${String(tgId)}, ${String(tgId + 1)})`;
+      and provider_user_id in (${String(tgId)}, ${String(tgId + 1)}, ${String(tgId + 2)})`;
 
   test.afterAll(async () => {
     await sql`delete from users where id in (${userId()})`;
@@ -82,13 +82,15 @@ test.describe("Mini App onboarding", () => {
     await page.getByRole("button", { name: "Davom etamiz", exact: true }).click();
     await page.getByRole("button", { name: "Davom etamiz · 1 ta tanlandi" }).click();
 
-    // 3. A deploy happens while the page is open → the user is offered a refresh.
+    // 3. A deploy happens while the Mini App is open → it reloads itself once onto the new build
+    //    (answers come back from the server draft); a repeated mismatch only shows the banner.
     await page.route("**/api/version", (r) => r.fulfill({ json: { id: "newer-build" } }));
-    // Re-dispatch until the banner's listener is attached (hydration timing).
-    await expect(async () => {
-      await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
-      await expect(page.getByText("Ilovaning yangi versiyasi chiqdi.")).toBeVisible({ timeout: 500 });
-    }).toPass();
+    await Promise.all([
+      page.waitForEvent("load"),
+      page.evaluate(() => document.dispatchEvent(new Event("visibilitychange"))),
+    ]);
+    await expect(page.getByText("03 / 04")).toBeVisible();
+    await expect(page.getByText("Ilovaning yangi versiyasi chiqdi.")).toBeVisible();
 
     // 4. Submit fails (connection drops): friendly message, nothing lost, retry works.
     await page.getByRole("button", { name: "Gruziya" }).click();
@@ -121,6 +123,66 @@ test.describe("Mini App onboarding", () => {
     // The previous locale stays mounted but hidden for a moment: assert the visible heading only.
     await expect(page.getByRole("heading", { name: "Давайте знакомиться" })).toBeVisible();
     await page.context().close();
+  });
+
+  // Owner bug: a button "did nothing" inside Telegram. Here the stub has the real Mini App chrome
+  // (MainButton/BackButton/openTelegramLink) and records every call.
+  test("works with Telegram's native buttons and opens t.me links via the Mini App API", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({ userAgent: UA });
+    const data = initData(tgId + 2, "Bobur");
+    await ctx.route("https://telegram.org/js/telegram-web-app.js*", (r) =>
+      r.fulfill({
+        contentType: "text/javascript",
+        body: `(() => {
+          const log = (window.__tg = { main: { visible: false, text: "", cb: null }, links: [] });
+          const btn = (o) => ({ setParams(p) { if ("text" in p) o.text = p.text; if ("is_visible" in p) o.visible = p.is_visible; },
+            onClick(cb) { o.cb = cb; }, offClick() { o.cb = null; }, show() { o.visible = true; }, hide() { o.visible = false; },
+            showProgress() {}, hideProgress() {} });
+          window.Telegram = { WebApp: { initData: ${JSON.stringify(data)}, ready() {}, expand() {},
+            setHeaderColor() {}, setBackgroundColor() {}, MainButton: btn(log.main), BackButton: btn({}),
+            HapticFeedback: { selectionChanged() {}, notificationOccurred() {} },
+            openTelegramLink(u) { log.links.push(u); }, openLink(u) { log.links.push(u); } } };
+        })();`,
+      }),
+    );
+    const page = await ctx.newPage();
+    type Tg = {
+      __tg?: { main: { text: string; visible: boolean; cb: (() => void) | null }; links: string[] };
+    };
+    const main = () =>
+      page.evaluate(() => (window as unknown as Tg).__tg?.main ?? { text: "", visible: false, cb: null });
+    const press = () => page.evaluate(() => (window as unknown as Tg).__tg?.main.cb?.());
+    const pressWhen = async (text: string) => {
+      await expect.poll(async () => (await main()).text).toBe(text);
+      await press();
+    };
+
+    await page.goto("/uz/tg");
+    await expect(page).toHaveURL(/\/uz\/welcome/);
+    await pressWhen("Boshladik!");
+    await expect(page).toHaveURL(/\/uz\/onboarding/);
+    await pickBirthDate(page, 10, 5, 1996);
+    await pressWhen("Davom etamiz");
+    await pressWhen("Davom etamiz");
+    await pressWhen("Profilni saqlaymiz");
+    // No requestContact in this client → bot link, opened through openTelegramLink (plain t.me links are ignored).
+    await pressWhen("Botda tasdiqlayman");
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as Tg).__tg?.links))
+      .toEqual([expect.stringMatching(/^https:\/\/t\.me\/e2e_test_bot\?start=phone$/)]);
+
+    // A page without a main action: the stale native button is hidden after a full load.
+    await page.goto("/uz/trips?all=1");
+    await expect.poll(async () => (await main()).visible).toBe(false);
+
+    // Sample trip (seed): "Men ham boraman!" is the native button and sends the request.
+    await page.goto("/uz/trips/00000000-0000-4000-8000-000000000200");
+    await pressWhen("Men ham boraman!");
+    await expect(page.getByText("So'rovingiz yuborildi", { exact: false })).toBeVisible();
+    await expect.poll(async () => (await main()).visible).toBe(false);
+    await ctx.close();
   });
 
   test("profile API rejects cross-site posts", async ({ request }) => {

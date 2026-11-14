@@ -50,22 +50,21 @@ test.describe("trip flow", () => {
     const tripUrl = owner.url();
 
     const traveler: Page = await loginAndOnboard(browser, base + 2, "Aziz");
-    await traveler.goto("/uz/trips?country=GE");
+    await traveler.goto("/uz/trips?all=1&country=GE");
+    await expect(traveler.getByRole("heading", { name: /Gruziya: \d+ ta safar topildi/ })).toBeVisible();
     await traveler.getByText(title).click();
-    await traveler.fill("#message", "Salom, men ham boraman");
-    await traveler.getByRole("button", { name: "Qo'shilish so'rovi" }).click();
-    await expect(traveler.getByText("So'rovingiz yuborildi")).toBeVisible();
+    await traveler.getByRole("button", { name: "Men ham boraman!" }).click();
+    await expect(traveler.getByText("So'rovingiz yuborildi", { exact: false })).toBeVisible();
 
     await owner.goto(tripUrl);
-    await expect(owner.getByText("Salom, men ham boraman")).toBeVisible();
+    await expect(owner.getByRole("link", { name: "Aziz" })).toBeVisible();
     await owner.getByRole("button", { name: "Qabul qilish" }).click();
     // Wait for the approval to commit (requests list empties) before checking the traveler side.
     await expect(owner.getByText("Yangi so'rov yo'q.")).toBeVisible();
-    await expect(owner.getByRole("link", { name: "Aziz" })).toBeVisible();
 
     await traveler.reload();
     await expect(traveler.getByText("Siz guruhdasiz!")).toBeVisible();
-    await expect(traveler.getByText("2 / 3 kishi")).toBeVisible();
+    await expect(traveler.getByText("Ishtirokchilar · 2/3")).toBeVisible();
   });
 
   test("bad signature does not log in", async ({ page }) => {

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ExternalLink } from "@/components/external-link";
 import { BadgeCheck, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PageLoading } from "@/components/page-loading";
@@ -63,12 +64,12 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
           </h2>
           <p className="text-sm text-muted-foreground">{t("phoneText")}</p>
           {bot && (
-            <a
+            <ExternalLink
               href={`https://t.me/${bot}?start=phone`}
               className={buttonVariants({ className: "h-10 self-start px-4" })}
             >
               {t("phoneButton")}
-            </a>
+            </ExternalLink>
           )}
         </section>
       )}

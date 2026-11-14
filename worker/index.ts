@@ -2,7 +2,9 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import * as Sentry from "@sentry/node";
 import { PgBoss } from "pg-boss";
+import { getDb } from "@/lib/db";
 import { createBot } from "./bot";
+import { SEED_ENVS, seedSamples } from "./seed";
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL is not set");
@@ -18,6 +20,13 @@ boss.on("error", (e) => {
 });
 await boss.start();
 console.log("worker started");
+
+// Staging/development only: sample trips marked "Namuna" (is_test). Production never seeds.
+if (SEED_ENVS.includes(process.env.APP_ENV ?? "")) {
+  await seedSamples(getDb())
+    .then((n) => console.log(`sample trips ready: ${n}`))
+    .catch((e) => console.error("seed failed", e));
+}
 
 let stopping = false;
 let current: ReturnType<typeof createBot> | null = null;

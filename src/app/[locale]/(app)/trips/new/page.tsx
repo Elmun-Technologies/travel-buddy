@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ExternalLink } from "@/components/external-link";
 import { getTranslations } from "next-intl/server";
 import { PageLoading } from "@/components/page-loading";
 import { TripForm } from "@/components/trips/trip-forms";
@@ -29,12 +30,12 @@ async function NewTrip({ params }: PageProps<"/[locale]/trips/new">) {
         <section className="flex flex-col gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-5">
           <p>{t("phoneRequired")}</p>
           {botUsername() && (
-            <a
+            <ExternalLink
               href={`https://t.me/${botUsername()}?start=phone`}
               className={buttonVariants({ className: "h-10 self-start px-4" })}
             >
               {tp("phoneButton")}
-            </a>
+            </ExternalLink>
           )}
         </section>
       )}

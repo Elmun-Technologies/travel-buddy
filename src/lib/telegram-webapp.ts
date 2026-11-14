@@ -27,6 +27,8 @@ export type TgWebApp = {
   setHeaderColor?(c: string): void;
   setBackgroundColor?(c: string): void;
   requestContact?(cb?: (shared: boolean) => void): void;
+  openLink?(url: string): void;
+  openTelegramLink?(url: string): void;
   MainButton?: TgButton;
   BackButton?: { show(): void; hide(): void; onClick(cb: () => void): void; offClick(cb: () => void): void };
   HapticFeedback?: {
@@ -53,18 +55,39 @@ export function tg(): TgWebApp | null {
 // telegram-web-app.js loads after hydration; re-render once it is there.
 const listeners = new Set<() => void>();
 let polling: ReturnType<typeof setInterval> | undefined;
+// Telegram keeps the native buttons across full page loads (e.g. after a reload or a hard
+// navigation), so a stale "Save profile" button could sit over the page and do nothing.
+// Hide them once per page load, before any MainAction sets them up (first subscribe runs first).
+let reset = false;
+function resetChrome() {
+  if (reset || !window.Telegram?.WebApp) return;
+  reset = true;
+  window.Telegram.WebApp.MainButton?.hide();
+  window.Telegram.WebApp.BackButton?.hide();
+}
+
 function subscribe(cb: () => void) {
   listeners.add(cb);
+  resetChrome();
   if (!polling && !window.Telegram?.WebApp) {
     let tries = 0;
     polling = setInterval(() => {
       if (window.Telegram?.WebApp || ++tries > 40) {
         clearInterval(polling);
+        resetChrome();
         listeners.forEach((l) => l());
       }
     }, 100);
   }
   return () => listeners.delete(cb);
+}
+
+/** Open a link the right way: inside Telegram via the Mini App API (plain t.me links are ignored there). */
+export function openExternal(url: string) {
+  const app = tg();
+  if (app && /^https:\/\/t\.me\//.test(url) && app.openTelegramLink) return app.openTelegramLink(url);
+  if (app?.openLink) return app.openLink(url);
+  window.open(url, "_blank", "noopener");
 }
 
 /** True inside Telegram when the native MainButton/BackButton are available. */

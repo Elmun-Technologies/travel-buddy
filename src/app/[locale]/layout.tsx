@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import Script from "next/script";
+import { TelegramInit } from "@/components/telegram-actions";
 import { UpdateBanner } from "@/components/update-banner";
+import { TG_SCRIPT } from "@/lib/telegram-webapp";
 import { APP_NAME } from "@/lib/config";
 import "../globals.css";
 
@@ -45,9 +48,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* Every page may run inside the Mini App (links, buttons, version check need the API). */}
+        <Script src={TG_SCRIPT} strategy="afterInteractive" />
         <NextIntlClientProvider>
           {children}
           <UpdateBanner />
+          <TelegramInit />
         </NextIntlClientProvider>
       </body>
     </html>

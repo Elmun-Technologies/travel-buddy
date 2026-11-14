@@ -95,7 +95,7 @@ describe.runIf(run)("trip + join flow (db)", () => {
     const res = await createTrip(owner, trip);
     if (!res.ok) throw new Error(res.error);
     const id = res.id;
-    expect((await listFeed(null, { page: 1, country: "GE" })).items.some((t) => t.id === id)).toBe(true);
+    expect((await listFeed(null, { page: 1, country: ["GE"] })).items.some((t) => t.id === id)).toBe(true);
 
     expect(await requestJoin(owner, id, null)).toEqual({ ok: false, error: "own_trip" });
     expect(await requestJoin(joiner, id, "hi")).toEqual({ ok: true });
@@ -125,7 +125,7 @@ describe.runIf(run)("trip + join flow (db)", () => {
     const res = await createTrip(owner, { ...trip, groupSizeMax: 5 });
     if (!res.ok) throw new Error(res.error);
     await getDb().insert(blocks).values({ blockerId: blocker, blockedId: owner });
-    expect((await listFeed(blocker, { page: 1, country: "GE" })).items.some((t) => t.id === res.id)).toBe(
+    expect((await listFeed(blocker, { page: 1, country: ["GE"] })).items.some((t) => t.id === res.id)).toBe(
       false,
     );
     expect(await getTripView(res.id, blocker)).toBeNull();

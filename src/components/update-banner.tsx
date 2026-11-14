@@ -18,8 +18,19 @@ export function UpdateBanner() {
       if (document.visibilityState !== "visible") return;
       const res = await fetch("/api/version", { cache: "no-store" }).catch(() => null);
       const id = res?.ok ? ((await res.json()) as { id: string | null }).id : null;
-      if (id && id !== mine) setStale(true);
+      if (!id || id === mine) return;
+      // Inside the Mini App (reopened after a deploy): just reload — drafts are saved server-side.
+      // Once per new build (sessionStorage guard): never a reload loop if ids keep differing.
+      const key = `tb:reloaded:${id}`;
+      let first = false;
+      try {
+        first = !sessionStorage.getItem(key);
+        sessionStorage.setItem(key, "1");
+      } catch {}
+      if (window.Telegram?.WebApp?.initData && first) window.location.reload();
+      else setStale(true);
     };
+    void check(); // the WebView may resume a page from before the deploy
     const iv = setInterval(check, 120_000);
     document.addEventListener("visibilitychange", check);
     return () => {

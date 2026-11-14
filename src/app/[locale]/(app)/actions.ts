@@ -6,7 +6,7 @@ import { fieldErrors, formError, type FormState } from "@/lib/form";
 import { asLocale } from "@/lib/guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { destroySession, getSessionUser } from "@/lib/session";
-import { decideRequest, leaveTrip, requestJoin } from "@/modules/groups/service";
+import { decideRequest, leaveTrip } from "@/modules/groups/service";
 import { intentFromForm, intentSchema, tripFromForm, tripSchema } from "@/modules/trips/schema";
 import { closeIntent, closeTrip, createIntent, createTrip } from "@/modules/trips/service";
 
@@ -56,16 +56,6 @@ export async function closeIntentAction(f: FormData) {
   const { user } = await authed(f);
   await closeIntent(user.id, str(f.get("intentId")));
   refresh();
-}
-
-export async function joinAction(_: FormState, f: FormData): Promise<FormState> {
-  const { user } = await authed(f);
-  if (!(await rateLimit(`join:user:${user.id}`, 30, 3600))) return formError("rate_limited");
-  const message = str(f.get("message")).trim().slice(0, 500) || null;
-  const res = await requestJoin(user.id, str(f.get("tripId")), message);
-  if (!res.ok) return formError(res.error);
-  refresh();
-  return null;
 }
 
 export async function decideAction(f: FormData) {

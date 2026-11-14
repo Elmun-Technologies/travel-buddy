@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Mini App — Bosh sahifa</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.d{font-family:'Inter Tight',sans-serif;letter-spacing:-0.03em;line-height:1.02;font-weight:400;margin:0}
+.tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font:500 12px 'Inter',sans-serif;border:1px solid #CFCFCF;background:#fff;color:#0B0B0B}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font:500 11px 'Inter',sans-serif;color:#5F5F5F;text-decoration:none;min-width:56px;min-height:44px;justify-content:center}
+a{color:#0B0B0B}
+</style>
+</helmet>
+<div style="width:390px;height:1180px;box-sizing:border-box;background:#EDEDED;font-family:'Inter',sans-serif;color:#0B0B0B;display:flex;flex-direction:column;position:relative">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:8px">
+<button style="border:0;background:none;font:500 15px 'Inter',sans-serif;color:#0A5CFF;min-height:44px;padding:0 10px">Yopish</button>
+<div style="text-align:center"><div style="font-weight:600;font-size:15px">Travel Buddy</div><div style="font-size:12px;color:#5F5F5F">mini ilova</div></div>
+<a href="Bot-Start.dc.html" aria-label="Bildirishnomalar" style="min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;position:relative"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0112 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 004 0"/></svg><span style="position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:999px;background:#0A5CFF"></span></a>
+</header>
+
+<main style="flex:1;padding:4px 12px 120px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+<section style="background:#fff;border-radius:22px;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div><div style="font-size:13px;color:#5F5F5F">Xayrli kun,</div><div class="d" style="font-size:30px;margin-top:2px">[Ism]</div></div>
+<a href="App-Profile.dc.html" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-decoration:none">
+<span style="width:48px;height:48px;border-radius:999px;background:#C9D4E3;display:flex;align-items:center;justify-content:center;font-weight:600">N</span>
+<span style="font-size:11px;color:#16803C;font-weight:600">✓ Tasdiqlangan</span></a>
+</section>
+
+<a href="App-Room-Chat.dc.html" style="background:#0B0B0B;color:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;text-decoration:none">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:#C9C9C9;font-weight:600;letter-spacing:.04em">SIZNING SAFARINGIZ</span><span style="background:#F3EE1C;color:#0B0B0B;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600">6 kun qoldi</span></div>
+<div class="d" style="font-size:26px">Tbilisi &amp; Kazbegi</div>
+<div style="display:flex;gap:16px;font-size:13px;color:#D6D6D6"><span>3 yangi xabar</span><span>Tayyor 5/7</span><span>1 so'rovnoma</span></div>
+</a>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 4px 0"><h2 class="d" style="font-size:24px">Sizga yoqishi mumkin</h2><a href="App-Trips.dc.html" style="font-size:14px">Hammasi</a></div>
+<div style="display:flex;gap:8px;overflow:hidden">
+<a href="App-TripDetail.dc.html" style="flex:0 0 300px;background:#fff;border-radius:22px;overflow:hidden;text-decoration:none">
+<div role="img" aria-label="Kazbegi" style="height:150px;background-color:#B9C7D6;position:relative;background-image:url('../../assets/photos/gergeti.jpg');background-size:cover;background-position:center"><span style="position:absolute;top:12px;left:12px;background:#0A5CFF;color:#fff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600">94% mos</span></div>
+<div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+<div class="d" style="font-size:20px">Gruziya · 7 kun</div>
+<div style="font-size:13px;color:#5F5F5F">20–27 noyabr · $550–650</div>
+<div style="font-size:12px;color:#0A3FB0;background:#E8F0FF;border-radius:10px;padding:8px">Sanangiz, trekking va budjetingizga to'g'ri keladi</div>
+</div></a>
+<div style="flex:0 0 300px;background:#fff;border-radius:22px;overflow:hidden">
+<div role="img" aria-label="Istanbul" style="height:150px;background-color:#B9C7D6;background-image:url('../../assets/photos/istanbul-galata.jpg');background-size:cover;background-position:center"></div>
+<div style="padding:14px"><div class="d" style="font-size:20px">Turkiya · 5 kun</div></div></div>
+</div>
+</section>
+
+<section style="background:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="d" style="font-size:24px">Yig'ilayotgan guruhlar</h2></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;font-size:14px"><strong>Olmaota · tog'lar</strong><span>4/8</span></div><div style="height:6px;border-radius:999px;background:#EDEDED"><div style="width:50%;height:100%;border-radius:999px;background:#0B0B0B"></div></div><div style="font-size:12px;color:#5F5F5F">5–9 dekabr · Klub: Tog' sayohatchilari</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;font-size:14px"><strong>Dubay · Yangi yil</strong><span>9/12</span></div><div style="height:6px;border-radius:999px;background:#EDEDED"><div style="width:75%;height:100%;border-radius:999px;background:#0B0B0B"></div></div><div style="font-size:12px;color:#5F5F5F">29 dek – 3 yan · 3 joy qoldi</div></div>
+</div>
+</section>
+
+<section style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+<a href="App-Club.dc.html" style="background:#0A5CFF;color:#fff;border-radius:22px;padding:16px;min-height:130px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;text-decoration:none"><span style="font-size:12px;font-weight:600;letter-spacing:.04em">KLUBLAR</span><span class="d" style="font-size:20px">O'z odamlaringizni toping</span></a>
+<a href="App-Memories.dc.html" style="background:#F3EE1C;color:#0B0B0B;border-radius:22px;padding:16px;min-height:130px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;text-decoration:none"><span style="font-size:12px;font-weight:600;letter-spacing:.04em">TAASSUROTLAR</span><span class="d" style="font-size:20px">Kim qayerdan qaytdi</span></a>
+</section>
+</main>
+
+<a href="App-CreateTrip.dc.html" style="position:absolute;right:16px;bottom:92px;background:#0B0B0B;color:#fff;border-radius:999px;padding:0 20px;min-height:52px;display:flex;align-items:center;gap:8px;font-weight:600;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Safar ochaman</a>
+
+<nav style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E3E3E3;display:flex;justify-content:space-around;padding:8px 0 20px">
+<a href="App-Home.dc.html" class="tab" style="color:#0B0B0B"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg>Asosiy</a>
+<a href="App-Trips.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Safarlar</a>
+<a href="App-Room-Chat.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.4A8 8 0 1121 12z"/></svg>Xonalar</a>
+<a href="App-Club.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/></svg>Klublar</a>
+<a href="App-Profile.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>Profil</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

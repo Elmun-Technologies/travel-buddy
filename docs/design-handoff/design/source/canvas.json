@@ -1,0 +1,359 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-14T06:55:00Z"
+ },
+ "title": "Travel Buddy — to'liq dizayn (bot, Mini App, sayt)",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Bot-Start.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1720,
+   "title": "Bot · /start va bildirishnomalar"
+  },
+  "App-Welcome.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mini App · Xush kelibsiz"
+  },
+  "App-Onboarding.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mini App · Onboarding 02/04"
+  },
+  "App-Home.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 1180,
+   "title": "Mini App · Bosh sahifa"
+  },
+  "App-Trips.dc.html": {
+   "x": 0,
+   "y": 2240,
+   "w": 390,
+   "h": 1180,
+   "title": "Mini App · Safarlar lentasi"
+  },
+  "App-TripDetail.dc.html": {
+   "x": 470,
+   "y": 2240,
+   "w": 390,
+   "h": 1180,
+   "title": "Mini App · Safar sahifasi"
+  },
+  "App-CreateTrip.dc.html": {
+   "x": 0,
+   "y": 4140,
+   "w": 390,
+   "h": 1180,
+   "title": "Safar ochish · 1/3 — Qayerga?"
+  },
+  "App-Profile.dc.html": {
+   "x": 940,
+   "y": 2240,
+   "w": 390,
+   "h": 1300,
+   "title": "Mini App · Profil"
+  },
+  "App-Room-Chat.dc.html": {
+   "x": 0,
+   "y": 5920,
+   "w": 390,
+   "h": 1000,
+   "title": "Safar xonasi · Chat"
+  },
+  "App-Room-Plan.dc.html": {
+   "x": 470,
+   "y": 5920,
+   "w": 390,
+   "h": 1180,
+   "title": "Safar xonasi · Reja va ro'yxat"
+  },
+  "App-Room-Costs.dc.html": {
+   "x": 1410,
+   "y": 5920,
+   "w": 390,
+   "h": 1000,
+   "title": "Safar xonasi · Xarajat va so'rovnoma"
+  },
+  "App-Club.dc.html": {
+   "x": 0,
+   "y": 7840,
+   "w": 390,
+   "h": 1400,
+   "title": "Klub sahifasi"
+  },
+  "App-Memories.dc.html": {
+   "x": 470,
+   "y": 7840,
+   "w": 390,
+   "h": 1400,
+   "title": "Taassurotlar va sharhlar"
+  },
+  "Main.dc.html": {
+   "x": 0,
+   "y": 11820,
+   "w": 1440,
+   "h": 4431,
+   "title": "Sayt · Landing",
+   "expand": "fill"
+  },
+  "Web-Story.dc.html": {
+   "x": 1520,
+   "y": 11820,
+   "w": 1440,
+   "h": 3485,
+   "title": "Sayt · Ulashiladigan safar hikoyasi",
+   "expand": "fill"
+  },
+  "UI-Kit.dc.html": {
+   "x": 2000,
+   "y": 0,
+   "w": 1200,
+   "h": 1869,
+   "title": "Dizayn tizimi · tokenlar va komponentlar"
+  },
+  "App-Destination.dc.html": {
+   "x": 940,
+   "y": 7840,
+   "w": 390,
+   "h": 1600,
+   "title": "Davlat sahifasi · Gruziya"
+  },
+  "App-CreateTrip-2.dc.html": {
+   "w": 390,
+   "x": 470,
+   "y": 4140,
+   "h": 1180,
+   "title": "Safar ochish · 2/3 — Kim bilan?"
+  },
+  "App-CreateTrip-Share.dc.html": {
+   "w": 390,
+   "x": 940,
+   "y": 4140,
+   "h": 1180,
+   "title": "Safar ochish · 3/3 — Ulashamiz"
+  },
+  "App-Room-Book.dc.html": {
+   "w": 390,
+   "x": 940,
+   "y": 5920,
+   "h": 1320,
+   "title": "Safar xonasi · Yig'amiz (chipta, joy, tur)"
+  },
+  "App-Creator.dc.html": {
+   "x": 0,
+   "y": 16851,
+   "w": 390,
+   "h": 1500,
+   "title": "1M Safar — dastur (Mini App)"
+  },
+  "App-Creator-Track.dc.html": {
+   "x": 470,
+   "y": 16851,
+   "w": 390,
+   "h": 1180,
+   "title": "1M Safar — mening videom"
+  },
+  "Web-Creator.dc.html": {
+   "x": 940,
+   "y": 16851,
+   "w": 1440,
+   "h": 2629,
+   "title": "Sayt · 1M Safar dasturi",
+   "expand": "fill"
+  },
+  "Web-Inbound.dc.html": {
+   "x": 2460,
+   "y": 16851,
+   "w": 1440,
+   "h": 1912,
+   "title": "Sayt · Film Uzbekistan (konsept, EN)",
+   "expand": "fill"
+  },
+  "App-Visa.dc.html": {
+   "x": 0,
+   "y": 10040,
+   "w": 390,
+   "h": 1180,
+   "title": "Viza va hujjatlar"
+  },
+  "App-Price.dc.html": {
+   "x": 470,
+   "y": 10040,
+   "w": 390,
+   "h": 1180,
+   "title": "Haqiqiy narx"
+  },
+  "App-Family.dc.html": {
+   "x": 940,
+   "y": 10040,
+   "w": 390,
+   "h": 1180,
+   "title": "Yaqinlar sahifasi (ota-ona ko'radi)"
+  },
+  "App-SOS.dc.html": {
+   "x": 1410,
+   "y": 10040,
+   "w": 390,
+   "h": 1180,
+   "title": "SOS va xavfsizlik"
+  }
+ },
+ "order": [
+  "Bot-Start.dc.html",
+  "App-Welcome.dc.html",
+  "App-Onboarding.dc.html",
+  "App-Home.dc.html",
+  "App-Trips.dc.html",
+  "App-TripDetail.dc.html",
+  "App-Profile.dc.html",
+  "App-CreateTrip.dc.html",
+  "App-CreateTrip-2.dc.html",
+  "App-CreateTrip-Share.dc.html",
+  "App-Room-Chat.dc.html",
+  "App-Room-Plan.dc.html",
+  "App-Room-Book.dc.html",
+  "App-Room-Costs.dc.html",
+  "App-Club.dc.html",
+  "App-Memories.dc.html",
+  "App-Destination.dc.html",
+  "App-Visa.dc.html",
+  "App-Price.dc.html",
+  "App-Family.dc.html",
+  "App-SOS.dc.html",
+  "Main.dc.html",
+  "Web-Story.dc.html",
+  "App-Creator.dc.html",
+  "App-Creator-Track.dc.html",
+  "Web-Creator.dc.html",
+  "Web-Inbound.dc.html",
+  "UI-Kit.dc.html"
+ ],
+ "notes": {
+  "t1": {
+   "x": 0,
+   "y": -300,
+   "text": "01 · Telegram bot va birinchi tanishuv",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "t2": {
+   "x": 0,
+   "y": 1940,
+   "text": "02 · Safarlar va profil",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "t3": {
+   "x": 0,
+   "y": 5620,
+   "text": "04 · Safar xonasi — asosiy ustunlik",
+   "kind": "title1",
+   "maxW": 1330
+  },
+  "t4": {
+   "x": 0,
+   "y": 7540,
+   "text": "05 · Davlat, Klublar va Taassurotlar",
+   "kind": "title1",
+   "maxW": 1330
+  },
+  "t5": {
+   "x": 0,
+   "y": 11520,
+   "text": "07 · Sayt (web)",
+   "kind": "title1",
+   "maxW": 2960
+  },
+  "t6": {
+   "x": 2000,
+   "y": -300,
+   "text": "Dizayn tizimi",
+   "kind": "title1",
+   "maxW": 1200
+  },
+  "s1": {
+   "x": 1880,
+   "y": 5920,
+   "w": 420,
+   "text": "Safar xonasi guruh tasdiqlangach ochiladi. Telegram guruh + Excel + qog'oz ro'yxat o'rnini bosadi. Pul platforma orqali o'tmaydi — faqat hisob yuritiladi.",
+   "fill": "blue"
+  },
+  "s2": {
+   "x": 1410,
+   "y": 7840,
+   "w": 420,
+   "text": "Safar tugagach Safar xonasi Taassurot sahifasiga aylanadi. Hamma rozi bo'lsa — ochiq hikoya sahifasi (05 · Sayt) va OG rasm bilan ulashiladi. Bu bepul reklama.",
+   "fill": "orange"
+  },
+  "s3": {
+   "x": 1410,
+   "y": 8400,
+   "w": 420,
+   "text": "Tanishuv ilovasi EMAS: odamlarni varaqlab like yo'q — faqat safar va guruhlar tanlanadi; shaxsiy yozishma faqat bitta tasdiqlangan safardagilar orasida; ochiq safar 3+ kishidan; profilda 'kimni qidiryapman' yo'q; shikoyat sababi 'Tanishuv maqsadida' → tez bloklash.",
+   "fill": "pink"
+  },
+  "t7": {
+   "x": 0,
+   "y": 3840,
+   "text": "03 · Safar ochish — 3 qadam va ulashish",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "s4": {
+   "x": 1410,
+   "y": 4140,
+   "w": 420,
+   "text": "Safar ochish — 3 qadam: qayerga+qachon → kim bilan+budjet → ulashish. Yosh, qoidalar, reja keyin guruh bilan qo'shiladi. Oxirgi ekran — do'stlarga havola (Telegram, nusxa, story rasm). Bonus yo'q: ulashish faqat qulaylik uchun. Har bir havola OG rasmli safar kartasi bo'lib ochiladi.",
+   "fill": "green"
+  },
+  "s5": {
+   "x": 1880,
+   "y": 6480,
+   "w": 420,
+   "text": "Yig'amiz: guruh o'zi tanlaydi. 1) O'zimiz — reysga ovoz, har kim Aviasales havolasi (yo'nalish+sana tayyor) orqali o'zi oladi; joyga ovoz, xarajat avtomatik bo'linadi. 2) Tayyor tur — tekshirilgan agentliklar guruhga narx yuboradi, guruh tanlaydi. Pul platformadan o'tmaydi. Daromad: agentlikdan lid/komissiya + affiliate.",
+   "fill": "purple"
+  },
+  "t8": {
+   "x": 0,
+   "y": 16551,
+   "text": "08 · 1M Safar — yashirin taklif, faqat safardagilarga",
+   "kind": "title1",
+   "maxW": 2400
+  },
+  "s6": {
+   "x": 3980,
+   "y": 16851,
+   "w": 420,
+   "text": "1M Safar: 1 mln organik ko'rish = $1 000 gacha xarajat qoplanadi (chipta, mehmonxona, transfer). Tavsiya: 200 mingdan boshlab har 1 000 ko'rishga $1 — ko'proq odam qatnashadi, narx bir xil. Ko'rishlar Instagram API orqali avtomatik; reklama bilan ko'tarilgan Reels hisoblanmaydi. Oylik fond cheklangan. Keyingi bosqich: chet ellik sayyohlar uchun turizm idoralari bilan (Film Uzbekistan).",
+   "fill": "orange"
+  },
+  "t9": {
+   "x": 0,
+   "y": 9740,
+   "text": "06 · Ishonch va qiymat — ishga tushishdan oldin",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "s7": {
+   "x": 1880,
+   "y": 10040,
+   "w": 420,
+   "text": "Viza: O'zbekiston pasporti bo'yicha har bir davlat; viza kerak bo'lsa — hamkor viza agentliklari. Haqiqiy narx: guruhlar xarajatidan, xona turi bo'yicha (4/2/1 kishilik); agentliklar shu tarkibda narx beradi. Yaqinlar sahifasi: tashkilotchi tekshiruvi, guruh soni, reja, 112 va elchixona. So'zida turish: chipta muddati + 'N/N safarga bordi'. SOS: joylashuv guruhga va ishonchli kontaktga.",
+   "fill": "teal"
+  }
+ },
+ "designSystems": []
+}

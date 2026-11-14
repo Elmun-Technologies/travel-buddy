@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Mini App — Safarlar lentasi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0B}
+.d{font-family:'Inter Tight',sans-serif;letter-spacing:-0.03em;line-height:1.02;font-weight:400;margin:0}
+.tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font:500 12px 'Inter',sans-serif;border:1px solid #CFCFCF;background:#fff;color:#0B0B0B}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font:500 11px 'Inter',sans-serif;color:#5F5F5F;text-decoration:none;min-width:56px;min-height:44px;justify-content:center}
+.seg{display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;padding:0 14px;font:500 13px 'Inter',sans-serif;text-decoration:none;white-space:nowrap}
+.card{background:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.lbl{font-size:12px;font-weight:600;letter-spacing:.04em;color:#5F5F5F}
+.in{border:1px solid #DADADA;border-radius:14px;min-height:48px;padding:0 14px;font:15px 'Inter',sans-serif;background:#fff;box-sizing:border-box;width:100%}
+</style>
+</helmet>
+<div style="width:390px;height:1180px;box-sizing:border-box;background:#EDEDED;font-family:'Inter',sans-serif;color:#0B0B0B;display:flex;flex-direction:column;position:relative;overflow:hidden">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:8px">
+<button style="border:0;background:none;font:500 15px 'Inter',sans-serif;color:#0A5CFF;min-height:44px;padding:0 10px">Yopish</button>
+<div style="text-align:center"><div style="font-weight:600;font-size:15px">Travel Buddy</div><div style="font-size:12px;color:#5F5F5F">mini ilova</div></div>
+<span style="width:44px"></span>
+</header>
+<main style="flex:1;padding:4px 12px 100px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+<section class="card" style="gap:14px">
+<h1 class="d" style="font-size:32px">Safarlar</h1>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;background:#EDEDED;border-radius:999px;padding:4px">
+<a href="#" class="seg" style="background:#fff;color:#0B0B0B;font-weight:600">Guruhlar · 24</a>
+<a href="#" class="seg" style="color:#5F5F5F">Sherik qidiryapti · 61</a>
+</div>
+<div style="display:flex;gap:6px;overflow:hidden">
+<a href="#" class="seg" style="background:#0B0B0B;color:#fff">Hammasi</a>
+<a href="#" class="seg" style="border:1px solid #CFCFCF;color:#0B0B0B">Gruziya</a>
+<a href="#" class="seg" style="border:1px solid #CFCFCF;color:#0B0B0B">Dekabr</a>
+<a href="#" class="seg" style="border:1px solid #CFCFCF;color:#0B0B0B">≤ $700</a>
+<a href="App-Visa.dc.html" class="seg" style="border:1px solid #CFCFCF;color:#0B0B0B">Vizasiz</a>
+<a href="#" class="seg" style="border:1px solid #CFCFCF;color:#0B0B0B">Filtr ⋯</a>
+</div>
+</section>
+<a href="App-TripDetail.dc.html" style="background:#fff;border-radius:22px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column">
+<div role="img" aria-label="Kazbegi" style="height:132px;background-color:#B9C7D6;position:relative;background-image:url('../../assets/photos/gergeti.jpg');background-size:cover;background-position:center">
+<span style="position:absolute;top:12px;left:12px;background:#0A5CFF;color:#fff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600">94% mos</span>
+<span style="position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:999px;background:#F3EE1C;color:#0B0B0B;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+<div style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div class="d" style="font-size:22px">Gruziya · 7 kun</div></div>
+<div style="font-size:13px;color:#5F5F5F">20–27 noyabr · $550–650 · Toshkentdan</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:6px;border-radius:999px;background:#EDEDED"><div style="width:70%;height:100%;border-radius:999px;background:#0B0B0B"></div></div><span style="font-size:13px;font-weight:600">7/10</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="tag">Trekking</span><span class="tag">20–35 yosh</span><span class="tag">Aralash</span></div>
+</div></a>
+<a href="App-TripDetail.dc.html" style="background:#fff;border-radius:22px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column">
+<div role="img" aria-label="Olmaota tog'lari" style="height:132px;background-color:#B9C7D6;position:relative;background-image:url('../../assets/photos/almaty.jpg');background-size:cover;background-position:center">
+<span style="position:absolute;top:12px;left:12px;background:#0A5CFF;color:#fff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600">88% mos</span>
+<span style="position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:999px;background:#F3EE1C;color:#0B0B0B;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+<div style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div class="d" style="font-size:22px">Qozog'iston · 5 kun</div></div>
+<div style="font-size:13px;color:#5F5F5F">5–9 dekabr · $300–400 · poyezdda</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:6px;border-radius:999px;background:#EDEDED"><div style="width:50%;height:100%;border-radius:999px;background:#0B0B0B"></div></div><span style="font-size:13px;font-weight:600">4/8</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="tag" style="background:#0B0B0B;color:#fff;border-color:#0B0B0B">Klub: Tog' sayohatchilari</span><span class="tag">Tog'</span><span class="tag">Faqat ayollar</span></div>
+</div></a>
+<a href="App-TripDetail.dc.html" style="background:#fff;border-radius:22px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column">
+<div role="img" aria-label="Istanbul" style="height:132px;background-color:#B9C7D6;position:relative;background-image:url('../../assets/photos/istanbul-galata.jpg');background-size:cover;background-position:center">
+<span style="position:absolute;top:12px;left:12px;background:#0A5CFF;color:#fff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600">71% mos</span>
+<span style="position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:999px;background:#F3EE1C;color:#0B0B0B;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+<div style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div class="d" style="font-size:22px">Turkiya · 5 kun</div></div>
+<div style="font-size:13px;color:#5F5F5F">12–16 dekabr · $450–600</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:6px;border-radius:999px;background:#EDEDED"><div style="width:50%;height:100%;border-radius:999px;background:#0B0B0B"></div></div><span style="font-size:13px;font-weight:600">3/6</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="tag">Shahar</span><span class="tag">Shopping</span></div>
+</div></a>
+
+<div style="text-align:center;font-size:12px;color:#5F5F5F;padding:6px">Rasmlar: tashkilotchi yuklagan haqiqiy foto. Bo'lmasa — yo'nalish rasmi (litsenziyali).</div>
+</main>
+<nav style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E3E3E3;display:flex;justify-content:space-around;padding:8px 0 20px">
+<a href="App-Home.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg>Asosiy</a>
+<a href="App-Trips.dc.html" class="tab" style="color:#0B0B0B"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Safarlar</a>
+<a href="App-Room-Chat.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.4A8 8 0 1121 12z"/></svg>Xonalar</a>
+<a href="App-Club.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/></svg>Klublar</a>
+<a href="App-Profile.dc.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>Profil</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

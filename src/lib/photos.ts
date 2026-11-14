@@ -26,7 +26,10 @@ const CITY_PHOTO: Record<string, string> = {
 
 export const FEATURED_COUNTRIES = ["GE", "TR", "KZ", "AE", "UZ"] as const;
 
+export function photoName(country: string, city?: string | null) {
+  return (city && CITY_PHOTO[city.trim().toLowerCase()]) || COUNTRY_PHOTO[country] || "hike-group";
+}
+
 export function countryPhoto(country: string, size: 400 | 1200 = 1200, city?: string | null) {
-  const name = (city && CITY_PHOTO[city.trim().toLowerCase()]) || COUNTRY_PHOTO[country] || "hike-group";
-  return `/photos/${name}-${size}.webp`;
+  return `/photos/${photoName(country, city)}-${size}.webp`;
 }

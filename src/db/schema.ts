@@ -218,6 +218,10 @@ export const trips = pgTable(
     status: tripStatus("status").notNull().default("draft"),
     visibility: tripVisibility("visibility").notNull().default("public"),
     isTest: boolean("is_test").notNull().default(false),
+    // Short code for share links: t.me/<bot>?startapp=trip_<code>, /{locale}/t/<code>.
+    publicCode: text("public_code").unique(),
+    // "exact": real dates; "month": "Shu oy / Keyingi oy" — the group agrees on days later.
+    datePrecision: text("date_precision").notNull().default("exact"),
   },
   (t) => [index("trips_dest_start_status").on(t.destinationCountry, t.startDate, t.status)],
 );

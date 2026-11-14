@@ -19,7 +19,10 @@ async function Onboarding({ params, searchParams }: PageProps<"/[locale]/onboard
   const locale = asLocale((await params).locale);
   const user = await requireUser(locale);
   if (await getOwnProfile(user.id)) redirect({ href: "/home", locale });
-  const name = (await searchParams).name;
+  const sp = await searchParams;
+  const name = sp.name;
+  // Came from a shared trip: go back there after onboarding (only trip paths are allowed).
+  const next = typeof sp.next === "string" && /^\/trips\/[0-9a-f-]{36}$/.test(sp.next) ? sp.next : "/home";
   return (
     <OnboardingWizard
       draftKey={`tb:onboarding:${user.id}`}
@@ -28,6 +31,7 @@ async function Onboarding({ params, searchParams }: PageProps<"/[locale]/onboard
       bot={botUsername()}
       name={typeof name === "string" ? name.slice(0, 50) : ""}
       locale={locale}
+      next={next}
       languages={languageOptions(locale).slice(0, 8)} // the rest: profile edit
       destinations={POPULAR_DESTINATIONS.map((c) => ({ value: c, label: countryName(c, locale) }))}
     />

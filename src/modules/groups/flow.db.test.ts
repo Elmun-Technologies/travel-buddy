@@ -51,6 +51,7 @@ const trip = {
   womenOnly: false,
   accommodationPref: "any" as const,
   description: null,
+  datePrecision: "exact" as const,
 };
 
 describe.runIf(run)("trip + join flow (db)", () => {

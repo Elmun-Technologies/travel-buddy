@@ -9,7 +9,7 @@ export default function AppLayout({ children }: LayoutProps<"/[locale]">) {
       <Suspense fallback={<AppNavView brand={APP_NAME} path="" />}>
         <AppNav brand={APP_NAME} />
       </Suspense>
-      <main className="mx-auto w-full max-w-[880px] flex-1 px-3 pt-3 pb-28 md:px-4 md:pt-6 md:pb-10">
+      <main className="mx-auto flex w-full max-w-[880px] flex-1 flex-col px-3 pt-3 pb-28 [--main-action-bottom:calc(64px+max(0.75rem,env(safe-area-inset-bottom)))] md:px-4 md:pt-6 md:pb-10 md:[--main-action-bottom:0px]">
         {children}
       </main>
     </>

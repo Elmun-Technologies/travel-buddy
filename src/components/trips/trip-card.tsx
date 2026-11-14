@@ -1,8 +1,10 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowIcon } from "@/components/clay";
+import { LinkPending } from "@/components/link-pending";
 import { Link } from "@/i18n/navigation";
 import { countryName } from "@/lib/catalog";
-import { formatBudget, formatDateRange } from "@/lib/format";
+import { formatBudget, formatTripDates } from "@/lib/format";
+import { isSampleTrip } from "@/lib/sample";
 import { countryPhoto } from "@/lib/photos";
 import type { TripCard as Trip } from "@/modules/trips/service";
 
@@ -22,17 +24,22 @@ export async function TripCard({ trip, badge }: { trip: Trip; badge?: string }) 
     ? Math.min(100, Math.round((trip.approvedCount / trip.groupSizeMax) * 100))
     : 0;
   return (
-    <Link href={`/trips/${trip.id}`} className="press flex flex-col overflow-hidden rounded-[22px] bg-card">
+    <Link
+      href={`/trips/${trip.id}`}
+      className="press relative flex flex-col overflow-hidden rounded-[22px] bg-card"
+    >
+      <LinkPending />
       <div className="relative h-[132px] bg-[#b9c7d6]">
         {/* eslint-disable-next-line @next/next/no-img-element -- pre-compressed WebP */}
         <img
           src={countryPhoto(trip.destinationCountry, 1200, trip.destinationCity)}
           alt={countryName(trip.destinationCountry, locale)}
           loading="lazy"
-          className="size-full object-cover"
+          draggable={false}
+          className="pointer-events-none size-full object-cover select-none"
         />
         <div className="absolute top-3 left-3 flex gap-1.5">
-          {trip.isTest && (
+          {isSampleTrip(trip.id) && (
             <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-ink">
               {t("sample")}
             </span>
@@ -52,7 +59,7 @@ export async function TripCard({ trip, badge }: { trip: Trip; badge?: string }) 
             country: countryName(trip.destinationCountry, locale),
             days: days(trip.startDate, trip.endDate),
           })}{" "}
-          · {formatDateRange(trip.startDate, trip.endDate, locale)}
+          · {formatTripDates(trip, locale)}
           {budget && ` · ${budget}`}
         </div>
         {trip.groupSizeMax && (

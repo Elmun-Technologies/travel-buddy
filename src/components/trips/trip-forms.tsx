@@ -2,10 +2,10 @@
 
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { createIntentAction, createTripAction } from "@/app/[locale]/(app)/actions";
+import { createIntentAction } from "@/app/[locale]/(app)/actions";
 import { ChipGroup, Field, FormError, inputClass } from "@/components/form";
 import { Button } from "@/components/ui/button";
-import { ACCOMMODATION, CURRENCIES, type Option, TRAVEL_STYLES } from "@/lib/catalog";
+import { CURRENCIES, type Option, TRAVEL_STYLES } from "@/lib/catalog";
 
 type Values = Record<string, string | string[] | boolean | number | null | undefined>;
 // On validation errors the action echoes the raw form values back (budget still in major units).
@@ -131,112 +131,6 @@ function PlaceFields({ v, e, minDate, countries }: FormProps & { v: Values; e: R
         options={TRAVEL_STYLES.map((x) => ({ value: x, label: ts(x) }))}
       />
     </>
-  );
-}
-
-export function TripForm({ minDate, countries }: FormProps) {
-  const t = useTranslations("trip");
-  const tc = useTranslations("common");
-  const ta = useTranslations("accommodation");
-  const locale = useLocale();
-  const [state, action, pending] = useActionState(createTripAction, null);
-  const v = (state?.values as Values | undefined) ?? {};
-  const e = state?.errors ?? {};
-  return (
-    <form key={JSON.stringify(state)} action={action} className="flex flex-col gap-6">
-      <input type="hidden" name="locale" value={locale} />
-      <FormError code={e._form} />
-      <Field label={t("title")} name="title" error={e.title}>
-        <input
-          id="title"
-          name="title"
-          required
-          minLength={5}
-          maxLength={80}
-          placeholder={t("titlePlaceholder")}
-          defaultValue={s(v.title)}
-          className={inputClass}
-          aria-invalid={!!e.title}
-        />
-      </Field>
-      <PlaceFields v={v} e={e} minDate={minDate} countries={countries} />
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Field label={t("groupSizeMax")} name="groupSizeMax" error={e.groupSizeMax}>
-          <input
-            id="groupSizeMax"
-            name="groupSizeMax"
-            type="number"
-            required
-            min={2}
-            max={30}
-            defaultValue={s(v.groupSizeMax) || "4"}
-            className={inputClass}
-          />
-        </Field>
-        <Field label={t("ageMin")} name="ageMin" error={e.ageMin}>
-          <input
-            id="ageMin"
-            name="ageMin"
-            type="number"
-            min={18}
-            max={99}
-            defaultValue={s(v.ageMin)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label={t("ageMax")} name="ageMax" error={e.ageMax}>
-          <input
-            id="ageMax"
-            name="ageMax"
-            type="number"
-            min={18}
-            max={99}
-            defaultValue={s(v.ageMax)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label={t("accommodationPref")} name="accommodationPref">
-          <select
-            id="accommodationPref"
-            name="accommodationPref"
-            defaultValue={s(v.accommodationPref) || "any"}
-            className={inputClass}
-          >
-            {ACCOMMODATION.map((a) => (
-              <option key={a} value={a}>
-                {ta(a)}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
-      <label className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          name="womenOnly"
-          defaultChecked={v.womenOnly === true}
-          className="mt-0.5 size-5 accent-primary"
-        />
-        <span>
-          <span className="font-medium">{t("womenOnly")}</span>
-          <span className="block text-sm text-muted-foreground">{t("womenOnlyHint")}</span>
-        </span>
-      </label>
-      <Field label={`${t("description")} (${tc("optional")})`} name="description" error={e.description}>
-        <textarea
-          id="description"
-          name="description"
-          rows={5}
-          maxLength={2000}
-          placeholder={t("descriptionPlaceholder")}
-          defaultValue={s(v.description)}
-          className={`${inputClass} h-auto py-2`}
-        />
-      </Field>
-      <Button type="submit" disabled={pending} className="h-11 text-base sm:self-start sm:px-8">
-        {pending ? tc("saving") : t("submit")}
-      </Button>
-    </form>
   );
 }
 

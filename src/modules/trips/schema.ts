@@ -53,6 +53,7 @@ export const tripSchema = z
     womenOnly: z.boolean().default(false),
     accommodationPref: z.enum(ACCOMMODATION).default("any"),
     description: optionalText(2000),
+    datePrecision: z.enum(["exact", "month"]).default("exact"),
   })
   .superRefine((v, ctx) => {
     checkDatesAndBudget(v, ctx);
@@ -76,19 +77,6 @@ function placeFromForm(f: FormData) {
     budgetMax: f.get("budgetMax") || null,
     currency: f.get("currency") || "USD",
     travelStyles: f.getAll("travelStyles"),
-  };
-}
-
-export function tripFromForm(f: FormData) {
-  return {
-    ...placeFromForm(f),
-    title: f.get("title") ?? "",
-    groupSizeMax: f.get("groupSizeMax"),
-    ageMin: f.get("ageMin") || null,
-    ageMax: f.get("ageMax") || null,
-    womenOnly: f.get("womenOnly") === "on",
-    accommodationPref: f.get("accommodationPref") || "any",
-    description: f.get("description") ?? "",
   };
 }
 
@@ -119,3 +107,43 @@ export const feedFilterSchema = z.object({
   page: z.coerce.number().int().min(1).max(100).default(1).catch(1),
 });
 export type FeedFilter = z.output<typeof feedFilterSchema>;
+
+/** Trip creation in 3 steps (App-CreateTrip): the client sends choices, the server derives the rest. */
+export const createTripBody = z.object({
+  country: z.enum(COUNTRIES),
+  city: z.string().trim().max(60).optional(),
+  when: z.enum(["this_month", "next_month", "exact"]),
+  startDate: z.iso.date().optional(),
+  endDate: z.iso.date().optional(),
+  flex: z.boolean().default(false), // "±2 kun bo'lsa ham mayli"
+  size: z.number().int().min(3).max(20), // open trips start at 3 people (product-decisions §5)
+  band: z.enum(["lt300", "300_600", "600_1000", "any"]),
+  styles: z.array(z.enum(TRAVEL_STYLES)).max(6).default([]),
+  womenOnly: z.boolean().default(false),
+  note: z.string().trim().max(280).optional(),
+});
+export type CreateTripBody = z.output<typeof createTripBody>;
+
+const BAND: Record<CreateTripBody["band"], [number | null, number | null]> = {
+  lt300: [null, 300],
+  "300_600": [300, 600],
+  "600_1000": [600, 1000],
+  any: [null, null],
+};
+
+/** Month choice → first..last day (this month starts today); exact → as given. */
+export function datesFor(b: CreateTripBody, today = todayISO()) {
+  if (b.when === "exact")
+    return { startDate: b.startDate ?? "", endDate: b.endDate ?? "", datePrecision: "exact" as const };
+  const [y, m] = today.split("-").map(Number);
+  const first = new Date(Date.UTC(y, m - 1 + (b.when === "next_month" ? 1 : 0), 1));
+  const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0));
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  return {
+    startDate: b.when === "this_month" ? today : iso(first),
+    endDate: iso(last),
+    datePrecision: "month" as const,
+  };
+}
+
+export const bandToBudget = (band: CreateTripBody["band"]) => BAND[band];

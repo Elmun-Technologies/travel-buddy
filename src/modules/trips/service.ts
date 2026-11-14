@@ -44,6 +44,8 @@ const cardFields = {
   status: trips.status,
   ownerUserId: trips.ownerUserId,
   isTest: trips.isTest,
+  publicCode: trips.publicCode,
+  datePrecision: trips.datePrecision,
 };
 
 async function withCounts<T extends { id: string; ownerUserId: string | null }>(rows: T[]) {
@@ -59,7 +61,7 @@ async function withCounts<T extends { id: string; ownerUserId: string | null }>(
 }
 
 export type CreateTripResult =
-  | { ok: true; id: string }
+  | { ok: true; id: string; code: string }
   | { ok: false; error: "phone_required" | "profile_required" | "women_only_creator" };
 
 export async function createTrip(userId: string, input: TripInput): Promise<CreateTripResult> {
@@ -68,16 +70,37 @@ export async function createTrip(userId: string, input: TripInput): Promise<Crea
   if (!profile) return { ok: false, error: "profile_required" };
   if (!state?.phoneVerified) return { ok: false, error: "phone_required" };
   if (input.womenOnly && profile.gender !== "female") return { ok: false, error: "women_only_creator" };
-  const id = await db.transaction(async (tx) => {
-    const [t] = await tx
+  const t = await db.transaction(async (tx) => {
+    const [row] = await tx
       .insert(trips)
-      .values({ ...input, kind: "independent", ownerUserId: userId, status: "open", isTest: isTestEnv() })
-      .returning({ id: trips.id });
-    await addOrganizer(tx, t.id, userId);
-    await createTripConversation(tx, t.id, userId);
-    return t.id;
+      .values({
+        ...input,
+        kind: "independent",
+        ownerUserId: userId,
+        status: "open",
+        isTest: isTestEnv(),
+        publicCode: newPublicCode(),
+      })
+      .returning({ id: trips.id, publicCode: trips.publicCode });
+    await addOrganizer(tx, row.id, userId);
+    await createTripConversation(tx, row.id, userId);
+    return row;
   });
-  return { ok: true, id };
+  return { ok: true, id: t.id, code: t.publicCode! };
+}
+
+// 7 chars from 31 unambiguous symbols ≈ 2.7e10 codes: collisions are negligible at our scale
+// (the unique index would reject one; the user just retries).
+const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+export function newPublicCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(7));
+  return Array.from(bytes, (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+}
+
+export async function getTripIdByCode(code: string) {
+  if (!/^[0-9A-Z]{6,8}$/.test(code)) return null;
+  const [t] = await getDb().select({ id: trips.id }).from(trips).where(eq(trips.publicCode, code));
+  return t?.id ?? null;
 }
 
 const isTestEnv = () => process.env.APP_ENV !== "production";

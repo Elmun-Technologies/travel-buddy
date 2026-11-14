@@ -7,54 +7,12 @@
     "join": "Join the waitlist",
     "language": "Language"
   },
-  "hero": {
-    "badge": "Coming soon · Starting in Tashkent",
-    "title": "Find a travel buddy. Join a group. Go.",
-    "subtitle": "Don't want to go alone, or your friends' dates never match? We find travelers who fit your destination, dates and budget.",
-    "cta": "Be one of the first",
-    "note": "Free. We'll let you know first when we launch."
-  },
-  "how": {
-    "title": "How it works",
-    "s1": {
-      "title": "Find people",
-      "text": "Travelers who match your destination, dates, budget, style and age."
-    },
-    "s2": {
-      "title": "Join trips",
-      "text": "Request to join groups started by travelers or verified agencies."
-    },
-    "s3": {
-      "title": "Book",
-      "text": "Send a request for an agency tour — the agency contacts you and confirms your spot."
-    }
-  },
-  "trust": {
-    "title": "Safety comes first",
-    "t1": {
-      "title": "Verified profiles",
-      "text": "Telegram, phone and ID verification badges."
-    },
-    "t2": {
-      "title": "Your number stays private",
-      "text": "Phone numbers are never shown publicly."
-    },
-    "t3": {
-      "title": "Women-only groups",
-      "text": "Organizers can make a group open to women only."
-    },
-    "t4": {
-      "title": "Report and block",
-      "text": "On every profile and message. Blocked people never see you again."
-    }
-  },
   "waitlist": {
     "title": "Join the waitlist",
     "subtitle": "Leave your email or Telegram. Pick the destinations you care about.",
     "contactLabel": "Email or Telegram username",
     "contactPlaceholder": "you@email.com or @username",
-    "destinationsLabel": "Where do you want to go? (optional)",
-    "submit": "Join",
+    "submit": "Count me in",
     "submitting": "Sending...",
     "success": "Thanks! You're on the list. We'll let you know when we launch.",
     "errors": {
@@ -63,16 +21,6 @@
       "server": "Something went wrong. Please try again later."
     },
     "consent": "By joining you agree to receive only the launch announcement."
-  },
-  "destinations": {
-    "GE": "Georgia",
-    "TR": "Turkey",
-    "KZ": "Kazakhstan",
-    "TH": "Thailand",
-    "AE": "UAE (Dubai)",
-    "MY": "Malaysia",
-    "EG": "Egypt",
-    "KG": "Kyrgyzstan"
   },
   "footer": {
     "rights": "© {app}. All rights reserved."
@@ -431,5 +379,138 @@
     "extreme": "Rafting, paragliding, diving",
     "budget": "Hostels, public transport, saving money",
     "shopping": "Markets, malls, outlets"
+  },
+  "landing": {
+    "nav": {
+      "how": "How it works",
+      "room": "Trip room",
+      "clubs": "Clubs",
+      "stories": "Memories",
+      "start": "Get started"
+    },
+    "hero": {
+      "soon": "Coming soon · Starting in Tashkent",
+      "title1": "We find travel buddies.",
+      "title2": "We build the group.",
+      "title3": "We go together.",
+      "lead": "Don't want to travel alone, and your friends' dates never line up? Tell us where, when and on what budget — we'll sort out the rest together.",
+      "cta": "Find me a travel buddy",
+      "how": "How it works",
+      "photoAlt": "Kazbegi mountains, Georgia",
+      "sample": "Example",
+      "cardTitle": "Tbilisi & Kazbegi",
+      "cardMeta": "20–27 November · 7 days · $550–650",
+      "cardSpots": "7/10 spots taken",
+      "cardOpen": "Open the trip",
+      "tag1": "Trekking",
+      "tag2": "Ages 20–35",
+      "tag3": "Mixed group"
+    },
+    "pills": {
+      "buddy": "buddy",
+      "group": "group",
+      "trip": "trip"
+    },
+    "how": {
+      "title": "How it works",
+      "lead": "Just three steps. Nothing to install — it all runs inside Telegram.",
+      "s1": "Where are you going?",
+      "s1t": "Tell us the destination, dates and budget. We'll find people who fit — and tell you why.",
+      "s2": "Who are you going with?",
+      "s2t": "Tap \"I'm in\" on a group you like, or start your own trip and send the link to friends.",
+      "s3": "Let's go!",
+      "s3t": "Plan, tickets, costs and chat in one place. And a shared album when you're back."
+    },
+    "compare": {
+      "before": "Before",
+      "b1": "Scattered posts in Telegram groups, strangers you know nothing about",
+      "b2": "Even with a buddy, the plan lives in WhatsApp and costs in a notebook",
+      "b3": "Nothing is left once the trip is over",
+      "now": "Now",
+      "n1": "Profiles verified via Telegram and phone, plus reviews",
+      "n2": "One trip room: chat, plan, checklist, costs, polls",
+      "n3": "A memories album and a trip story you can share"
+    },
+    "room": {
+      "badge": "Our edge",
+      "title": "Trip room",
+      "lead": "As soon as the group is set, your room opens. No more Telegram chat, Excel sheet and paper list.",
+      "chat": "Chat & announcements",
+      "announce": "Announcement · Meet: 20 November, 06:00, airport, terminal 2",
+      "msg1": "Got my passport ✓",
+      "msg2": "Great, let's book tickets tomorrow",
+      "plan": "Day-by-day plan",
+      "d1": "Tbilisi",
+      "d1t": "Old town, Narikala",
+      "d2": "Kazbegi",
+      "d2t": "Gergeti, 4-hour trek",
+      "d3": "Gudauri",
+      "d3t": "Paragliding (optional)",
+      "costs": "Costs",
+      "total": "Total spent · 7 people",
+      "owe": "You → Akmal",
+      "costsNote": "We just do the maths — the money stays with you."
+    },
+    "book": {
+      "kicker": "WHAT ABOUT TICKETS AND TOURS?",
+      "title": "You found your people. Now let's put the trip together.",
+      "lead": "There are two ways — the group decides. We're with you either way.",
+      "o1": "We plan it ourselves",
+      "o1t": "Pick a flight together; everyone books their own ticket with a ready-made link. Vote on where to stay; costs split automatically.",
+      "o2": "We ask for a ready tour",
+      "o2t": "We request prices for your group from verified agencies. They compete — you just compare and pick."
+    },
+    "clubs": {
+      "title": "Clubs",
+      "lead": "Not a one-off post — your own people. Join a club or start one: this is where trips are born.",
+      "sample": "Example",
+      "c1": "Mountain travellers",
+      "c1t": "Trekking · Chimgan, Kazbegi, Almaty",
+      "c2": "Women's travel club",
+      "c2t": "Women only · verified profiles",
+      "c3": "Samarkand cycling",
+      "c3t": "Bike trips · weekends",
+      "open": "Start a club"
+    },
+    "stories": {
+      "title": "Memories",
+      "lead": "Back home: a shared album, stories and kind words for each other. If everyone agrees, we'll turn it into a page to show your friends.",
+      "s1": "Kazbegi, 7 people",
+      "s1t": "Example · 48 photos · 6 stories",
+      "s1alt": "A group of hikers in the mountains",
+      "s2": "Cappadocia, 5 people",
+      "s2t": "Example · 31 photos · 5 stories",
+      "s2alt": "Hot-air balloons over Cappadocia",
+      "invite": "Every trip is an invitation to the next one",
+      "invitet": "Shared pages have an \"I want to go too\" button."
+    },
+    "facts": {
+      "free": "Free",
+      "freet": "Finding buddies and joining groups costs nothing",
+      "age": "18+",
+      "aget": "Adults only, age is checked",
+      "langs": "3 languages",
+      "langst": "Uzbek, Russian and English",
+      "trust": "Trust",
+      "t1": "Telegram sign-in",
+      "t2": "Verified phone",
+      "t3": "ID check (optional)",
+      "t4": "Reviews, reporting and blocking"
+    },
+    "agencies": {
+      "soon": "Coming soon",
+      "title": "A travel agency? Send offers to groups that are ready to go.",
+      "cta": "Sign up"
+    },
+    "final": {
+      "title": "Be among the first.",
+      "now": "or find a buddy right now ↗"
+    },
+    "footer": {
+      "brand": "© 2026 {app}",
+      "terms": "Terms of use",
+      "privacy": "Privacy",
+      "safety": "Safety rules"
+    }
   }
 }

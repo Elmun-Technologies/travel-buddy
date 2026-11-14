@@ -3,35 +3,31 @@
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { joinWaitlistAction } from "@/app/[locale]/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { DESTINATIONS } from "@/modules/waitlist/schema";
 
-export function WaitlistForm() {
+/** Final CTA on the blue panel (Main.png): contact + "Meni yozib qo'ying". */
+export function WaitlistForm({ botUrl, nowLabel }: { botUrl: string; nowLabel: string }) {
   const t = useTranslations("waitlist");
-  const td = useTranslations("destinations");
   const locale = useLocale();
   const [state, action, pending] = useActionState(joinWaitlistAction, null);
 
   if (state?.ok) {
     return (
-      <p role="status" className="rounded-xl bg-primary/10 p-6 text-center font-medium text-primary">
+      <p role="status" className="rounded-[22px] bg-white/15 p-6 text-lg font-medium">
         {t("success")}
       </p>
     );
   }
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="locale" value={locale} />
       {/* Honeypot, hidden from humans and screen readers */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-
-      <div className="flex flex-col gap-2">
-        <label htmlFor="contact" className="text-sm font-medium">
-          {t("contactLabel")}
-        </label>
-        <Input
+      <label htmlFor="contact" className="text-sm">
+        {t("contactLabel")}
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <input
           id="contact"
           name="contact"
           required
@@ -39,35 +35,25 @@ export function WaitlistForm() {
           autoComplete="email"
           placeholder={t("contactPlaceholder")}
           aria-invalid={state?.ok === false && state.error === "invalid"}
-          className="h-11 text-base"
+          className="min-h-[52px] flex-[1_1_240px] rounded-full border-0 bg-white px-5 text-base text-ink outline-none focus-visible:ring-3 focus-visible:ring-white/60"
         />
+        <button
+          type="submit"
+          disabled={pending}
+          className="press min-h-[52px] rounded-full bg-ink px-6 text-[15px] font-medium text-white disabled:opacity-60"
+        >
+          {pending ? t("submitting") : t("submit")}
+        </button>
       </div>
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-sm font-medium">{t("destinationsLabel")}</legend>
-        <div className="flex flex-wrap gap-2">
-          {DESTINATIONS.map((code) => (
-            <label
-              key={code}
-              className="cursor-pointer rounded-full border px-3 py-1.5 text-sm transition-colors has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground has-focus-visible:ring-2 has-focus-visible:ring-ring"
-            >
-              <input type="checkbox" name="destinations" value={code} className="sr-only" />
-              {td(code)}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
       {state?.ok === false && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm font-medium text-signal">
           {t(`errors.${state.error}`)}
         </p>
       )}
-
-      <Button type="submit" disabled={pending} className="h-11 text-base">
-        {pending ? t("submitting") : t("submit")}
-      </Button>
-      <p className="text-xs text-muted-foreground">{t("consent")}</p>
+      <a href={botUrl} className="self-start text-sm text-white underline-offset-4 hover:underline">
+        {nowLabel}
+      </a>
+      <p className="text-xs text-white/75">{t("consent")}</p>
     </form>
   );
 }

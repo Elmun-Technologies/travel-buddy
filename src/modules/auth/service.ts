@@ -8,6 +8,7 @@ import {
   getUserState,
   markPhoneVerified,
   type PhoneResult,
+  restoreUser,
   setAdminRole,
   setLocale,
 } from "@/modules/users/service";
@@ -41,7 +42,12 @@ async function findOrCreate(tg: TelegramUser, locale: string): Promise<LoginResu
       .where(and(eq(authAccounts.provider, "telegram"), eq(authAccounts.providerUserId, String(tg.id))));
     if (acc) {
       const state = await getUserState(tx, acc.userId);
-      if (state?.status !== "active") return { ok: false, error: "suspended" };
+      if (state?.status === "deleted") {
+        const restored = await restoreUser(tx, acc.userId);
+        if (!restored) return { ok: false, error: "suspended" };
+      } else if (state?.status !== "active") {
+        return { ok: false, error: "suspended" };
+      }
       return { ok: true, userId: acc.userId, isNew: false };
     }
     const userId = await createUser(tx, locale);

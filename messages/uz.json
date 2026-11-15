@@ -136,7 +136,7 @@
     },
     "blocked": {
       "title": "Bloklanganlar",
-      "empty": "Siz hali kimnidirni bloklagansiz.",
+      "empty": "Siz hali hech kimni bloklamagansiz.",
       "unblock": "Blokdan chiqarish",
       "confirm": "{name}ni blokdan chiqarishni istaysizmi?",
       "unblocked": "{name} blokidan chiqarildi"

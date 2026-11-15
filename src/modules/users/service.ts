@@ -80,6 +80,22 @@ export async function deleteUser(userId: string) {
     .where(eq(users.id, userId));
 }
 
+/** Restore a soft-deleted account if within 30 days. Returns true if restored. */
+export async function restoreUser(tx: DbOrTx, userId: string) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const [u] = await tx
+    .select({ id: users.id, status: users.status, deletedAt: users.deletedAt })
+    .from(users)
+    .where(eq(users.id, userId));
+  if (!u || u.status !== "deleted") return false;
+  if (u.deletedAt && u.deletedAt < thirtyDaysAgo) return false;
+  await tx
+    .update(users)
+    .set({ status: "active", deletedAt: null })
+    .where(eq(users.id, userId));
+  return true;
+}
+
 /** Hard-delete users whose soft-delete is older than 30 days. Runs in worker daily. */
 export async function permanentlyDeleteUsers(tx: DbOrTx) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);

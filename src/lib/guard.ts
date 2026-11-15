@@ -1,4 +1,5 @@
 import "server-only";
+import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { redirect } from "@/i18n/navigation";
 import { type Locale, routing } from "@/i18n/routing";
@@ -19,4 +20,11 @@ export async function requireProfile(locale: Locale) {
   const profile = await getOwnProfile(user.id);
   if (!profile) return redirect({ href: "/onboarding", locale });
   return { user, profile };
+}
+
+/** Admin pages: anyone else gets a plain 404 (the panel's existence isn't advertised). */
+export async function requireAdmin() {
+  const user = await getSessionUser();
+  if (user?.role !== "admin") notFound();
+  return user;
 }

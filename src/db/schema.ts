@@ -628,6 +628,9 @@ export const visaRules = pgTable(
     notes: text("notes"),
     checkedAt: date("checked_at").notNull(),
     sourceUrl: text("source_url"),
+    // Uzbekistan's embassy in the destination (SOS and family pages). Entered in admin from mfa.uz.
+    embassyPhone: text("embassy_phone"),
+    embassyUrl: text("embassy_url"),
     isSample: boolean("is_sample").notNull().default(false),
   },
   (t) => [uniqueIndex("visa_rules_pair").on(t.passportCountry, t.destination)],

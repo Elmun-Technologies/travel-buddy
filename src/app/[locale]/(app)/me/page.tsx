@@ -163,6 +163,13 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
           <span className="font-medium">{t("language")}</span>
           <LocaleSwitch />
         </div>
+        {user.role === "admin" && (
+          <div className={row}>
+            <Link href="/admin" className="min-h-11 py-3 font-medium text-blue">
+              {ta("adminPanel")}
+            </Link>
+          </div>
+        )}
         <div className={row}>
           <span id="sound-label" className="font-medium">
             {t("sounds")}

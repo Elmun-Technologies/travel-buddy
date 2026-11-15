@@ -8,6 +8,7 @@ import {
   getUserState,
   markPhoneVerified,
   type PhoneResult,
+  setAdminRole,
   setLocale,
 } from "@/modules/users/service";
 import type { TelegramUser } from "./telegram";
@@ -16,6 +17,23 @@ export type LoginResult = { ok: true; userId: string; isNew: boolean } | { ok: f
 
 /** Finds or creates the user behind a verified Telegram identity. */
 export async function loginWithTelegram(tg: TelegramUser, locale: string): Promise<LoginResult> {
+  const res = await findOrCreate(tg, locale);
+  if (res.ok) await syncAdminRole(res.userId, tg.id);
+  return res;
+}
+
+/** Admins are the Telegram ids in ADMIN_TELEGRAM_IDS (comma-separated); synced on every login. */
+export const isAdminTelegramId = (id: number | string, list = process.env.ADMIN_TELEGRAM_IDS ?? "") =>
+  list
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .includes(String(id));
+
+const syncAdminRole = (userId: string, telegramId: number) =>
+  setAdminRole(userId, isAdminTelegramId(telegramId));
+
+async function findOrCreate(tg: TelegramUser, locale: string): Promise<LoginResult> {
   return getDb().transaction(async (tx) => {
     const [acc] = await tx
       .select({ userId: authAccounts.userId })

@@ -63,3 +63,11 @@ export async function getNotifyOff(userId: string) {
 export async function setNotifyOff(userId: string, off: string[]) {
   await getDb().update(users).set({ notifyOff: off }).where(eq(users.id, userId));
 }
+
+/** Grant or take away admin (only travelers/admins switch; agency members are untouched). */
+export async function setAdminRole(userId: string, admin: boolean) {
+  await getDb()
+    .update(users)
+    .set({ role: admin ? "admin" : "traveler" })
+    .where(and(eq(users.id, userId), eq(users.role, admin ? "traveler" : "admin")));
+}

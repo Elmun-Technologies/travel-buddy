@@ -96,7 +96,12 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
 
       <Panel className="flex flex-col gap-2">
         <p className="text-sm text-muted-foreground">
-          {countryName(trip.destinationCountry, locale)}
+          <Link
+            href={`/destinations/${trip.destinationCountry.toLowerCase()}`}
+            className="underline-offset-4 hover:underline"
+          >
+            {countryName(trip.destinationCountry, locale)}
+          </Link>
           {trip.destinationCity && ` · ${trip.destinationCity}`}
         </p>
         <Display className="text-[32px]">{trip.title}</Display>

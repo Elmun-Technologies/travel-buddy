@@ -62,3 +62,16 @@ test("visa and real price pages open without login, with or without data", async
   await page.goto("/uz/price/XX"); // streamed page: the status is already 200, the content is the 404 page
   await expect(page.getByText("Sahifa topilmadi")).toBeVisible();
 });
+
+test("destination page: country, visa/price blocks when present, and the main action", async ({ page }) => {
+  await page.goto("/uz/destinations/ge");
+  await expect(page.getByRole("heading", { name: "Gruziya", level: 1 })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Kuyni yana tinglash" })).toBeVisible();
+  await expect(
+    page
+      .getByRole("link", { name: "Gruziyaga ketamiz!" })
+      .or(page.getByRole("button", { name: "Gruziyaga ketamiz!" })),
+  ).toBeVisible();
+  await page.goto("/uz/destinations/xx");
+  await expect(page.getByText("Sahifa topilmadi")).toBeVisible();
+});

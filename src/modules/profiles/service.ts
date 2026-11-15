@@ -82,3 +82,19 @@ export async function getJoinProfile(userId: string) {
     .where(eq(travelerProfiles.userId, userId));
   return p ?? null;
 }
+
+/** "Saqlash" on a destination: adds/removes it from the profile's dream destinations (used for matching). */
+export async function setDreamDestination(userId: string, country: string, on: boolean) {
+  const db = getDb();
+  const [p] = await db
+    .select({ list: travelerProfiles.dreamDestinations })
+    .from(travelerProfiles)
+    .where(eq(travelerProfiles.userId, userId));
+  if (!p) return false;
+  const list = on ? [...new Set([...p.list, country])].slice(0, 10) : p.list.filter((c) => c !== country);
+  await db
+    .update(travelerProfiles)
+    .set({ dreamDestinations: list })
+    .where(eq(travelerProfiles.userId, userId));
+  return true;
+}

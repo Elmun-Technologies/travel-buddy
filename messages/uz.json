@@ -125,7 +125,15 @@
     "findTrips": "Safar topamiz",
     "language": "Til",
     "went": "{went}/{total} safarga bordi",
-    "sounds": "Ovozlar"
+    "sounds": "Ovozlar",
+    "deleteAccount": {
+      "title": "Akkauntni o'chirish",
+      "text": "Akkauntingiz 30 kun ichida butunlay o'chiradi. Shu muddat ichida qaytib kirsangiz, hamma ma'lumot tiklanadi. 30 kundan keyin shaxsiy ma'lumotlaringiz qaytarib bo'lmaydi.",
+      "confirm": "Ha, o'chirmoqchiman",
+      "cancel": "Bekor qilish",
+      "button": "Akkauntni o'chirish",
+      "success": "Akkauntingiz o'chirildi. Xayr!"
+    }
   },
   "feed": {
     "title": "Safarlar",

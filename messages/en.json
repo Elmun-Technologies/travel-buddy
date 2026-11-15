@@ -125,7 +125,15 @@
     "findTrips": "Find a trip",
     "language": "Language",
     "went": "Went on {went}/{total} trips",
-    "sounds": "Sounds"
+    "sounds": "Sounds",
+    "deleteAccount": {
+      "title": "Delete account",
+      "text": "Your account will be fully deleted within 30 days. You can come back during this time to restore everything. After 30 days, personal data cannot be recovered.",
+      "confirm": "Yes, delete",
+      "cancel": "Cancel",
+      "button": "Delete account",
+      "success": "Your account has been deleted. Goodbye!"
+    }
   },
   "feed": {
     "title": "Trips",

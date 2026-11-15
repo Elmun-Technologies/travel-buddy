@@ -16,6 +16,7 @@ import { getPublicProfile } from "@/modules/profiles/service";
 import { listMyIntents, listMyTrips } from "@/modules/trips/service";
 import { getNotifyOff } from "@/modules/users/service";
 import { closeIntentAction, logoutAction } from "../actions";
+import { DeleteAccountTrigger } from "@/components/profile/delete-account-trigger";
 
 export default function MePage(props: PageProps<"/[locale]/me">) {
   return (
@@ -181,6 +182,9 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
             <input type="hidden" name="locale" value={locale} />
             <button className="min-h-11 text-[15px] font-medium text-danger">{ta("logout")}</button>
           </form>
+        </div>
+        <div className={row}>
+          <DeleteAccountTrigger />
         </div>
       </Panel>
       <NotifySettings initialOff={notifyOff} />

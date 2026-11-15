@@ -65,6 +65,14 @@ export async function setNotifyOff(userId: string, off: string[]) {
 }
 
 /** Grant or take away admin (only travelers/admins switch; agency members are untouched). */
+export async function setAdminRole(userId: string, admin: boolean) {
+  await getDb()
+    .update(users)
+    .set({ role: admin ? "admin" : "traveler" })
+    .where(and(eq(users.id, userId), eq(users.role, admin ? "traveler" : "admin")));
+}
+
+/** Soft-delete the current user's account (GDPR). Worker hard-deletes after 30 days. */
 export async function deleteUser(userId: string) {
   await getDb()
     .update(users)
@@ -72,7 +80,7 @@ export async function deleteUser(userId: string) {
     .where(eq(users.id, userId));
 }
 
-/** Grant or take away admin (only travelers/admins switch; agency members are untouched). */
+/** Hard-delete users whose soft-delete is older than 30 days. Runs in worker daily. */
 export async function permanentlyDeleteUsers(tx: DbOrTx) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   await tx

@@ -49,6 +49,10 @@ const T = {
     freed: (trip: string, n: string, waiting: string) =>
       `«${trip}»: ${n} kishi muddatgacha chipta olmadi, joyi bo'shadi. Navbatda ${waiting} ta so'rov bor.`,
     tripBtn: "Safarni ochaman ↗",
+    creatorHead: "SAFARNING 2-KUNI · SIZ UCHUN",
+    creator: (trip: string) =>
+      `«${trip}» zo'rmi? Bir sir aytamiz: shu safardan olgan Reels'ingiz <b>1 mln ko'rish</b> yig'sa, chipta va mehmonxona xarajatingizni <b>$1 000 gacha</b> qoplab beramiz.\n\nFaqat shu safardagilar uchun. Qaytgach 30 kun ichida joylashga ulgurasiz.`,
+    creatorBtn: "Shartlarni ko'raman ↗",
   },
   ru: {
     approvedHead: "ВАС ЖДУТ!",
@@ -88,6 +92,10 @@ const T = {
     freed: (trip: string, n: string, waiting: string) =>
       `«${trip}»: ${n} чел. не купили билет до срока, места освободились. Заявок в очереди: ${waiting}.`,
     tripBtn: "Открыть поездку ↗",
+    creatorHead: "2-Й ДЕНЬ ПОЕЗДКИ · ДЛЯ ВАС",
+    creator: (trip: string) =>
+      `Как «${trip}»? Открываем секрет: если ваш Reels из этой поездки наберёт <b>1 млн просмотров</b>, вернём расходы на билеты и отель <b>до $1 000</b>.\n\nТолько для участников этой поездки. Опубликовать можно в течение 30 дней после возвращения.`,
+    creatorBtn: "Смотреть условия ↗",
   },
   en: {
     approvedHead: "THEY'RE WAITING FOR YOU!",
@@ -126,6 +134,10 @@ const T = {
     freed: (trip: string, n: string, waiting: string) =>
       `“${trip}”: ${n} didn't get a ticket by the deadline, so places opened up. Requests waiting: ${waiting}.`,
     tripBtn: "Open the trip ↗",
+    creatorHead: "DAY 2 OF THE TRIP · FOR YOU",
+    creator: (trip: string) =>
+      `Enjoying «${trip}»? Here's a secret: if your Reel from this trip reaches <b>1M views</b>, we refund your flights and hotel <b>up to $1,000</b>.\n\nOnly for people on this trip. You have 30 days after you return to post it.`,
+    creatorBtn: "See the terms ↗",
   },
 } as const;
 
@@ -196,6 +208,8 @@ export function render(
         .join("\n");
       return { head: t.sosHead, body, btn: t.roomBtn, path: "/room", map };
     }
+    case "creator_invite":
+      return { head: t.creatorHead, body: t.creator(trip), btn: t.creatorBtn, path: "/creator" };
     case "checkin_contact":
       return { head: t.checkinHead, body: t.checkin(member, trip), btn: null, path: "" };
     default:

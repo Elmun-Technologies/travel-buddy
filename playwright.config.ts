@@ -18,6 +18,7 @@ export default defineConfig({
       TELEGRAM_BOT_USERNAME: "e2e_test_bot",
       APP_ENV: "test",
       ADMIN_TELEGRAM_IDS: "7000000001", // e2e/admin.spec.ts
+      CREATOR_ENABLED: "1", // e2e/creator.spec.ts (hidden 1M Safar)
     },
   },
 });

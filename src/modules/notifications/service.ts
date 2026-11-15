@@ -16,7 +16,8 @@ export type NotificationType =
   | "spot_freed"
   | "sos"
   | "sos_contact"
-  | "checkin_contact";
+  | "checkin_contact"
+  | "creator_invite";
 
 /** What the user can turn off in the profile. Everything about them personally is "mine". */
 export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine"] as const;

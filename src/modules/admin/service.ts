@@ -5,6 +5,7 @@ import {
   auditLogs,
   authAccounts,
   conversations,
+  creatorEntries,
   messages,
   priceStats,
   reports,
@@ -201,6 +202,21 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
           .returning({ tripId: tripOptions.tripId });
         if (!o) return false;
         await notifyBoard(tx, o.tripId);
+        target = op.id;
+        break;
+      }
+      case "creator.set": {
+        const r = await tx
+          .update(creatorEntries)
+          .set({
+            status: op.status,
+            note: op.note ?? null,
+            ...(op.views != null ? { views: op.views, viewsAt: new Date() } : {}),
+            updatedAt: new Date(),
+          })
+          .where(eq(creatorEntries.id, op.id))
+          .returning({ id: creatorEntries.id });
+        if (!r.length) return false;
         target = op.id;
         break;
       }
@@ -412,4 +428,26 @@ export async function listAudit() {
     .leftJoin(travelerProfiles, eq(travelerProfiles.userId, auditLogs.actorId))
     .orderBy(desc(auditLogs.createdAt))
     .limit(100);
+}
+
+/** 1M Safar entries, newest first: the admin reads Instagram views and decides. */
+export async function listCreatorEntries() {
+  return getDb()
+    .select({
+      id: creatorEntries.id,
+      status: creatorEntries.status,
+      instagram: creatorEntries.instagram,
+      reelUrl: creatorEntries.reelUrl,
+      postedAt: creatorEntries.postedAt,
+      views: creatorEntries.views,
+      note: creatorEntries.note,
+      name: travelerProfiles.displayName,
+      tripId: trips.id,
+      title: trips.title,
+    })
+    .from(creatorEntries)
+    .innerJoin(trips, eq(trips.id, creatorEntries.tripId))
+    .leftJoin(travelerProfiles, eq(travelerProfiles.userId, creatorEntries.userId))
+    .orderBy(desc(creatorEntries.createdAt))
+    .limit(200);
 }

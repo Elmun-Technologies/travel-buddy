@@ -15,6 +15,8 @@ Qiymatlarni faqat egasi kiritadi. Repo'ga, chatga, logga yozilmaydi.
 | 4b      | `NEXT_PUBLIC_POSTHOG_KEY`                                                            | GitHub Variable                   | Ulashish tugmalari statistikasi                                                                 |
 | 5       | `TRAVELPAYOUTS_MARKER`                                                               | Coolify: web                      | Aviasales havolalari                                                                            |
 | 9a      | `ADMIN_TELEGRAM_IDS`                                                                 | Coolify: web                      | Admin panel egalari: Telegram ID'lar vergul bilan (masalan `123,456`). Kirishda rol yangilanadi |
+| 1M      | `CREATOR_ENABLED`                                                                    | Coolify: web va worker            | `1` bo'lsa 1M Safar ochiladi (taklif sahifalari, safarning 2-kunidagi bot xabari). Bo'sh — hammasi yopiq |
+| 1M      | `INSTAGRAM_HANDLE`                                                                   | Coolify: web                      | Belgilanadigan akkaunt, masalan `@travelbuddy`. Bo'sh bo'lsa APP_NAME'dan yasaladi |
 | 10      | `INSTAGRAM_APP_ID`, `INSTAGRAM_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` | Coolify: web va worker            | 1M Safar                                                                                        |
 | 10      | `SMS_PROVIDER`, provayder kalitlari                                                  | Coolify: worker                   | Pulli — alohida ruxsat bilan                                                                    |
 

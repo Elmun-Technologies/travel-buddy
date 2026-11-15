@@ -70,5 +70,12 @@ export const adminOp = z.discriminatedUnion("op", [
     price: money, // per person
   }),
   z.object({ op: z.literal("offer.remove"), id }),
+  z.object({
+    op: z.literal("creator.set"),
+    id,
+    status: z.enum(["joined", "tracking", "approved", "rejected", "paid"]),
+    views: opt(z.int().min(0).max(2_000_000_000)), // Instagram "views" (organic), read by hand for now
+    note: opt(z.string().trim().max(200)),
+  }),
 ]);
 export type AdminOp = z.infer<typeof adminOp>;

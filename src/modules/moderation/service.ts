@@ -49,3 +49,9 @@ export async function block(blockerId: string, blockedId: string) {
   if (blockerId === blockedId) return;
   await getDb().insert(blocks).values({ blockerId, blockedId }).onConflictDoNothing();
 }
+
+export async function unblock(blockerId: string, blockedId: string) {
+  await getDb()
+    .delete(blocks)
+    .where(and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId)));
+}

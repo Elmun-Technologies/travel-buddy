@@ -7,6 +7,7 @@ import { createBot } from "./bot";
 import { deliverNotifications, queueDigests } from "./notify";
 import { queueCreatorInvites } from "./creator";
 import { runReliability } from "./reliability";
+import { permanentlyDeleteUsers } from "@/modules/users/service";
 import { SEED_ENVS, seedSamples } from "./seed";
 
 const url = process.env.DATABASE_URL;
@@ -59,6 +60,7 @@ else console.log("TELEGRAM_BOT_TOKEN not set: bot disabled");
 let delivering = false;
 let lastDigest = 0;
 let lastReliability = 0;
+let lastCleanup = 0;
 const deliveryTimer = setInterval(async () => {
   if (!current || delivering) return;
   delivering = true;
@@ -71,6 +73,10 @@ const deliveryTimer = setInterval(async () => {
       lastReliability = Date.now();
       await runReliability(getDb()); // ticket deadlines, "N/N safarga bordi"
       if (process.env.CREATOR_ENABLED === "1") await queueCreatorInvites(getDb()); // 1M Safar, day 2
+    }
+    if (Date.now() - lastCleanup > 86_400_000) {
+      lastCleanup = Date.now();
+      await permanentlyDeleteUsers(getDb()); // cleanup deleted users
     }
     await deliverNotifications(current.bot.api, getDb(), process.env.APP_URL ?? "");
   } catch (e) {

@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { and, eq, inArray, lt, ne } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 
@@ -65,9 +65,17 @@ export async function setNotifyOff(userId: string, off: string[]) {
 }
 
 /** Grant or take away admin (only travelers/admins switch; agency members are untouched). */
-export async function setAdminRole(userId: string, admin: boolean) {
+export async function deleteUser(userId: string) {
   await getDb()
     .update(users)
-    .set({ role: admin ? "admin" : "traveler" })
-    .where(and(eq(users.id, userId), eq(users.role, admin ? "traveler" : "admin")));
+    .set({ status: "deleted", deletedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+/** Grant or take away admin (only travelers/admins switch; agency members are untouched). */
+export async function permanentlyDeleteUsers(tx: DbOrTx) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  await tx
+    .delete(users)
+    .where(and(eq(users.status, "deleted"), lt(users.deletedAt, thirtyDaysAgo)));
 }

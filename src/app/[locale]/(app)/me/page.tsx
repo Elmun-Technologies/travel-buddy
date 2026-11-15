@@ -186,6 +186,12 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
         <div className={row}>
           <DeleteAccountTrigger />
         </div>
+        <div className={row}>
+          <span className="font-medium">{t("blocked.title")}</span>
+          <Link href="/me/blocked" className="min-h-11 py-3 text-sm font-medium text-blue">
+            {tc("edit")}
+          </Link>
+        </div>
       </Panel>
       <NotifySettings initialOff={notifyOff} />
     </div>

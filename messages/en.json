@@ -133,6 +133,13 @@
       "cancel": "Cancel",
       "button": "Delete account",
       "success": "Your account has been deleted. Goodbye!"
+    },
+    "blocked": {
+      "title": "Blocked users",
+      "empty": "You haven't blocked anyone yet.",
+      "unblock": "Unblock",
+      "confirm": "Unblock {name}?",
+      "unblocked": "{name} has been unblocked"
     }
   },
   "feed": {

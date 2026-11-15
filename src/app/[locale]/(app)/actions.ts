@@ -9,6 +9,7 @@ import { destroySession, getSessionUser } from "@/lib/session";
 import { decideRequest, leaveTrip } from "@/modules/groups/service";
 import { intentFromForm, intentSchema } from "@/modules/trips/schema";
 import { closeIntent, closeTrip, createIntent } from "@/modules/trips/service";
+import { unblock } from "@/modules/moderation/service";
 
 // Every action re-reads the session: never trust the client.
 async function authed(f: FormData) {
@@ -60,5 +61,11 @@ export async function leaveAction(f: FormData) {
 export async function closeTripAction(f: FormData) {
   const { user } = await authed(f);
   await closeTrip(user.id, str(f.get("tripId")));
+  refresh();
+}
+
+export async function unblockAction(f: FormData) {
+  const { user } = await authed(f);
+  await unblock(user.id, str(f.get("blockedId")));
   refresh();
 }

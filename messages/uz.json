@@ -133,6 +133,13 @@
       "cancel": "Bekor qilish",
       "button": "Akkauntni o'chirish",
       "success": "Akkauntingiz o'chirildi. Xayr!"
+    },
+    "blocked": {
+      "title": "Bloklanganlar",
+      "empty": "Siz hali kimnidirni bloklagansiz.",
+      "unblock": "Blokdan chiqarish",
+      "confirm": "{name}ni blokdan chiqarishni istaysizmi?",
+      "unblocked": "{name} blokidan chiqarildi"
     }
   },
   "feed": {

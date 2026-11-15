@@ -16,6 +16,7 @@ type Props = {
   title: string;
   country: string;
   emergency: Emergency | null;
+  embassy: { phone: string; url: string | null } | null;
   organizer: string | null;
   bot: string;
   contacts: Contact[];
@@ -339,6 +340,17 @@ export function Sos(p: Props) {
             </a>
           ))}
           {"all" in e && e.all === "112" && <p className="pt-2 text-sm text-[#c9c9c9]">{t("noSim")}</p>}
+          {p.embassy && (
+            <a
+              href={`tel:${p.embassy.phone.replace(/[^\d+]/g, "")}`}
+              className="flex min-h-14 items-center justify-between gap-3 border-t border-white/15 pt-2"
+            >
+              <span className="text-[17px]">{t("embassy")}</span>
+              <span className="text-[17px] underline">
+                {p.embassy.phone} {"\u2197"}
+              </span>
+            </a>
+          )}
         </Panel>
       )}
       <div className="h-6" />

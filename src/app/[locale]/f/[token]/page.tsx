@@ -182,6 +182,15 @@ async function Family({ params }: PageProps<"/[locale]/f/[token]">) {
             <span className="text-[17px]">{t("localNumber", { country })}</span>
             <span className="font-display text-[44px] leading-none text-signal">{f.emergency}</span>
           </a>
+          {f.embassyPhone && (
+            <a
+              href={`tel:${f.embassyPhone.replace(/[^\d+]/g, "")}`}
+              className="flex min-h-14 items-center justify-between gap-3 border-t border-white/15"
+            >
+              <span className="text-[17px]">{t("embassy")}</span>
+              <span className="text-[17px] underline">{f.embassyPhone}</span>
+            </a>
+          )}
         </Panel>
       )}
 

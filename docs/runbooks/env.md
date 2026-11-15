@@ -6,16 +6,17 @@ Qiymatlarni faqat egasi kiritadi. Repo'ga, chatga, logga yozilmaydi.
 - **GitHub Secret** — maxfiy, build vaqtida kerak (repo → Settings → Secrets and variables → Actions → Secrets).
 - **GitHub Variable** — maxfiy emas, build vaqtida kerak (o'sha joy → Variables).
 
-| Bosqich | Nomi                                                                                 | Qayerga                           | Nima uchun                                                              |
-| ------- | ------------------------------------------------------------------------------------ | --------------------------------- | ----------------------------------------------------------------------- |
-| 3       | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`                                                 | GitHub **Secret**                 | Deploy'dan keyin ham ochiq turgan sahifalardagi formalar ishlashi uchun |
-| 3       | `SENTRY_DSN`                                                                         | Coolify: **web** va **worker**    | Server xatolari Sentry'ga                                               |
-| 3       | `NEXT_PUBLIC_SENTRY_DSN`                                                             | GitHub **Variable** (o'sha DSN)   | Brauzer/Mini App xatolari Sentry'ga                                     |
-| 3       | `APP_ENV` = `staging`                                                                | Coolify: web va worker (bo'lmasa) | Sentry'da muhitni ajratish                                              |
-| 4b      | `NEXT_PUBLIC_POSTHOG_KEY`                                                            | GitHub Variable                   | Ulashish tugmalari statistikasi                                         |
-| 5       | `TRAVELPAYOUTS_MARKER`                                                               | Coolify: web                      | Aviasales havolalari                                                    |
-| 10      | `INSTAGRAM_APP_ID`, `INSTAGRAM_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` | Coolify: web va worker            | 1M Safar                                                                |
-| 10      | `SMS_PROVIDER`, provayder kalitlari                                                  | Coolify: worker                   | Pulli — alohida ruxsat bilan                                            |
+| Bosqich | Nomi                                                                                 | Qayerga                           | Nima uchun                                                                                      |
+| ------- | ------------------------------------------------------------------------------------ | --------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 3       | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`                                                 | GitHub **Secret**                 | Deploy'dan keyin ham ochiq turgan sahifalardagi formalar ishlashi uchun                         |
+| 3       | `SENTRY_DSN`                                                                         | Coolify: **web** va **worker**    | Server xatolari Sentry'ga                                                                       |
+| 3       | `NEXT_PUBLIC_SENTRY_DSN`                                                             | GitHub **Variable** (o'sha DSN)   | Brauzer/Mini App xatolari Sentry'ga                                                             |
+| 3       | `APP_ENV` = `staging`                                                                | Coolify: web va worker (bo'lmasa) | Sentry'da muhitni ajratish                                                                      |
+| 4b      | `NEXT_PUBLIC_POSTHOG_KEY`                                                            | GitHub Variable                   | Ulashish tugmalari statistikasi                                                                 |
+| 5       | `TRAVELPAYOUTS_MARKER`                                                               | Coolify: web                      | Aviasales havolalari                                                                            |
+| 9a      | `ADMIN_TELEGRAM_IDS`                                                                 | Coolify: web                      | Admin panel egalari: Telegram ID'lar vergul bilan (masalan `123,456`). Kirishda rol yangilanadi |
+| 10      | `INSTAGRAM_APP_ID`, `INSTAGRAM_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` | Coolify: web va worker            | 1M Safar                                                                                        |
+| 10      | `SMS_PROVIDER`, provayder kalitlari                                                  | Coolify: worker                   | Pulli — alohida ruxsat bilan                                                                    |
 
 ## `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` ni yaratish
 

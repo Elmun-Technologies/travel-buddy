@@ -17,6 +17,7 @@ export default defineConfig({
       TELEGRAM_BOT_TOKEN: process.env.E2E_BOT_TOKEN ?? "1:e2e-test-token",
       TELEGRAM_BOT_USERNAME: "e2e_test_bot",
       APP_ENV: "test",
+      ADMIN_TELEGRAM_IDS: "7000000001", // e2e/admin.spec.ts
     },
   },
 });

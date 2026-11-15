@@ -15,6 +15,7 @@ import {
 import { mainNumber } from "@/lib/emergency";
 import { getDb } from "@/lib/db";
 import { getTelegramId } from "@/modules/auth/service";
+import { getVisaRule } from "@/modules/destinations/service";
 import { getMyMembership } from "@/modules/groups/service";
 import { getReliability } from "@/modules/reliability/service";
 
@@ -313,5 +314,6 @@ export async function getFamilyPage(tok: string) {
     sos: sos ? { at: sos.at.toISOString(), lat: sos.lat, lng: sos.lng } : null,
     location: loc ? { at: loc.at.toISOString(), lat: loc.lat!, lng: loc.lng! } : null,
     emergency: mainNumber(trip.destinationCountry),
+    embassyPhone: (await getVisaRule(trip.destinationCountry))?.embassyPhone ?? null,
   };
 }

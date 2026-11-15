@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Panel, clayInput } from "@/components/clay";
-import { BackAction } from "@/components/telegram-actions";
-import { useRouter } from "@/i18n/navigation";
+import { TitleBar } from "@/components/telegram-actions";
 import type { Emergency } from "@/lib/emergency";
 import { haptic, openExternal } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
@@ -51,7 +50,6 @@ const avatar = "flex size-11 flex-none items-center justify-center rounded-full 
 
 export function Sos(p: Props) {
   const t = useTranslations("sos");
-  const router = useRouter();
   const [holding, setHolding] = useState(false);
   const [sent, setSent] = useState<"sending" | "sent" | "failed" | null>(null);
   const [checkin, setCheckin] = useState(p.lastCheckin);
@@ -139,11 +137,7 @@ export function Sos(p: Props) {
 
   return (
     <>
-      <BackAction label={t("back")} onClick={() => router.push(`/trips/${p.tripId}/room`)} />
-      <div className="text-center">
-        <h1 className="font-semibold">{t("title")}</h1>
-        <div className="text-xs text-muted-foreground">{p.title}</div>
-      </div>
+      <TitleBar back={t("back")} href={`/trips/${p.tripId}/room`} title={t("title")} sub={p.title} />
 
       <Panel className="flex flex-col items-center gap-4 py-6">
         <button

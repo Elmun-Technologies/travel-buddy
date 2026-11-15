@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
-import { BackTo, MainAction } from "@/components/telegram-actions";
+import { MainAction, TitleBar } from "@/components/telegram-actions";
 import { Link } from "@/i18n/navigation";
 import { COUNTRIES, countryName } from "@/lib/catalog";
 import { asLocale } from "@/lib/guard";
@@ -54,13 +54,12 @@ async function Price({ params, searchParams }: PageProps<"/[locale]/price/[count
 
   return (
     <>
-      <BackTo label={t("back")} href={mine ? `/trips/${mine.id}/room` : "/visa"} />
-      <div className="text-center">
-        <h1 className="font-semibold">{t("title")}</h1>
-        <div className="text-xs text-muted-foreground">
-          {s ? t("sub", { country: name, days: s.days }) : name}
-        </div>
-      </div>
+      <TitleBar
+        back={t("back")}
+        href={mine ? `/trips/${mine.id}/room` : "/visa"}
+        title={t("title")}
+        sub={s ? t("sub", { country: name, days: s.days }) : name}
+      />
 
       <section className="relative h-[190px] overflow-hidden rounded-panel">
         <Image
@@ -116,7 +115,7 @@ async function Price({ params, searchParams }: PageProps<"/[locale]/price/[count
             <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
               {t("usually")}
             </span>
-            <Display as="div" className="text-[72px] leading-none text-signal">
+            <Display as="div" className="text-[56px] leading-none text-signal">
               {usd(s.median)}
             </Display>
             <span className="text-[15px] text-[#c9c9c9]">

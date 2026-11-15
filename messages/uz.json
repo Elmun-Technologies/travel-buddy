@@ -645,8 +645,6 @@
     }
   },
   "create": {
-    "stepNew": "Yangi safar · {n} / 3",
-    "stepReady": "Tayyor · 3 / 3",
     "cancel": "Bekor",
     "s1Title": "Qayerga boramiz?",
     "search": "Davlat yoki shahar, masalan: Gruziya",
@@ -681,7 +679,10 @@
     "titleDays": "{place} · {n} kun",
     "titleMonth": "{place} · {month}",
     "phoneTitle": "Avval telefonni tasdiqlaymiz",
-    "phoneText": "Safar ochgan odamga guruh ishonishi kerak. Bir bosish — va tayyor."
+    "phoneText": "Safar ochgan odamga guruh ishonishi kerak. Bir bosish — va tayyor.",
+    "newTrip": "Yangi safar",
+    "ready": "Tayyor",
+    "close": "Yopish"
   },
   "room": {
     "back": "Orqaga",

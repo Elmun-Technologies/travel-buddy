@@ -165,9 +165,9 @@ async function Family({ params }: PageProps<"/[locale]/f/[token]">) {
         <Panel className="flex flex-col gap-2">
           <h2 className={eyebrow}>{t("whereWhen")}</h2>
           {f.plan.map((p, i) => (
-            <p key={i} className="text-[17px]">
+            <p key={i} className="text-[15px]">
               <b>{dayDate(p.day) ?? t("day", { n: p.day })}</b> · {p.place}
-              {p.note && <span className="text-muted-foreground"> — {p.note}</span>}
+              {p.note && <span> — {p.note}</span>}
             </p>
           ))}
         </Panel>
@@ -211,9 +211,9 @@ async function Family({ params }: PageProps<"/[locale]/f/[token]">) {
 
 function Stat({ n, label }: { n: string; label: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-[18px] bg-background px-4 py-3">
-      <span className="font-display text-[34px] leading-none">{n}</span>
-      <span className="text-sm text-muted-foreground">{label}</span>
+    <div className="flex min-w-0 flex-col gap-1 rounded-[18px] bg-background px-3 py-3">
+      <span className="font-display text-[28px] leading-none">{n}</span>
+      <span className="text-[13px] whitespace-nowrap text-muted-foreground">{label}</span>
     </div>
   );
 }

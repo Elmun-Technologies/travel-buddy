@@ -138,14 +138,18 @@ export function Room({
 
   return (
     <>
-      <BackAction label={t("back")} onClick={() => router.push(`/trips/${tripId}`)} />
-      <div className="relative text-center">
-        <div className="font-semibold">{title}</div>
+      <div className="relative flex min-h-11 flex-col justify-center px-20 text-center">
+        <BackAction
+          label={t("back")}
+          onClick={() => router.push(`/trips/${tripId}`)}
+          className="absolute top-1/2 left-0 min-h-11 -translate-y-1/2 px-1 text-[15px] font-medium text-blue"
+        />
+        <div className="truncate font-semibold">{title}</div>
         <div className="text-xs text-muted-foreground">{t("subtitle")}</div>
         <Link
           href={`/trips/${tripId}/sos`}
           aria-label={t("sosLabel")}
-          className="absolute top-0 right-0 flex min-h-11 items-center rounded-full bg-danger px-4 text-sm font-bold text-white"
+          className="absolute top-1/2 right-0 flex min-h-11 -translate-y-1/2 items-center rounded-full bg-danger px-3 text-xs font-bold text-white"
         >
           SOS
         </Link>

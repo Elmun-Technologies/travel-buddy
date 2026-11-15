@@ -152,10 +152,10 @@ function PlanTab({ data, act, isOwner, trip }: TabProps) {
               )}
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex flex-wrap items-baseline gap-x-2">
-                  <Display as="h3" className="text-[30px] leading-none">
+                  <Display as="h3" className="text-xl leading-none">
                     {t("day", { n: p.day })}
                   </Display>
-                  <span className="text-xl font-semibold">{p.place}</span>
+                  <span className="text-lg font-semibold">{p.place}</span>
                   {p.proposed && (
                     <span className="rounded-full bg-signal px-2 py-0.5 text-xs font-semibold">
                       {t("proposal")}
@@ -390,7 +390,7 @@ function FamilyCard({ tripId, initial }: { tripId: string; initial: string | nul
     <Panel tone="soft" className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
-          <span className="text-xl font-semibold text-blue-ink">{t("familyTitle")}</span>
+          <span className="text-base font-semibold text-blue-ink">{t("familyTitle")}</span>
           <span className="text-[15px] text-blue-ink/80">{token ? t("familyOn") : t("familyText")}</span>
         </div>
         <button
@@ -484,7 +484,9 @@ function BookTab({ data, act, me, isOwner, trip, name, money }: TabProps) {
   const daysLeft = trip.deadline
     ? Math.round((Date.parse(trip.deadline) - Date.parse(trip.today)) / 86_400_000)
     : null;
-  const maxVotes = (list: { votes: number }[]) => Math.max(1, ...list.map((o) => o.votes));
+  // design: bar = share of the group that voted for it (5/7), not relative to the leader
+  const maxVotes = (list: { votes: number }[]) =>
+    Math.max(1, data.members.length, ...list.map((o) => o.votes));
 
   return (
     <>
@@ -936,7 +938,7 @@ function CostsTab({ data, act, me, name, money }: TabProps) {
       <div className="grid grid-cols-2 gap-3">
         <Panel className="flex flex-col gap-3">
           <h2 className={eyebrow}>{t("total")}</h2>
-          <Display as="div" className="text-[44px] leading-none">
+          <Display as="div" className="text-[36px] leading-none">
             {money(data.total)}
           </Display>
           <p className="text-sm text-muted-foreground">
@@ -947,7 +949,7 @@ function CostsTab({ data, act, me, name, money }: TabProps) {
           <h2 className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
             {myDebt ? t("youPay") : owedToMe ? t("youGet") : t("youPay")}
           </h2>
-          <Display as="div" className="text-[44px] leading-none text-signal">
+          <Display as="div" className="text-[36px] leading-none text-signal">
             {money(myDebt || owedToMe)}
           </Display>
           <p className="text-sm text-[#c9c9c9]">
@@ -1003,11 +1005,11 @@ function CostsTab({ data, act, me, name, money }: TabProps) {
         {data.expenses.length === 0 && <p className="py-2 text-muted-foreground">{t("expEmpty")}</p>}
         {data.expenses.map((e) => (
           <div key={e.id} className="flex min-h-[72px] items-center gap-3 border-b border-line last:border-0">
-            <span className="flex h-12 w-16 flex-none items-center justify-center rounded-[14px] bg-background text-sm font-semibold">
+            <span className="flex size-10 flex-none items-center justify-center rounded-[12px] bg-background text-[11px] font-semibold">
               {t(`cat_${e.category as (typeof CATS)[number]}`)}
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-[17px]">{e.title}</span>
+              <span className="truncate text-base">{e.title}</span>
               <span className="text-sm text-muted-foreground">
                 {e.paidBy === me ? t("paidByMe") : t("paidBy", { name: name(e.paidBy) })} ·{" "}
                 {t("splitN", { n: e.split })}

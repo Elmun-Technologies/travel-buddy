@@ -54,7 +54,7 @@ export default async function WelcomePage({ searchParams }: PageProps<"/[locale]
         <ul className="flex flex-wrap gap-1.5">
           {(["trust1", "trust2", "trust3", "trust4"] as const).map((k) => (
             <li key={k}>
-              <Tag className="px-3 py-1.5 text-sm">
+              <Tag className="text-[13px]">
                 <CheckIcon />
                 {t(k)}
               </Tag>

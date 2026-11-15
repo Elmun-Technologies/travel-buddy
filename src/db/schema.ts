@@ -668,6 +668,27 @@ export const priceStats = pgTable(
   (t) => [uniqueIndex("price_stats_key").on(t.destination, t.days, t.roomType)],
 );
 
+// ---------- 1M Safar (hidden offer, CREATOR_ENABLED) ----------
+
+/** One Reel per person per trip; one entry per person per year (checked in the service).
+ *  Views are entered by admin until the Instagram API is connected. */
+export const creatorEntries = pgTable(
+  "creator_entries",
+  {
+    ...base,
+    userId: userRef("user_id"),
+    tripId: tripRef(),
+    status: text("status").notNull().default("joined"), // joined | tracking | approved | rejected | paid
+    instagram: text("instagram"), // @handle
+    reelUrl: text("reel_url"),
+    postedAt: date("posted_at"),
+    views: integer("views"),
+    viewsAt: ts("views_at"),
+    note: text("note"), // admin: why rejected, etc.
+  },
+  (t) => [uniqueIndex("creator_entries_unique").on(t.userId, t.tripId)],
+);
+
 // ---------- trust & safety ----------
 export const reviews = pgTable(
   "reviews",

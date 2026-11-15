@@ -8,7 +8,7 @@ import { requireAdmin } from "@/lib/guard";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-const NAV = ["", "reports", "users", "trips", "requests", "visa", "prices", "audit"] as const;
+const NAV = ["", "reports", "users", "trips", "requests", "visa", "prices", "creator", "audit"] as const;
 
 // Internal panel for the team (ADMIN_TELEGRAM_IDS). Desktop-first, works on a phone too.
 export default function AdminLayout({ children }: LayoutProps<"/[locale]/admin">) {

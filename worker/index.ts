@@ -5,6 +5,7 @@ import { PgBoss } from "pg-boss";
 import { getDb } from "@/lib/db";
 import { createBot } from "./bot";
 import { deliverNotifications, queueDigests } from "./notify";
+import { queueCreatorInvites } from "./creator";
 import { runReliability } from "./reliability";
 import { SEED_ENVS, seedSamples } from "./seed";
 
@@ -69,6 +70,7 @@ const deliveryTimer = setInterval(async () => {
     if (Date.now() - lastReliability > 3_600_000) {
       lastReliability = Date.now();
       await runReliability(getDb()); // ticket deadlines, "N/N safarga bordi"
+      if (process.env.CREATOR_ENABLED === "1") await queueCreatorInvites(getDb()); // 1M Safar, day 2
     }
     await deliverNotifications(current.bot.api, getDb(), process.env.APP_URL ?? "");
   } catch (e) {

@@ -477,3 +477,57 @@ export function OfferForm({ tripId }: { tripId: string }) {
     </AdminForm>
   );
 }
+
+const CREATOR_STATUS = ["joined", "tracking", "approved", "rejected", "paid"] as const;
+
+/** 1M Safar: views read from Instagram by hand, then the decision. */
+export function CreatorForm({
+  id,
+  status,
+  views,
+  note,
+}: {
+  id: string;
+  status: string;
+  views: number | null;
+  note: string | null;
+}) {
+  const t = useTranslations("admin");
+  const tc = useTranslations("creator");
+  const [v, setV] = useState({ status, views: views?.toString() ?? "", note: note ?? "" });
+  return (
+    <AdminForm
+      build={() => {
+        const n = num(v.views.replace(/\s/g, ""));
+        return n != null && !Number.isInteger(n)
+          ? null
+          : { op: "creator.set", id, status: v.status as "joined", views: n, note: str(v.note) };
+      }}
+    >
+      <Field label={t("views")}>
+        <input
+          inputMode="numeric"
+          value={v.views}
+          onChange={(e) => setV({ ...v, views: e.target.value })}
+          className={clayInput}
+        />
+      </Field>
+      <Field label={t("status")}>
+        <select
+          value={v.status}
+          onChange={(e) => setV({ ...v, status: e.target.value })}
+          className={clayInput}
+        >
+          {CREATOR_STATUS.map((s) => (
+            <option key={s} value={s}>
+              {tc(`st_${s}`)}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label={t("note")} wide>
+        <input value={v.note} onChange={(e) => setV({ ...v, note: e.target.value })} className={clayInput} />
+      </Field>
+    </AdminForm>
+  );
+}

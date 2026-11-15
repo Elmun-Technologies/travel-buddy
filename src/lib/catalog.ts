@@ -69,6 +69,8 @@ export const TRAVEL_STYLES = [
 
 export const GROUP_PREFS = ["mixed", "women_only"] as const;
 export const BUDGET_BANDS = ["lt300", "300_600", "600_1000", "any"] as const;
+/** Upper end of each onboarding budget band, dollars per person ("any" has none). */
+export const BAND_MAX: Record<string, number> = { lt300: 300, "300_600": 600, "600_1000": 1000 };
 /** Countries offered as one-tap chips in onboarding ("Qayerga borishni orzu qilasiz?"). */
 export const POPULAR_DESTINATIONS = [
   "GE",

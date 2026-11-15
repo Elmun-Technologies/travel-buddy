@@ -105,7 +105,7 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
         break;
       }
       case "visa.save": {
-        const { op: _, ...v } = op;
+        const v = { ...op, op: undefined }; // the row is the op minus its name
         await tx
           .insert(visaRules)
           .values({ ...v, documents: v.documents, isSample: false })

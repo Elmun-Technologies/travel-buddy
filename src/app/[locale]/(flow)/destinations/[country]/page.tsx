@@ -14,6 +14,7 @@ import { countryPhoto } from "@/lib/photos";
 import { getSessionUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { getPrices, getVisaRule } from "@/modules/destinations/service";
+import { rankTrips, travelerFor } from "@/modules/matching/service";
 import { getOwnProfile } from "@/modules/profiles/service";
 import { feedFilterSchema } from "@/modules/trips/schema";
 import { listFeed } from "@/modules/trips/service";
@@ -52,6 +53,10 @@ async function Destination({ params }: PageProps<"/[locale]/destinations/[countr
     listFeed(user?.id ?? null, feedFilterSchema.parse({ country, all: "1" })),
     user ? getOwnProfile(user.id) : null,
   ]);
+  const traveler = user ? await travelerFor(user.id) : null;
+  const matches = new Map(
+    traveler ? (await rankTrips(traveler, feed.items)).map((x) => [x.trip.id, x.match.percent]) : [],
+  );
   const name = countryName(country, locale);
   const facts = destinationFacts(country);
   const price = prices[0];
@@ -189,6 +194,7 @@ async function Destination({ params }: PageProps<"/[locale]/destinations/[countr
               <span className="text-[15px] text-muted-foreground">
                 {formatTripDates(g, locale)}
                 {g.groupSizeMax ? ` · ${g.approvedCount}/${g.groupSizeMax}` : ""}
+                {matches.get(g.id) != null && ` · ${t("match", { n: matches.get(g.id)! })}`}
               </span>
             </span>
             {i === 0 && (

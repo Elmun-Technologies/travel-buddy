@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { CheckIcon, Display, Panel } from "@/components/clay";
-import { SoundButton } from "@/components/sound";
 import { PageLoading } from "@/components/page-loading";
 import { Link } from "@/i18n/navigation";
 import { type Country, countryName, todayISO, BAND_MAX } from "@/lib/catalog";
@@ -69,7 +68,6 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
           <div className="text-[13px] text-muted-foreground">{greeting}</div>
           <Display className="mt-0.5 text-[30px]">{profile.displayName}</Display>
         </div>
-        <SoundButton className="ml-auto" />
         <Link href="/me" className="flex flex-col items-end gap-1.5">
           <span className="flex size-12 items-center justify-center rounded-full bg-[#c9d4e3] font-semibold">
             {profile.displayName.slice(0, 1)}
@@ -131,7 +129,7 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
               {t("all")}
             </Link>
           </div>
-          <div className="-mx-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
+          <div className="-mx-3 flex snap-x scroll-px-3 items-start gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
             {picks.map(({ trip, match }) => {
               const shared = trip.travelStyles.find((s) => profile.travelStyles.includes(s));
               const why = (match?.reasons ?? [])

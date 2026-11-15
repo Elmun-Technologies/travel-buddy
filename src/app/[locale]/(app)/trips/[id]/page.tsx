@@ -203,7 +203,7 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
             >
               <span className="flex flex-col">
                 <span className={label}>{t("visaLabel")}</span>
-                <span className="text-[17px]">
+                <span className="text-[15px]">
                   {t(`visa_${visa.status}` as "visa_visa_free")}
                   {visa.maxStayDays ? ` · ${t("visaUpTo", { n: visa.maxStayDays })}` : ""}
                 </span>
@@ -218,7 +218,7 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
             >
               <span className="flex flex-col">
                 <span className={label}>{t("priceLabel")}</span>
-                <span className="text-[17px]">
+                <span className="text-[15px]">
                   {t("priceUsually", { price: `$${Math.round(prices[0].median / 100)}` })}
                 </span>
               </span>
@@ -239,7 +239,7 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
           {t("rulesLabel")}
         </span>
-        <p className="text-[17px] leading-relaxed">{t("rules")}</p>
+        <p className="text-[15px] leading-relaxed">{t("rules")}</p>
         {user && !trip.isOwner && <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />}
       </Panel>
 

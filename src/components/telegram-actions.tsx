@@ -131,3 +131,28 @@ export function BackTo({ label, href, className }: { label: string; href: string
   const router = useRouter();
   return <BackAction label={label} onClick={() => router.push(href)} className={className} />;
 }
+
+/** Screen title row (design: "Orqaga" left, title + sub centred on the same line). */
+export function TitleBar({
+  back,
+  href,
+  title,
+  sub,
+}: {
+  back: string;
+  href: string;
+  title: string;
+  sub?: string | null;
+}) {
+  return (
+    <div className="relative flex min-h-11 flex-col items-center justify-center px-20 text-center">
+      <BackTo
+        label={back}
+        href={href}
+        className="absolute top-1/2 left-0 min-h-11 -translate-y-1/2 px-1 text-[15px] font-medium text-blue"
+      />
+      <h1 className="leading-tight font-semibold">{title}</h1>
+      {sub && <div className="text-xs text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}

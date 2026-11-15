@@ -645,8 +645,6 @@
     }
   },
   "create": {
-    "stepNew": "New trip · {n} / 3",
-    "stepReady": "Done · 3 / 3",
     "cancel": "Cancel",
     "s1Title": "Where are we going?",
     "search": "Country or city, e.g. Georgia",
@@ -681,7 +679,10 @@
     "titleDays": "{place} · {n, plural, one {# day} other {# days}}",
     "titleMonth": "{place} · {month}",
     "phoneTitle": "First, let's verify your phone",
-    "phoneText": "A group needs to trust whoever opens the trip. One tap and you're done."
+    "phoneText": "A group needs to trust whoever opens the trip. One tap and you're done.",
+    "newTrip": "New trip",
+    "ready": "Done",
+    "close": "Close"
   },
   "room": {
     "back": "Back",

@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
-import { BackTo } from "@/components/telegram-actions";
+import { TitleBar } from "@/components/telegram-actions";
 import { redirect } from "@/i18n/navigation";
 import { countryName } from "@/lib/catalog";
 import { asLocale, requireProfile } from "@/lib/guard";
@@ -40,11 +40,7 @@ async function Offer({ params }: PageProps<"/[locale]/trips/[id]/creator">) {
 
   return (
     <>
-      <BackTo label={t("back")} href={`/trips/${trip.id}/room`} />
-      <div className="-mt-2 text-center">
-        <h1 className="font-semibold">{t("title")}</h1>
-        <div className="text-xs text-muted-foreground">{t("sub")}</div>
-      </div>
+      <TitleBar back={t("back")} href={`/trips/${trip.id}/room`} title={t("title")} sub={t("sub")} />
 
       <Panel tone="dark" className="flex flex-col gap-5 p-5">
         <span className="self-start rounded-full bg-signal px-3 py-1.5 text-sm font-medium text-ink">

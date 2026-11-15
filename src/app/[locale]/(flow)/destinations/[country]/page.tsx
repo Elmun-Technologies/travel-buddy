@@ -185,12 +185,12 @@ async function Destination({ params }: PageProps<"/[locale]/destinations/[countr
             <Image
               src={countryPhoto(g.destinationCountry, 400, g.destinationCity)}
               alt=""
-              width={96}
-              height={96}
-              className="size-24 flex-none rounded-[16px] object-cover"
+              width={80}
+              height={80}
+              className="size-20 flex-none rounded-[16px] object-cover"
             />
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-xl font-semibold">{g.title}</span>
+              <span className="line-clamp-2 text-lg leading-tight font-semibold">{g.title}</span>
               <span className="text-[15px] text-muted-foreground">
                 {formatTripDates(g, locale)}
                 {g.groupSizeMax ? ` · ${g.approvedCount}/${g.groupSizeMax}` : ""}

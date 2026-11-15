@@ -164,11 +164,31 @@ export function CreateWizard({
 
   return (
     <>
-      {step === 1 && <BackAction label={t("cancel")} onClick={() => router.push("/trips")} />}
-      {step === 2 && <BackAction label={to("back")} onClick={() => setStep(1)} />}
-      <div className="flex flex-col gap-2 px-1 pt-1">
-        <div className="text-center text-[13px] text-muted-foreground">
-          {step < 3 ? t("stepNew", { n: step }) : t("stepReady")}
+      <div className="flex flex-col gap-2 px-1">
+        <div className="relative flex min-h-11 flex-col items-center justify-center px-20 text-center">
+          {step === 1 && (
+            <BackAction
+              label={t("cancel")}
+              onClick={() => router.push("/trips")}
+              className="absolute top-1/2 left-0 min-h-11 -translate-y-1/2 px-1 text-[15px] font-medium text-blue"
+            />
+          )}
+          {step === 2 && (
+            <BackAction
+              label={to("back")}
+              onClick={() => setStep(1)}
+              className="absolute top-1/2 left-0 min-h-11 -translate-y-1/2 px-1 text-[15px] font-medium text-blue"
+            />
+          )}
+          {step === 3 && created && (
+            <BackAction
+              label={t("close")}
+              onClick={() => router.push(`/trips/${created.id}`)}
+              className="absolute top-1/2 left-0 min-h-11 -translate-y-1/2 px-1 text-[15px] font-medium text-blue"
+            />
+          )}
+          <span className="leading-tight font-semibold">{step < 3 ? t("newTrip") : t("ready")}</span>
+          <span className="text-xs text-muted-foreground">{step} / 3</span>
         </div>
         <Steps step={step} />
       </div>

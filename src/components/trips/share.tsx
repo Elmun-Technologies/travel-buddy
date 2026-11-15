@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronRight, Link2, Send, Smartphone, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Display, Panel } from "@/components/clay";
+import { Panel } from "@/components/clay";
 import { haptic, openExternal, tg } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 
@@ -90,9 +90,7 @@ export function ShareFriendCard(s: ShareLinks) {
   return (
     <Panel tone="soft" className="flex items-center justify-between gap-3">
       <div>
-        <Display as="div" className="text-[22px] font-medium">
-          {t("friendTitle")}
-        </Display>
+        <div className="text-base font-semibold text-blue-ink">{t("friendTitle")}</div>
         <p className="mt-1 text-sm">{t("friendText")}</p>
       </div>
       <button

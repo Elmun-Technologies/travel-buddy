@@ -7,7 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { Display, Panel } from "@/components/clay";
 import { ExternalLink } from "@/components/external-link";
 import { PageLoading } from "@/components/page-loading";
-import { BackTo } from "@/components/telegram-actions";
+import { TitleBar } from "@/components/telegram-actions";
 import { Link } from "@/i18n/navigation";
 import { countryName } from "@/lib/catalog";
 import { formatDay } from "@/lib/format";
@@ -64,11 +64,7 @@ async function Track({ params }: PageProps<"/[locale]/creator">) {
 
   return (
     <>
-      <BackTo label={t("back")} href="/home" />
-      <div className="-mt-2 text-center">
-        <h1 className="font-semibold">{t("trackTitle")}</h1>
-        <div className="text-xs text-muted-foreground">{t("title")}</div>
-      </div>
+      <TitleBar back={t("back")} href="/home" title={t("trackTitle")} sub={t("title")} />
       {offers.length > 0 && (
         <Panel className="flex flex-col gap-2">
           <h3 className={eyebrow}>{t("offers")}</h3>

@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Display, Panel } from "@/components/clay";
 import { ExternalLink } from "@/components/external-link";
 import { PageLoading } from "@/components/page-loading";
-import { BackTo } from "@/components/telegram-actions";
+import { TitleBar } from "@/components/telegram-actions";
 import { Link } from "@/i18n/navigation";
 import { countryName } from "@/lib/catalog";
 import { formatDay } from "@/lib/format";
@@ -42,11 +42,7 @@ async function Visa({ params, searchParams }: PageProps<"/[locale]/visa">) {
 
   return (
     <>
-      <BackTo label={t("back")} href="/home" />
-      <div className="text-center">
-        <h1 className="font-semibold">{t("title")}</h1>
-        <div className="text-xs text-muted-foreground">{t("passport")}</div>
-      </div>
+      <TitleBar back={t("back")} href="/home" title={t("title")} sub={t("passport")} />
       <Display as="h2" className="px-1 pt-2 text-[44px] leading-[1.02]">
         {t("headline")}
       </Display>
@@ -93,13 +89,13 @@ async function VisaCard({ r, open, locale }: { r: VisaRule; open: boolean; local
       <Image
         src={countryPhoto(r.destination, 400)}
         alt=""
-        width={64}
-        height={64}
-        className="size-16 flex-none rounded-[16px] object-cover"
+        width={52}
+        height={52}
+        className="size-[52px] flex-none rounded-[14px] object-cover"
       />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-xl font-semibold">{name}</span>
-        <span className="text-[15px] text-muted-foreground">{summary}</span>
+        <span className="text-lg leading-tight font-semibold">{name}</span>
+        <span className="text-sm text-muted-foreground">{summary}</span>
         {r.isSample && (
           <span className="mt-1 self-start rounded-full bg-signal px-2 py-0.5 text-xs font-semibold">
             {t("sample")}
@@ -108,7 +104,7 @@ async function VisaCard({ r, open, locale }: { r: VisaRule; open: boolean; local
       </span>
       <span
         className={cn(
-          "flex-none rounded-full px-3 py-1.5 text-[15px] font-semibold",
+          "flex-none rounded-full px-2.5 py-1 text-sm font-semibold",
           STATUS[r.status as keyof typeof STATUS],
         )}
       >
@@ -121,7 +117,7 @@ async function VisaCard({ r, open, locale }: { r: VisaRule; open: boolean; local
       <Link
         href={`/visa?c=${r.destination}`}
         id={r.destination}
-        className="press lift flex items-center gap-4 rounded-panel bg-card p-4"
+        className="press lift flex items-center gap-3 rounded-panel bg-card p-4"
       >
         {head}
       </Link>

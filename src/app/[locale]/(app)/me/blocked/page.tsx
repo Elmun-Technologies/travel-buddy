@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+// /me kabi: authsuz foydalanuvchi /login'ga yo'naladi
+// requireUser import qilingan (shartnoma: includeGhostRequester wargs)
 import { Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
-import { asLocale, requireProfile } from "@/lib/guard";
+import { asLocale, requireUser } from "@/lib/guard";
 import { Link } from "@/i18n/navigation";
 import { getDisplayNames } from "@/modules/profiles/service";
 import { unblockAction } from "../../actions";
@@ -20,7 +22,7 @@ export default function BlockedPage(props: PageProps<"/[locale]/me/blocked">) {
 
 async function Blocked({ params }: PageProps<"/[locale]/me/blocked">) {
   const locale = asLocale((await params).locale);
-  const { user } = await requireProfile(locale);
+  const user = await requireUser(locale); // /me kabi, /login'ga yo'naltirish
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
   const db = getDb();

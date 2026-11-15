@@ -47,6 +47,9 @@ const cardFields = {
   isTest: trips.isTest,
   publicCode: trips.publicCode,
   datePrecision: trips.datePrecision,
+  dateFlexDays: trips.dateFlexDays,
+  ageMin: trips.ageMin,
+  ageMax: trips.ageMax,
 };
 
 async function withCounts<T extends { id: string; ownerUserId: string | null }>(rows: T[]) {

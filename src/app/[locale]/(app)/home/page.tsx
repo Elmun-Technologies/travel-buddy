@@ -5,13 +5,16 @@ import { CheckIcon, Display, Panel } from "@/components/clay";
 import { SoundButton } from "@/components/sound";
 import { PageLoading } from "@/components/page-loading";
 import { Link } from "@/i18n/navigation";
-import { type Country, countryName, todayISO } from "@/lib/catalog";
+import { type Country, countryName, todayISO, BAND_MAX } from "@/lib/catalog";
 import { formatBudget, formatTripDates } from "@/lib/format";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { isSampleTrip } from "@/lib/sample";
 import { countryPhoto } from "@/lib/photos";
+import { rankTrips, travelerFor } from "@/modules/matching/service";
 import { getOwnProfile } from "@/modules/profiles/service";
 import { listFeed, listForming, listMyTrips } from "@/modules/trips/service";
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function HomePage(props: PageProps<"/[locale]/home">) {
   return (
@@ -21,7 +24,6 @@ export default function HomePage(props: PageProps<"/[locale]/home">) {
   );
 }
 
-const BAND_MAX: Record<string, number> = { lt300: 300, "300_600": 600, "600_1000": 1000 };
 const daysBetween = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000);
 const label = "text-xs font-semibold tracking-[.04em] uppercase";
 
@@ -34,21 +36,26 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
   const dreams = profile.dreamDestinations as Country[];
   const budget = BAND_MAX[profile.budgetBand ?? ""];
 
-  const [mine, suggested, anyTrips, forming, t, ts] = await Promise.all([
+  const [mine, suggested, anyTrips, forming, t, ts, traveler] = await Promise.all([
     listMyTrips(user.id),
     listFeed(user.id, { page: 1, country: dreams.length ? dreams : undefined, budget }),
     listFeed(user.id, { page: 1 }),
     listForming(user.id),
     getTranslations("home"),
     getTranslations("styles"),
+    travelerFor(user.id),
   ]);
   const myIds = new Set(mine.map((m) => m.id));
   const next = mine
     .filter((m) => m.myStatus.status === "approved" && m.startDate >= today)
     .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
-  const picks = (suggested.items.length ? suggested.items : anyTrips.items)
-    .filter((x) => !myIds.has(x.id))
-    .slice(0, 6);
+  // "Sizga yoqishi mumkin": every open trip we fetched, scored (CLAUDE.md §6), best first.
+  const pool = [...suggested.items, ...anyTrips.items].filter(
+    (x, i, all) => !myIds.has(x.id) && all.findIndex((y) => y.id === x.id) === i,
+  );
+  const picks = (
+    traveler ? await rankTrips(traveler, pool) : pool.map((trip) => ({ trip, match: null }))
+  ).slice(0, 6);
 
   const hour = Number(
     new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent", hour: "numeric", hour12: false }),
@@ -125,13 +132,11 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
             </Link>
           </div>
           <div className="-mx-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none]">
-            {picks.map((trip) => {
-              const why = [
-                dreams.includes(trip.destinationCountry as Country) && t("whyCountry"),
-                trip.travelStyles.find((s) => profile.travelStyles.includes(s)) &&
-                  ts(trip.travelStyles.find((s) => profile.travelStyles.includes(s))!),
-                budget && trip.budgetMin != null && trip.budgetMin <= budget * 100 && t("whyBudget"),
-              ].filter(Boolean);
+            {picks.map(({ trip, match }) => {
+              const shared = trip.travelStyles.find((s) => profile.travelStyles.includes(s));
+              const why = (match?.reasons ?? [])
+                .slice(0, 3)
+                .map((f) => (f === "styles" && shared ? ts(shared).toLowerCase() : t(`why_${f}`)));
               return (
                 <Link
                   key={trip.id}
@@ -146,8 +151,13 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
                       loading="lazy"
                       className="size-full object-cover"
                     />
+                    {match?.percent != null && (
+                      <span className="pop-in absolute top-3 left-3 rounded-full bg-blue px-3 py-1.5 text-sm font-semibold text-white">
+                        {t("matchPercent", { n: match.percent })}
+                      </span>
+                    )}
                     {isSampleTrip(trip.id) && (
-                      <span className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold">
+                      <span className="absolute top-3 right-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold">
                         {t("sample")}
                       </span>
                     )}
@@ -163,7 +173,11 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
                     </div>
                     {why.length > 0 && (
                       <div className="rounded-[10px] bg-blue-soft p-2 text-xs text-blue-ink">
-                        {t("why")}: {why.join(" · ")}
+                        {capitalize(
+                          why.length === 1
+                            ? t("whyOne", { last: why[0] })
+                            : t("whyMany", { first: why.slice(0, -1).join(", "), last: why.at(-1)! }),
+                        )}
                       </div>
                     )}
                   </div>

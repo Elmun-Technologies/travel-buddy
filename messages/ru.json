@@ -590,7 +590,17 @@
     "memoriesText": "Кто откуда вернулся",
     "newTrip": "Создать поездку",
     "visaTitle": "Визы и документы",
-    "visaText": "Куда можно без визы с моим паспортом?"
+    "visaText": "Куда можно без визы с моим паспортом?",
+    "matchPercent": "{n}% совпадение",
+    "whyOne": "Подходит: {last}",
+    "whyMany": "Подходит: {first} и {last}",
+    "why_destination": "направление",
+    "why_dates": "даты",
+    "why_budget": "бюджет",
+    "why_styles": "стиль",
+    "why_interests": "интересы",
+    "why_age": "возраст",
+    "why_language": "язык"
   },
   "rooms": {
     "title": "Комнаты",
@@ -967,7 +977,8 @@
     "short_photo": "Фото",
     "short_extreme": "Экстрим",
     "short_budget": "Бюджетно",
-    "short_shopping": "Шопинг"
+    "short_shopping": "Шопинг",
+    "match": "{n}% совпадение"
   },
   "admin": {
     "title": "Админ",

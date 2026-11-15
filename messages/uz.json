@@ -590,7 +590,17 @@
     "memoriesText": "Kim qayerdan qaytdi",
     "newTrip": "Safar ochaman",
     "visaTitle": "Viza va hujjatlar",
-    "visaText": "Pasportim bilan qayerga vizasiz boraman?"
+    "visaText": "Pasportim bilan qayerga vizasiz boraman?",
+    "matchPercent": "{n}% mos",
+    "whyOne": "{last}ga to'g'ri keladi",
+    "whyMany": "{first} va {last}ga to'g'ri keladi",
+    "why_destination": "yo'nalishingiz",
+    "why_dates": "sanangiz",
+    "why_budget": "budjetingiz",
+    "why_styles": "uslubingiz",
+    "why_interests": "qiziqishlaringiz",
+    "why_age": "yoshingiz",
+    "why_language": "tilingiz"
   },
   "rooms": {
     "title": "Xonalar",
@@ -967,7 +977,8 @@
     "short_photo": "Foto",
     "short_extreme": "Ekstrim",
     "short_budget": "Tejamkor",
-    "short_shopping": "Xarid"
+    "short_shopping": "Xarid",
+    "match": "{n}% mos"
   },
   "admin": {
     "title": "Admin",

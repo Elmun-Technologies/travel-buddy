@@ -98,3 +98,20 @@ export async function setDreamDestination(userId: string, country: string, on: b
     .where(eq(travelerProfiles.userId, userId));
   return true;
 }
+
+/** What matching needs about trip organizers (age, interests, languages). */
+export async function getMatchProfiles(userIds: string[]) {
+  if (!userIds.length) return new Map<string, { age: number; interests: string[]; languages: string[] }>();
+  const rows = await getDb()
+    .select({
+      id: travelerProfiles.userId,
+      birthDate: travelerProfiles.birthDate,
+      interests: travelerProfiles.interests,
+      languages: travelerProfiles.languages,
+    })
+    .from(travelerProfiles)
+    .where(inArray(travelerProfiles.userId, userIds));
+  return new Map(
+    rows.map((r) => [r.id, { age: ageOn(r.birthDate), interests: r.interests, languages: r.languages }]),
+  );
+}

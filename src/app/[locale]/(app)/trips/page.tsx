@@ -5,7 +5,14 @@ import { PageLoading } from "@/components/page-loading";
 import { FeedChips, type FeedQuery } from "@/components/trips/feed-chips";
 import { TripCard } from "@/components/trips/trip-card";
 import { Link } from "@/i18n/navigation";
-import { type Country, countryName, POPULAR_DESTINATIONS, todayISO, TRAVEL_STYLES } from "@/lib/catalog";
+import {
+  type Country,
+  countryName,
+  POPULAR_DESTINATIONS,
+  todayISO,
+  TRAVEL_STYLES,
+  BAND_MAX,
+} from "@/lib/catalog";
 import { asLocale } from "@/lib/guard";
 import { countryPhoto, FEATURED_COUNTRIES } from "@/lib/photos";
 import { getSessionUser } from "@/lib/session";
@@ -21,8 +28,6 @@ export default function FeedPage(props: PageProps<"/[locale]/trips">) {
     </Suspense>
   );
 }
-
-const BAND_MAX: Record<string, number> = { lt300: 300, "300_600": 600, "600_1000": 1000 };
 
 function monthOpt(offset: number, locale: string) {
   const [y, m] = todayISO().split("-").map(Number);

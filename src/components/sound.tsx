@@ -49,7 +49,6 @@ export function SoundButton({ className }: { className?: string }) {
 
 /** Profile settings row. */
 export function SoundSwitch() {
-  const t = useTranslations("sound");
   const on = useSoundOn();
   return (
     <button

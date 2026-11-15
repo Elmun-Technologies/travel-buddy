@@ -590,7 +590,17 @@
     "memoriesText": "Who came back from where",
     "newTrip": "Start a trip",
     "visaTitle": "Visas and documents",
-    "visaText": "Where can I go visa-free with my passport?"
+    "visaText": "Where can I go visa-free with my passport?",
+    "matchPercent": "{n}% match",
+    "whyOne": "Fits your {last}",
+    "whyMany": "Fits your {first} and {last}",
+    "why_destination": "destination",
+    "why_dates": "dates",
+    "why_budget": "budget",
+    "why_styles": "style",
+    "why_interests": "interests",
+    "why_age": "age",
+    "why_language": "language"
   },
   "rooms": {
     "title": "Rooms",
@@ -967,7 +977,8 @@
     "short_photo": "Photo",
     "short_extreme": "Adventure",
     "short_budget": "Budget",
-    "short_shopping": "Shopping"
+    "short_shopping": "Shopping",
+    "match": "{n}% match"
   },
   "admin": {
     "title": "Admin",

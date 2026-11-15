@@ -8,6 +8,7 @@ import { BackAction, MainAction } from "@/components/telegram-actions";
 import { ShareList } from "@/components/trips/share";
 import { useRouter } from "@/i18n/navigation";
 import { BUDGET_BANDS, type Option, TRAVEL_STYLES } from "@/lib/catalog";
+import { playCountry } from "@/lib/music";
 import { haptic } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 
@@ -192,7 +193,7 @@ export function CreateWizard({
                   key={c.value}
                   on={place?.country === c.value && !place.city}
                   onClick={() => {
-                    haptic.select();
+                    playCountry(c.value); // the country's own little tune
                     setPlace({ country: c.value, label: c.label });
                     setQuery("");
                   }}
@@ -211,11 +212,11 @@ export function CreateWizard({
                   type="button"
                   aria-pressed={on}
                   onClick={() => {
-                    haptic.select();
+                    playCountry(tile.country);
                     setPlace(tile);
                   }}
                   className={cn(
-                    "press relative h-[140px] overflow-hidden rounded-[18px] border-[3px]",
+                    "press lift relative h-[140px] overflow-hidden rounded-[18px] border-[3px]",
                     on ? "border-ink" : "border-transparent",
                   )}
                 >

@@ -16,6 +16,7 @@ import { BackAction, MainAction } from "@/components/telegram-actions";
 import { Link, useRouter } from "@/i18n/navigation";
 import { LocaleSwitch } from "@/components/locale-switch";
 import { ageOn, BUDGET_BANDS, type Option } from "@/lib/catalog";
+import { playCountry } from "@/lib/music";
 import { haptic, openExternal, tg } from "@/lib/telegram-webapp";
 import { BirthDate } from "./birth-date";
 import { StyleCards } from "./style-cards";
@@ -422,7 +423,8 @@ export function OnboardingWizard({
                   key={o.value}
                   on={v.dreamDestinations.includes(o.value)}
                   onClick={() => {
-                    haptic.select();
+                    if (v.dreamDestinations.includes(o.value)) haptic.select();
+                    else playCountry(o.value); // picked: its tune
                     set("dreamDestinations", toggle(v.dreamDestinations, o.value));
                   }}
                 >

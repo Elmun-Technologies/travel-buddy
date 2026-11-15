@@ -74,7 +74,15 @@ export function MainAction({
 }
 
 /** "Back": Telegram's native BackButton, or a text link in the page header on the web. */
-export function BackAction({ label, onClick }: { label: string; onClick: () => void }) {
+export function BackAction({
+  label,
+  onClick,
+  className,
+}: {
+  label: string;
+  onClick: () => void;
+  className?: string;
+}) {
   const app = useTelegramChrome();
   const cb = useRef(onClick);
   useEffect(() => {
@@ -98,7 +106,7 @@ export function BackAction({ label, onClick }: { label: string; onClick: () => v
     <button
       type="button"
       onClick={onClick}
-      className="min-h-11 self-start px-1 text-[15px] font-medium text-blue"
+      className={className ?? "min-h-11 self-start px-1 text-[15px] font-medium text-blue"}
     >
       {label}
     </button>
@@ -119,7 +127,7 @@ export function TelegramInit() {
 }
 
 /** BackAction for server pages: goes to a fixed place. */
-export function BackTo({ label, href }: { label: string; href: string }) {
+export function BackTo({ label, href, className }: { label: string; href: string; className?: string }) {
   const router = useRouter();
-  return <BackAction label={label} onClick={() => router.push(href)} />;
+  return <BackAction label={label} onClick={() => router.push(href)} className={className} />;
 }

@@ -58,11 +58,12 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
       }
     : filter;
 
-  const [{ items, hasMore, total }, t, ts, visaFree] = await Promise.all([
+  const [{ items, hasMore, total }, t, ts, visaFree, tdest] = await Promise.all([
     listFeed(user?.id ?? null, f),
     getTranslations("feed"),
     getTranslations("styles"),
     visaFreeCountries(),
+    getTranslations("destination"),
   ]);
 
   const q: FeedQuery = {
@@ -101,9 +102,19 @@ async function Feed({ params, searchParams }: PageProps<"/[locale]/trips">) {
         )}
       </Panel>
 
-      <h2 id="results" className="scroll-mt-4 px-1 pt-2 text-[15px] font-semibold">
-        {one ? t("foundIn", { country: one, n: total }) : t("found", { n: total })}
-      </h2>
+      <div className="flex items-baseline justify-between gap-2 px-1 pt-2">
+        <h2 id="results" className="scroll-mt-4 text-[15px] font-semibold">
+          {one ? t("foundIn", { country: one, n: total }) : t("found", { n: total })}
+        </h2>
+        {one && (
+          <Link
+            href={`/destinations/${f.country![0].toLowerCase()}`}
+            className="min-h-11 py-3 text-sm font-medium text-blue"
+          >
+            {tdest("about", { country: one })} {"\u2197"}
+          </Link>
+        )}
+      </div>
 
       {items.length ? (
         <div className="grid gap-2 sm:grid-cols-2">

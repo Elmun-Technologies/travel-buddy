@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "dist/**",
     "test-results/**",
     "playwright-report/**",
+    ".claude/**",
   ]),
 ]);
 

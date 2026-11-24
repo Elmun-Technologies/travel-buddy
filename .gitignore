@@ -49,3 +49,6 @@ next-env.d.ts
 
 # design handoff archives
 *.zip
+
+# agent worktrees
+/.claude/worktrees/

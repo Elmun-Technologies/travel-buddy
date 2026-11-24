@@ -27,6 +27,7 @@ export function DeleteAccountDialog({
       const res = await fetch("/api/profile/delete", {
         method: "POST",
         headers: { "content-type": "application/json" },
+        body: "{}",
       });
       if (res.ok) {
         await router.replace("/");

@@ -61,6 +61,7 @@ it.runIf(!!process.env.DATABASE_URL)(
     const worker = spawn(process.execPath, ["dist/index.mjs"], {
       env: {
         ...process.env,
+        APP_ENV: "test",
         TELEGRAM_BOT_TOKEN: "1:test",
         TELEGRAM_API_ROOT: `http://127.0.0.1:${port}`,
         APP_URL: "https://example.com", // https → bot also sets the Mini App menu button

@@ -26,9 +26,13 @@ export async function POST(req: Request) {
   if (!b.success) return json({ error: "invalid" }, 422);
   const userId = r.value.user.id;
   const op = b.data;
-  // SOS is never rate-limited away; everything else is.
-  if (op.op !== "sos" && !(await rateLimit(`safety:user:${userId}`, 60, 600)))
-    return json({ error: "rate_limited" }, 429);
+  // A real SOS must always get through, so its limit is generous; it only stops scripted floods
+  // (every SOS notifies the whole group and the trusted contacts).
+  const limited =
+    op.op === "sos"
+      ? !(await rateLimit(`sos:user:${userId}`, 5, 600))
+      : !(await rateLimit(`safety:user:${userId}`, 60, 600));
+  if (limited) return json({ error: "rate_limited" }, 429);
 
   if (op.op === "contact.add") {
     const c = await addContact(userId, op.name);

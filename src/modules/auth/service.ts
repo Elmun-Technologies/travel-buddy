@@ -43,8 +43,8 @@ async function findOrCreate(tg: TelegramUser, locale: string): Promise<LoginResu
     if (acc) {
       const state = await getUserState(tx, acc.userId);
       if (state?.status === "deleted") {
-        const restored = await restoreUser(tx, acc.userId);
-        if (!restored) return { ok: false, error: "suspended" };
+        // Signing in again within 30 days of deleting brings the account back.
+        if (!(await restoreUser(tx, acc.userId))) return { ok: false, error: "suspended" };
       } else if (state?.status !== "active") {
         return { ok: false, error: "suspended" };
       }

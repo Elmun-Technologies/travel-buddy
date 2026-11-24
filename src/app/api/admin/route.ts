@@ -1,4 +1,4 @@
-import { authedJson, json } from "@/lib/api";
+import { authedJson, clientIp, json } from "@/lib/api";
 import { rateLimit } from "@/lib/rate-limit";
 import { adminOp } from "@/modules/admin/schema";
 import { applyAdminOp } from "@/modules/admin/service";
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   if (!op.success)
     return json({ error: "invalid", issues: op.error.issues.map((i) => i.path.join(".")) }, 422);
   if (!(await rateLimit(`admin:user:${user.id}`, 300, 600))) return json({ error: "rate_limited" }, 429);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const ip = clientIp(req.headers);
   const ok = await applyAdminOp(user.id, op.data, ip);
   return ok ? json({ ok: true }) : json({ error: "not_found" }, 404);
 }

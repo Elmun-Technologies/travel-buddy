@@ -145,7 +145,7 @@ export const idVerifications = pgTable("id_verifications", {
   // Private bucket keys; nulled after files are purged (30 days after decision).
   documentKey: text("document_key"),
   selfieKey: text("selfie_key"),
-  reviewedBy: uuid("reviewed_by").references(() => users.id),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
   reviewedAt: ts("reviewed_at"),
   filesPurgedAt: ts("files_purged_at"),
 });
@@ -189,7 +189,7 @@ export const agencyVerifications = pgTable("agency_verifications", {
   documentKeys: textArray("document_keys"),
   status: verificationStatus("status").notNull().default("pending"),
   note: text("note"),
-  reviewedBy: uuid("reviewed_by").references(() => users.id),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
   reviewedAt: ts("reviewed_at"),
 });
 
@@ -199,7 +199,8 @@ export const trips = pgTable(
   {
     ...base,
     kind: tripKind("kind").notNull(),
-    ownerUserId: uuid("owner_user_id").references(() => users.id),
+    // Null once the organizer's account is erased: the group keeps its history.
+    ownerUserId: uuid("owner_user_id").references(() => users.id, { onDelete: "set null" }),
     agencyId: uuid("agency_id").references(() => agencies.id),
     title: text("title").notNull(),
     destinationCountry: text("destination_country").notNull(),
@@ -326,7 +327,7 @@ export const leads = pgTable(
       .references(() => agencies.id),
     userId: uuid("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     message: text("message"),
     people: integer("people").notNull().default(1),
     status: leadStatus("status").notNull().default("new"),
@@ -699,29 +700,32 @@ export const reviews = pgTable(
       .references(() => trips.id),
     authorId: uuid("author_id")
       .notNull()
-      .references(() => users.id),
-    subjectUserId: uuid("subject_user_id").references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectUserId: uuid("subject_user_id").references(() => users.id, { onDelete: "cascade" }),
     subjectAgencyId: uuid("subject_agency_id").references(() => agencies.id),
     rating: integer("rating").notNull(), // 1..5
     body: text("body"),
     hiddenAt: ts("hidden_at"),
   },
-  (t) => [index("reviews_subject_user").on(t.subjectUserId)],
+  (t) => [
+    index("reviews_subject_user").on(t.subjectUserId),
+    // One review per companion per trip (editing replaces it).
+    uniqueIndex("reviews_once").on(t.tripId, t.authorId, t.subjectUserId),
+  ],
 );
 
 export const reports = pgTable(
   "reports",
   {
     ...base,
-    reporterId: uuid("reporter_id")
-      .notNull()
-      .references(() => users.id),
+    // Kept (without the reporter) after the reporter's account is erased.
+    reporterId: uuid("reporter_id").references(() => users.id, { onDelete: "set null" }),
     targetType: reportTarget("target_type").notNull(),
     targetId: uuid("target_id").notNull(),
     reason: text("reason").notNull(),
     details: text("details"),
     status: reportStatus("status").notNull().default("open"),
-    resolvedBy: uuid("resolved_by").references(() => users.id),
+    resolvedBy: uuid("resolved_by").references(() => users.id, { onDelete: "set null" }),
     resolvedAt: ts("resolved_at"),
   },
   (t) => [index("reports_status").on(t.status, t.createdAt)],
@@ -755,15 +759,23 @@ export const notifications = pgTable(
     channel: text("channel").notNull().default("in_app"), // in_app | telegram | email
     sentAt: ts("sent_at"),
     readAt: ts("read_at"),
+    // Delivery retries (worker): tries so far and when the next one is due.
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: ts("next_attempt_at"),
   },
-  (t) => [index("notifications_user").on(t.userId, t.createdAt)],
+  (t) => [
+    index("notifications_user").on(t.userId, t.createdAt),
+    index("notifications_unsent")
+      .on(t.createdAt)
+      .where(sql`${t.sentAt} is null`),
+  ],
 );
 
 // Post-MVP billing; intentionally unused for now.
 export const subscriptions = pgTable("subscriptions", {
   ...base,
   agencyId: uuid("agency_id").references(() => agencies.id),
-  userId: uuid("user_id").references(() => users.id),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   plan: text("plan").notNull(),
   status: text("status").notNull(),
   currentPeriodEnd: ts("current_period_end"),
@@ -773,7 +785,7 @@ export const auditLogs = pgTable(
   "audit_logs",
   {
     ...base,
-    actorId: uuid("actor_id").references(() => users.id),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
     action: text("action").notNull(),
     targetType: text("target_type"),
     targetId: uuid("target_id"),

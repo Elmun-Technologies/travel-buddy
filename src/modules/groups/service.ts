@@ -1,6 +1,6 @@
 import "server-only";
-import { and, count, eq, inArray } from "drizzle-orm";
-import { tripMembers } from "@/db/schema";
+import { and, count, eq, inArray, or } from "drizzle-orm";
+import { tripMembers, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { addTripChatMember, removeTripChatMember } from "@/modules/chat/service";
@@ -69,7 +69,8 @@ export async function requestJoin(
         .select({ status: tripMembers.status })
         .from(tripMembers)
         .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId))),
-      trip.ownerUserId ? isBlockedBetween(userId, trip.ownerUserId) : false,
+      // Same connection as the row lock: a second pool connection here can deadlock the pool.
+      trip.ownerUserId ? isBlockedBetween(userId, trip.ownerUserId, tx) : false,
       approvedCount(tx, tripId),
     ]);
     const denied = joinDenied(
@@ -115,6 +116,8 @@ export async function decideRequest(
       const r = await tx.update(tripMembers).set({ status: "rejected" }).where(where).returning();
       return r.length ? { ok: true } : { ok: false, error: "not_pending" };
     }
+    // A closed or hidden (moderated) trip takes no new members and must not come back as "full".
+    if (trip.status !== "open" && trip.status !== "full") return { ok: false, error: "forbidden" };
     const n = await approvedCount(tx, tripId);
     if (trip.groupSizeMax != null && n >= trip.groupSizeMax) return { ok: false, error: "full" };
     const r = await tx.update(tripMembers).set({ status: "approved" }).where(where).returning();
@@ -131,23 +134,78 @@ export async function leaveTrip(userId: string, tripId: string) {
   await getDb().transaction(async (tx) => {
     const trip = await lockTripForJoin(tx, tripId);
     if (!trip || trip.ownerUserId === userId) return;
-    const r = await tx
-      .update(tripMembers)
-      .set({ status: "left" })
-      .where(
-        and(
-          eq(tripMembers.tripId, tripId),
-          eq(tripMembers.userId, userId),
-          inArray(tripMembers.status, ["requested", "approved"]),
-        ),
-      )
-      .returning({ was: tripMembers.status });
-    if (!r.length) return;
-    if (r[0].was === "approved" && trip.ticketDeadline && trip.ticketDeadline < todayISO())
-      await recordNoShow(tx, userId, tripId);
+    const mine = and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId));
+    const [before] = await tx.select({ status: tripMembers.status }).from(tripMembers).where(mine);
+    if (before?.status !== "requested" && before?.status !== "approved") return;
+    await tx.update(tripMembers).set({ status: "left" }).where(mine);
+    if (before.status !== "approved") return; // a cancelled request frees no seat
+    if (trip.ticketDeadline && trip.ticketDeadline < todayISO()) await recordNoShow(tx, userId, tripId);
     await removeTripChatMember(tx, tripId, userId);
     if (trip.status === "full") await setTripStatus(tx, tripId, "open");
   });
+}
+
+/**
+ * After a block between an organizer and someone in (or asking to join) their trip: the member
+ * leaves that group, so the two stop meeting in the room. Members who block each other stay —
+ * their messages and notifications are already hidden from one another.
+ */
+export async function separateAfterBlock(a: string, b: string) {
+  const shared = await getDb()
+    .select({ tripId: trips.id, memberId: tripMembers.userId })
+    .from(trips)
+    .innerJoin(tripMembers, eq(tripMembers.tripId, trips.id))
+    .where(
+      and(
+        inArray(tripMembers.status, ["requested", "approved"]),
+        or(
+          and(eq(trips.ownerUserId, a), eq(tripMembers.userId, b)),
+          and(eq(trips.ownerUserId, b), eq(tripMembers.userId, a)),
+        ),
+      ),
+    );
+  for (const s of shared) {
+    await getDb().transaction(async (tx) => {
+      const trip = await lockTripForJoin(tx, s.tripId);
+      if (!trip) return;
+      const mine = and(eq(tripMembers.tripId, s.tripId), eq(tripMembers.userId, s.memberId));
+      const [before] = await tx.select({ status: tripMembers.status }).from(tripMembers).where(mine);
+      if (before?.status === "requested") await tx.update(tripMembers).set({ status: "rejected" }).where(mine);
+      if (before?.status !== "approved") return;
+      await tx.update(tripMembers).set({ status: "left" }).where(mine);
+      await removeTripChatMember(tx, s.tripId, s.memberId);
+      if (trip.status === "full") await setTripStatus(tx, s.tripId, "open");
+    });
+  }
+}
+
+/** Account deleted: free the person's seats and pending requests in other people's trips. */
+export async function leaveAllTrips(tx: DbOrTx, userId: string) {
+  const rows = await tx
+    .update(tripMembers)
+    .set({ status: "left" })
+    .where(
+      and(
+        eq(tripMembers.userId, userId),
+        eq(tripMembers.role, "member"),
+        inArray(tripMembers.status, ["requested", "approved"]),
+      ),
+    )
+    .returning({ tripId: tripMembers.tripId });
+  for (const { tripId } of rows) await removeTripChatMember(tx, tripId, userId);
+  if (rows.length)
+    await tx
+      .update(trips)
+      .set({ status: "open" })
+      .where(
+        and(
+          inArray(
+            trips.id,
+            rows.map((r) => r.tripId),
+          ),
+          eq(trips.status, "full"),
+        ),
+      );
 }
 
 /** Organizer view: pending requests + approved members with names. */

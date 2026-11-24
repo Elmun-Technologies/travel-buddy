@@ -2,6 +2,7 @@ import { z } from "zod";
 import { connection } from "next/server";
 import { subscribeRoom } from "@/lib/room-events";
 import { getSessionUser } from "@/lib/session";
+import { isActiveUser } from "@/modules/users/service";
 import { getPolls, getRoom, listMessages, markRead, type RoomEvent } from "@/modules/chat/service";
 
 // Live room updates (Server-Sent Events). Membership is re-checked every 25 s with the keep-alive.
@@ -36,7 +37,9 @@ export async function GET(req: Request, { params }: RouteContext<"/api/rooms/[tr
       };
       const unsubscribe = subscribeRoom(room.id, (e) => void onEvent(e).catch(() => {}));
       const ping = setInterval(async () => {
-        if (!(await getRoom(user.id, tripId.data).catch(() => null))) return stop();
+        // Still a member, and still a live account (suspended or deleted people are cut off).
+        const ok = await Promise.all([getRoom(user.id, tripId.data), isActiveUser(user.id)]).catch(() => null);
+        if (!ok?.[0] || !ok[1]) return stop();
         await markRead(room.id, user.id).catch(() => {}); // open room = read: no chat digest
         try {
           ctrl.enqueue(enc.encode(": ping\n\n"));

@@ -1,6 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import type { Locale } from "@/i18n/routing";
+import { clientIp } from "@/lib/api";
 import { rateLimit } from "@/lib/rate-limit";
 import { createSession } from "@/lib/session";
 import { getOwnProfile } from "@/modules/profiles/service";
@@ -12,7 +13,7 @@ export const botToken = () => process.env.TELEGRAM_BOT_TOKEN ?? "";
 export async function clientMeta() {
   const h = await headers();
   return {
-    ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
+    ip: clientIp(h),
     userAgent: h.get("user-agent") ?? undefined,
   };
 }

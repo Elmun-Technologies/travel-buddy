@@ -9,8 +9,10 @@ import {
   settlements,
   tripOptions,
   tripTickets,
+  trips,
 } from "@/db/schema";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { todayISO } from "@/lib/catalog";
 import { getDb } from "@/lib/db";
 import { emit } from "@/modules/chat/service";
 import { listMembers } from "@/modules/groups/service";
@@ -255,6 +257,12 @@ export async function applyOp(
         return true;
       case "deadline.set":
         if (!isOrganizer) return false;
+        // A deadline in the past would drop everyone without a ticket within the hour; it must
+        // be from tomorrow on and not after departure.
+        if (op.day != null) {
+          const [t] = await tx.select({ start: trips.startDate }).from(trips).where(eq(trips.id, tripId));
+          if (op.day <= todayISO() || (t && op.day > t.start)) return false;
+        }
         await setTicketDeadline(tx, tripId, op.day);
         return true;
       case "stay.book": {

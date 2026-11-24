@@ -27,7 +27,8 @@ const swatches = [
 
 async function Kit() {
   await connection();
-  if (process.env.APP_ENV === "production") notFound();
+  // Fails closed: only known non-production environments see the kit (unset/misspelled = hidden).
+  if (!["development", "staging", "test"].includes(process.env.APP_ENV ?? "")) notFound();
   return (
     <>
       <Display className="px-1 text-[40px]">UI Kit · Clay</Display>

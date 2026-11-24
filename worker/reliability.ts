@@ -29,6 +29,8 @@ export async function runReliability(db: Db) {
         from trips t
         where t.id = tm.trip_id and t.status in ('open', 'full') and t.ticket_deadline < ${today}
           and tm.status = 'approved' and tm.role = 'member'
+          -- someone approved after the deadline passed is not punished for missing it
+          and (tm.updated_at at time zone 'Asia/Tashkent')::date <= t.ticket_deadline
           and not exists (select 1 from trip_tickets k where k.trip_id = t.id and k.user_id = tm.user_id)
         returning tm.trip_id, tm.user_id),
       outcome as (
@@ -61,6 +63,6 @@ export async function runReliability(db: Db) {
       insert into reliability (user_id, trip_id, outcome)
       select tm.user_id, tm.trip_id, 'went' from trip_members tm
       where tm.status = 'approved' and tm.trip_id in (select id from done)
-      on conflict do nothing`);
+      on conflict (user_id, trip_id) do update set outcome = 'went'`);
   });
 }

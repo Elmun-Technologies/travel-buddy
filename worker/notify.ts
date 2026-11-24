@@ -1,5 +1,5 @@
 // Delivers queued Telegram notifications (notifications.channel = 'telegram', sent_at null).
-// At-most-once: rows are claimed (sent_at set) before sending, so a crash never double-sends.
+// At-least-once with retries: see deliverNotifications.
 import { sql } from "drizzle-orm";
 import type { Api } from "grammy";
 import { InlineKeyboard } from "grammy";
@@ -153,6 +153,7 @@ type Row = {
   text: string | null;
   n: string | null;
   off: boolean;
+  inactive?: boolean; // the recipient deleted or lost their account
   to_chat: string | null; // a trusted contact's chat instead of the user's own
   lat: string | null;
   lng: string | null;
@@ -244,14 +245,31 @@ export async function queueDigests(db: Db) {
     select user_id, 'room_digest', jsonb_build_object('tripId', trip_id, 'n', n::text), 'telegram' from due`);
 }
 
+/** Up to this many tries per message; the wait grows: 1, 2, 4, 8, 16 minutes. */
+const MAX_ATTEMPTS = 6;
+const LEASE_MINUTES = 2;
+
+/** Telegram errors that will never succeed on a retry (bot blocked, chat gone, bad request). */
+function isTerminal(e: unknown) {
+  const code = (e as { error_code?: number } | null)?.error_code;
+  return code === 400 || code === 401 || code === 403 || code === 404;
+}
+
+/**
+ * At-least-once delivery. A claimed row is leased for a couple of minutes (attempts + 1,
+ * next_attempt_at later) and only marked sent after Telegram accepted it. A crash, a network error
+ * or a 429 therefore means "try again later", never "lost". SOS goes first, always.
+ */
 export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
   const rows = await db.execute<Row>(sql`
     with claimed as (
-      update notifications set sent_at = now()
+      update notifications set attempts = attempts + 1,
+        next_attempt_at = now() + make_interval(mins => ${LEASE_MINUTES}) * power(2, attempts)
       where id in (
         select id from notifications
-        where channel = 'telegram' and sent_at is null
-        order by created_at limit 20 for update skip locked)
+        where channel = 'telegram' and sent_at is null and attempts < ${MAX_ATTEMPTS}
+          and (next_attempt_at is null or next_attempt_at <= now())
+        order by (type in ('sos', 'sos_contact')) desc, created_at limit 20 for update skip locked)
       returning id, user_id, type, payload)
     select c.id, c.type, c.payload->>'tripId' as trip_id,
       c.payload->>'text' as text, c.payload->>'n' as n, c.payload->>'chatId' as to_chat,
@@ -260,21 +278,32 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
       (case when c.type in ('sos', 'sos_contact', 'checkin_contact') then 'always'
         when c.type = 'room_pin' then 'pin' when c.type = 'room_poll' then 'poll'
         when c.type = 'room_digest' then 'chat' else 'mine' end) = any(u.notify_off) as off,
+      (u.status <> 'active') as inactive,
       a.provider_user_id as chat_id, u.locale, t.title as trip,
       op.display_name as organizer, mp.display_name as member
     from claimed c
     join users u on u.id = c.user_id
     left join auth_accounts a on a.user_id = c.user_id and a.provider = 'telegram'
-    left join trips t on t.id = (c.payload->>'tripId')::uuid
+    left join trips t on t.id = nullif(c.payload->>'tripId', '')::uuid
     left join traveler_profiles op on op.user_id = t.owner_user_id
-    left join traveler_profiles mp on mp.user_id = (c.payload->>'memberId')::uuid`);
+    left join traveler_profiles mp on mp.user_id = nullif(c.payload->>'memberId', '')::uuid`);
+
+  const done = (id: string) =>
+    db.execute(sql`update notifications set sent_at = now() where id = ${id}`);
 
   for (const r of rows) {
     const chat = r.to_chat ?? r.chat_id;
-    if (!chat || !r.trip || r.off) continue; // no Telegram (sample users), deleted trip, or turned off
+    // Nothing to send: no Telegram (sample users), deleted trip, turned off, or the person is gone.
+    if (!chat || !r.trip || r.off || r.inactive) {
+      await done(r.id);
+      continue;
+    }
     const l = lang(r.locale);
     const m = render(r, l);
-    if (!m) continue;
+    if (!m) {
+      await done(r.id);
+      continue;
+    }
     const footer = r.type.startsWith("room_") ? `\n\n<i>${T[l].settings}</i>` : "";
     // Trusted contacts are not in the app: they get a map link, not a Mini App button.
     const kb = r.to_chat
@@ -284,14 +313,28 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
       : m.btn && appUrl.startsWith("https://")
         ? new InlineKeyboard().webApp(m.btn, `${appUrl}/${l}/trips/${r.trip_id}${m.path}`)
         : undefined;
-    await api
-      .sendMessage(chat, `${m.head ? `<b>${m.head}</b>\n` : ""}${m.body}${footer}`, {
+    try {
+      await api.sendMessage(chat, `${m.head ? `<b>${m.head}</b>\n` : ""}${m.body}${footer}`, {
         parse_mode: "HTML",
         reply_markup: kb,
         link_preview_options: { is_disabled: true },
-      })
-      // 403 = the user blocked the bot: nothing to retry (an SMS fallback is a later, opt-in feature).
-      .catch((e) => console.error(`notification ${r.id} failed`, e instanceof Error ? e.message : e));
+      });
+      await done(r.id);
+    } catch (e) {
+      const err = e as { error_code?: number; parameters?: { retry_after?: number } };
+      if (isTerminal(e)) {
+        // The user blocked the bot or the chat is gone: nothing to retry.
+        console.error(`notification ${r.id} dropped: ${e instanceof Error ? e.message : e}`);
+        await done(r.id);
+      } else {
+        const wait = err.error_code === 429 ? (err.parameters?.retry_after ?? 5) : null;
+        if (wait != null)
+          await db.execute(
+            sql`update notifications set next_attempt_at = now() + make_interval(secs => ${wait}) where id = ${r.id}`,
+          );
+        console.error(`notification ${r.id} will be retried`, e instanceof Error ? e.message : e);
+      }
+    }
   }
   return rows.length;
 }

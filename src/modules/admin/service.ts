@@ -90,7 +90,8 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
         const r = await tx
           .update(users)
           .set({ status: suspend ? "suspended" : "active" })
-          .where(and(eq(users.id, op.id), inArray(users.status, suspend ? ["active"] : ["suspended"])))
+          // A reported person who deleted their own account can still be suspended (no quiet comeback).
+          .where(and(eq(users.id, op.id), inArray(users.status, suspend ? ["active", "deleted"] : ["suspended"])))
           .returning({ id: users.id });
         if (!r.length) return false;
         if (suspend) {
@@ -329,7 +330,6 @@ export async function searchUsers(q: string) {
     .leftJoin(authAccounts, and(eq(authAccounts.userId, users.id), eq(authAccounts.provider, "telegram")))
     .where(
       and(
-        isNull(users.deletedAt),
         q.trim()
           ? or(ilike(travelerProfiles.displayName, term), eq(authAccounts.providerUserId, q.trim()))
           : undefined,

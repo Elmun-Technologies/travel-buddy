@@ -6,7 +6,7 @@ import { ageOn } from "@/lib/catalog";
 import { getDb } from "@/lib/db";
 import { hasTelegram } from "@/modules/auth/service";
 import { isBlockedBetween } from "@/modules/moderation/service";
-import { getPhoneVerified } from "@/modules/users/service";
+import { deletedAmong, getPhoneVerified, isActiveUser } from "@/modules/users/service";
 import type { ProfileInput } from "./schema";
 
 export async function getOwnProfile(userId: string) {
@@ -48,12 +48,15 @@ export async function getDisplayNames(userIds: string[]) {
     .select({ id: travelerProfiles.userId, name: travelerProfiles.displayName })
     .from(travelerProfiles)
     .where(inArray(travelerProfiles.userId, userIds));
-  return new Map(rows.map((r) => [r.id, r.name]));
+  const gone = await deletedAmong(userIds); // deleted accounts are nameless at once
+  return new Map(rows.filter((r) => !gone.has(r.id)).map((r) => [r.id, r.name]));
 }
 
 /** What other users may see. Never phone, never exact birth date; gender only if opted in. */
 export async function getPublicProfile(viewerId: string, userId: string) {
   if (viewerId !== userId && (await isBlockedBetween(viewerId, userId))) return null;
+  // Suspended and deleted accounts have no public profile.
+  if (viewerId !== userId && !(await isActiveUser(userId))) return null;
   const p = await getOwnProfile(userId);
   if (!p) return null;
   const [phones, rel] = await Promise.all([getPhoneVerified([userId]), getReliability([userId])]);

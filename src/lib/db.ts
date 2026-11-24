@@ -10,8 +10,13 @@ export function getDb() {
   if (!g.db) {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not set");
-    // Small pool: shared 8 GB server.
-    g.sql = postgres(url, { max: 5, idle_timeout: 30 });
+    // Small pool: shared 8 GB server (the database allows 50 connections in total).
+    // The timeouts make a stuck lock or a forgotten transaction fail instead of hanging the pool.
+    g.sql = postgres(url, {
+      max: 10,
+      idle_timeout: 30,
+      connection: { lock_timeout: 10_000, idle_in_transaction_session_timeout: 30_000 },
+    });
     g.db = drizzle({ client: g.sql, schema });
   }
   return g.db;

@@ -15,7 +15,7 @@ const money = z.coerce
   .number()
   .int()
   .min(0)
-  .max(100_000_000)
+  .max(10_000_000) // x100 must stay inside a 32-bit column
   .transform((v) => v * 100)
   .nullable()
   .catch(null);

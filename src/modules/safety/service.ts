@@ -1,6 +1,6 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
-import { and, count, desc, eq, gt, inArray, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import {
   familyLinks,
   notifications,
@@ -13,7 +13,7 @@ import {
   users,
 } from "@/db/schema";
 import { mainNumber } from "@/lib/emergency";
-import { getDb } from "@/lib/db";
+import { type DbOrTx, getDb } from "@/lib/db";
 import { getTelegramId } from "@/modules/auth/service";
 import { getVisaRule } from "@/modules/destinations/service";
 import { getMyMembership } from "@/modules/groups/service";
@@ -65,7 +65,8 @@ export async function acceptContact(tok: string, chatId: string) {
   const [c] = await getDb()
     .update(trustedContacts)
     .set({ chatId })
-    .where(eq(trustedContacts.token, tok))
+    // Single use: once someone accepted, a later opener of the same link cannot take their place.
+    .where(and(eq(trustedContacts.token, tok), or(isNull(trustedContacts.chatId), eq(trustedContacts.chatId, chatId))))
     .returning({ userId: trustedContacts.userId });
   if (!c) return null;
   const [p] = await getDb()
@@ -215,6 +216,14 @@ export async function revokeFamilyLink(userId: string, tripId: string) {
     .where(
       and(eq(familyLinks.userId, userId), eq(familyLinks.tripId, tripId), isNull(familyLinks.revokedAt)),
     );
+}
+
+/** Account deleted: every family link of the person stops working. */
+export async function revokeAllFamilyLinks(tx: DbOrTx, userId: string) {
+  await tx
+    .update(familyLinks)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(familyLinks.userId, userId), isNull(familyLinks.revokedAt)));
 }
 
 /**

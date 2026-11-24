@@ -1,5 +1,5 @@
 import "server-only";
-import { sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { notifications } from "@/db/schema";
 import type { DbOrTx } from "@/lib/db";
 
@@ -54,4 +54,9 @@ export async function notifyRoom(
       and not exists (select 1 from blocks b
         where (b.blocker_id = cm.user_id and b.blocked_id = ${senderId})
            or (b.blocker_id = ${senderId} and b.blocked_id = cm.user_id))`);
+}
+
+/** Account deleted: nothing queued for the person is sent any more. */
+export async function dropUnsent(tx: DbOrTx, userId: string) {
+  await tx.delete(notifications).where(and(eq(notifications.userId, userId), isNull(notifications.sentAt)));
 }

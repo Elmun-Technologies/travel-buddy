@@ -11,6 +11,7 @@ import {
   isNull,
   lt,
   lte,
+  ne,
   notInArray,
   or,
   sql,
@@ -185,6 +186,18 @@ export async function closeTrip(userId: string, tripId: string) {
     .update(trips)
     .set({ status: "closed" })
     .where(and(eq(trips.id, tripId), eq(trips.ownerUserId, userId)));
+}
+
+/** Account deleted: the person's open listings stop taking people; their intents close. */
+export async function closeOwnedListings(tx: DbOrTx, userId: string) {
+  await tx
+    .update(trips)
+    .set({ status: "closed" })
+    .where(and(eq(trips.ownerUserId, userId), inArray(trips.status, ["draft", "open", "full"])));
+  await tx
+    .update(travelIntents)
+    .set({ status: "closed" })
+    .where(and(eq(travelIntents.userId, userId), ne(travelIntents.status, "closed")));
 }
 
 export async function setTicketDeadline(tx: DbOrTx, tripId: string, day: string | null) {

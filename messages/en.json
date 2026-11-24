@@ -291,7 +291,9 @@
     "blocked": "You can't join this trip.",
     "age": "Your age doesn't match the group's range.",
     "women_only": "This group is for women only.",
-    "women_only_pref": "\"Women only\" is available to those who picked \"Woman\" as their gender."
+    "women_only_pref": "\"Women only\" is available to those who picked \"Woman\" as their gender.",
+    "size_below_members": "There are already that many people in the group — you can't set fewer places.",
+    "women_only_locked": "Others have already joined — the group can't be switched to women only."
   },
   "styles": {
     "mountains": "Mountains & hiking",
@@ -657,7 +659,11 @@
       "dating": "Looking for dates",
       "unsafe": "Unsafe or abusive",
       "other": "Something else"
-    }
+    },
+    "block": "Block",
+    "blockAsk": "Once blocked, you will not see each other anywhere.",
+    "blockConfirm": "Yes, block",
+    "blockCancel": "Cancel"
   },
   "create": {
     "cancel": "Cancel",
@@ -697,7 +703,15 @@
     "phoneText": "A group needs to trust whoever opens the trip. One tap and you're done.",
     "newTrip": "New trip",
     "ready": "Done",
-    "close": "Close"
+    "close": "Close",
+    "editTitle": "Edit trip",
+    "editLink": "Edit",
+    "save": "Save",
+    "saved": "Saved",
+    "destinationFixed": "The destination can't be changed: people joined for this exact place.",
+    "sizeFloor": "There are already {n} people in the group — you can't go lower.",
+    "notEditable": "A trip that has started can't be edited.",
+    "membersNotified": "If the dates change, we'll let the group know ourselves."
   },
   "room": {
     "back": "Back",
@@ -994,7 +1008,9 @@
     "short_extreme": "Adventure",
     "short_budget": "Budget",
     "short_shopping": "Shopping",
-    "match": "{n}% match"
+    "match": "{n}% match",
+    "metaTitle": "Find travel buddies for {country}",
+    "metaDescription": "Groups and travel companions heading to {country}, matched by dates, budget and style. Verified travellers."
   },
   "admin": {
     "title": "Admin",

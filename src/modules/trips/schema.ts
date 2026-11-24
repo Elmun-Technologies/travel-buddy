@@ -125,6 +125,10 @@ export const createTripBody = z.object({
 });
 export type CreateTripBody = z.output<typeof createTripBody>;
 
+/** Editing an open trip: everything from creation except where it goes. */
+export const updateTripBody = createTripBody.omit({ country: true, city: true });
+export type UpdateTripBody = z.output<typeof updateTripBody>;
+
 const BAND: Record<CreateTripBody["band"], [number | null, number | null]> = {
   lt300: [null, 300],
   "300_600": [300, 600],

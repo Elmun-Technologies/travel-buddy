@@ -1,14 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { authedJson, json } from "@/lib/api";
-import { countryName } from "@/lib/catalog";
 import { fieldErrors } from "@/lib/form";
 import { formatBudget, formatTripDates } from "@/lib/format";
 import { rateLimit } from "@/lib/rate-limit";
 import { bandToBudget, createTripBody, datesFor, tripSchema } from "@/modules/trips/schema";
 import { createTrip } from "@/modules/trips/service";
-
-const DAY = 86_400_000;
+import { buildTripTitle } from "@/modules/trips/title";
 
 // "Safarni ochamiz" (App-CreateTrip-2). Title, dates and budget are derived here so a trip opens in ~60 s.
 export async function POST(req: Request) {
@@ -22,14 +20,8 @@ export async function POST(req: Request) {
   const locale = routing.locales.find((l) => l === raw) ?? routing.defaultLocale;
   if (!(await rateLimit(`trip:user:${user.id}`, 10, 86_400))) return json({ error: "rate_limited" }, 429);
 
-  const t = await getTranslations({ locale, namespace: "create" });
   const dates = datesFor(b);
-  const place = b.city || countryName(b.country, locale);
-  const days = Math.round((Date.parse(dates.endDate) - Date.parse(dates.startDate)) / DAY) + 1;
-  const title =
-    dates.datePrecision === "month"
-      ? t("titleMonth", { place, month: formatTripDates(dates, locale) })
-      : t("titleDays", { place, n: days });
+  const title = await buildTripTitle(locale, b.country, b.city, dates);
   const [min, max] = bandToBudget(b.band);
 
   const input = tripSchema.safeParse({

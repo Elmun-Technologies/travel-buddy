@@ -13,9 +13,10 @@ COPY . .
 # Server Actions key: stable across builds so pages opened before a deploy still work.
 # Passed as a BuildKit secret, so it is not stored in image history.
 ARG APP_NAME
+ARG APP_URL
 ARG GIT_SHA
 ARG NEXT_PUBLIC_SENTRY_DSN
-ENV APP_NAME=$APP_NAME NEXT_DEPLOYMENT_ID=$GIT_SHA NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN NEXT_TELEMETRY_DISABLED=1
+ENV APP_NAME=$APP_NAME APP_URL=$APP_URL NEXT_DEPLOYMENT_ID=$GIT_SHA NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=secret,id=sa_key,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY pnpm build && pnpm worker:build
 
 FROM node:22-alpine AS web

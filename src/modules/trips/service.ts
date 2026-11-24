@@ -21,7 +21,8 @@ import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { createTripConversation } from "@/modules/chat/service";
 import { visaFreeCountries } from "@/modules/destinations/service";
-import { addOrganizer, countApproved, getMemberships } from "@/modules/groups/service";
+import { addOrganizer, approvedCount, approvedMemberIds, countApproved, getMemberships } from "@/modules/groups/service";
+import { notify } from "@/modules/notifications/service";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
 import { getUserState } from "@/modules/users/service";
@@ -179,6 +180,72 @@ export async function listMyTrips(userId: string) {
     .where(inArray(trips.id, [...memberships.keys()]))
     .orderBy(asc(trips.startDate));
   return (await withCounts(rows)).map((t) => ({ ...t, myStatus: memberships.get(t.id)! }));
+}
+
+export type UpdateTripPatch = Pick<
+  TripInput,
+  | "title"
+  | "startDate"
+  | "endDate"
+  | "datePrecision"
+  | "dateFlexDays"
+  | "budgetMin"
+  | "budgetMax"
+  | "travelStyles"
+  | "groupSizeMax"
+  | "womenOnly"
+  | "description"
+>;
+export type UpdateTripResult =
+  | { ok: true }
+  | {
+      ok: false;
+      error: "not_found" | "forbidden" | "started" | "size_below_members" | "women_only_locked" | "women_only_creator";
+    };
+
+/**
+ * The organizer edits an open trip (not where it goes: people joined for the destination).
+ * The row is locked like in join/leave, so the size check and the status flip never race a join.
+ * People already in the group are told when the dates change.
+ */
+export async function updateTrip(userId: string, tripId: string, patch: UpdateTripPatch): Promise<UpdateTripResult> {
+  const profile = patch.womenOnly ? await getJoinProfile(userId) : null;
+  return getDb().transaction(async (tx) => {
+    const [t] = await tx.select().from(trips).where(eq(trips.id, tripId)).for("update");
+    if (!t) return { ok: false, error: "not_found" };
+    if (t.ownerUserId !== userId) return { ok: false, error: "forbidden" };
+    if (!["open", "full", "closed"].includes(t.status) || t.startDate <= todayISO())
+      return { ok: false, error: "started" };
+    const n = await approvedCount(tx, tripId);
+    if (patch.groupSizeMax < n) return { ok: false, error: "size_below_members" };
+    if (patch.womenOnly && !t.womenOnly) {
+      if (profile?.gender !== "female") return { ok: false, error: "women_only_creator" };
+      if (n > 1) return { ok: false, error: "women_only_locked" }; // others already joined a mixed group
+    }
+    const status = t.status === "closed" ? "closed" : n >= patch.groupSizeMax ? "full" : "open";
+    await tx.update(trips).set({ ...patch, status }).where(eq(trips.id, tripId));
+    const datesChanged = patch.startDate !== t.startDate || patch.endDate !== t.endDate;
+    if (datesChanged)
+      for (const id of await approvedMemberIds(tx, tripId, userId)) await notify(tx, id, "trip_updated", { tripId });
+    return { ok: true };
+  });
+}
+
+/** Open public trips for the sitemap (never test samples, never hidden or closed ones). */
+export async function listPublicTripsForSitemap(limit: number) {
+  return getDb()
+    .select({ id: trips.id, updatedAt: trips.updatedAt })
+    .from(trips)
+    .where(
+      and(
+        inArray(trips.status, ["open", "full"]),
+        eq(trips.visibility, "public"),
+        eq(trips.isTest, false),
+        gte(trips.startDate, todayISO()),
+      ),
+    )
+    .orderBy(desc(trips.updatedAt))
+    .limit(limit);
 }
 
 export async function closeTrip(userId: string, tripId: string) {

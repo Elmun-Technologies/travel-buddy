@@ -16,12 +16,21 @@ export async function addOrganizer(tx: DbOrTx, tripId: string, userId: string) {
   await tx.insert(tripMembers).values({ tripId, userId, role: "organizer", status: "approved" });
 }
 
-async function approvedCount(tx: DbOrTx, tripId: string) {
+export async function approvedCount(tx: DbOrTx, tripId: string) {
   const [r] = await tx
     .select({ n: count() })
     .from(tripMembers)
     .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.status, "approved")));
   return r.n;
+}
+
+/** Approved members of a trip except one person (the organizer), for fan-out notifications. */
+export async function approvedMemberIds(tx: DbOrTx, tripId: string, exceptId: string) {
+  const rows = await tx
+    .select({ id: tripMembers.userId })
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.status, "approved")));
+  return rows.map((r) => r.id).filter((id) => id !== exceptId);
 }
 
 export async function countApproved(tripIds: string[]) {
@@ -114,7 +123,10 @@ export async function decideRequest(
     );
     if (!approve) {
       const r = await tx.update(tripMembers).set({ status: "rejected" }).where(where).returning();
-      return r.length ? { ok: true } : { ok: false, error: "not_pending" };
+      if (!r.length) return { ok: false, error: "not_pending" };
+      // A gentle note, no "rejected" word (product-decisions §1); blocked pairs never get here.
+      await notify(tx, memberId, "join_rejected", { tripId });
+      return { ok: true };
     }
     // A closed or hidden (moderated) trip takes no new members and must not come back as "full".
     if (trip.status !== "open" && trip.status !== "full") return { ok: false, error: "forbidden" };

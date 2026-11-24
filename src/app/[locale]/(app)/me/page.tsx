@@ -16,6 +16,7 @@ import { getPublicProfile } from "@/modules/profiles/service";
 import { listMyIntents, listMyTrips } from "@/modules/trips/service";
 import { getNotifyOff } from "@/modules/users/service";
 import { closeIntentAction, logoutAction } from "../actions";
+import { LegalLinks } from "@/components/legal/legal-links";
 import { DeleteAccountTrigger } from "@/components/profile/delete-account-trigger";
 
 export default function MePage(props: PageProps<"/[locale]/me">) {
@@ -194,6 +195,7 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
         </div>
       </Panel>
       <NotifySettings initialOff={notifyOff} />
+      <LegalLinks className="flex flex-wrap gap-x-4 px-2 pb-2 text-sm text-muted-foreground" />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { connection } from "next/server";
 import { z } from "zod";
 import { CheckIcon, Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
@@ -34,10 +35,14 @@ const tag =
 const avatarTones = ["bg-[#cfdae6]", "bg-[#e8dccb]", "bg-[#d6e6d3]", "bg-[#ead3e0]", "bg-[#d3e8e6]"];
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/trips/[id]">): Promise<Metadata> {
+  await connection(); // APP_URL is a runtime value; the preview image URL must be absolute
   const { id } = await params;
   const ok = z.uuid().safeParse(id);
   const trip = ok.success ? await getTripView(ok.data, null) : null;
-  return trip ? { title: trip.title, openGraph: { title: trip.title } } : {};
+  const base = process.env.APP_URL;
+  return trip
+    ? { ...(base ? { metadataBase: new URL(base) } : {}), title: trip.title, openGraph: { title: trip.title } }
+    : {};
 }
 
 export default function TripPage(props: PageProps<"/[locale]/trips/[id]">) {
@@ -329,6 +334,7 @@ async function JoinArea({
   const t = await getTranslations("trip");
   const te = await getTranslations("errors");
   const tr = await getTranslations("room");
+  const tcr = await getTranslations("create");
   const hidden = (name: string, value: string) => <input type="hidden" name={name} value={value} />;
   const small = "min-h-11 self-start py-2.5 text-sm text-muted-foreground underline-offset-4 hover:underline";
 
@@ -381,6 +387,11 @@ async function JoinArea({
               </div>
             </div>
           ))}
+          {["open", "full", "closed"].includes(trip.status) && trip.startDate > todayISO() && (
+            <Link href={`/trips/${trip.id}/edit`} className={small}>
+              {tcr("editTitle")}
+            </Link>
+          )}
           {(trip.status === "open" || trip.status === "full") && (
             <form action={closeTripAction}>
               {hidden("locale", locale)}

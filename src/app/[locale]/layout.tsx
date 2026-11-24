@@ -30,9 +30,8 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   return {
     title: t("title", { app: APP_NAME }),
     description: t("description"),
-    alternates: {
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
-    },
+    // Absolute base for canonical/alternate links. Baked at build (APP_URL build arg), like APP_NAME.
+    ...(process.env.APP_URL ? { metadataBase: new URL(process.env.APP_URL) } : {}),
     openGraph: { title: t("title", { app: APP_NAME }), description: t("description"), locale },
   };
 }

@@ -64,6 +64,7 @@ jobs:
           push: true
           build-args: |
             APP_NAME=${{ vars.APP_NAME }}
+            APP_URL=${{ vars.APP_URL }}
             GIT_SHA=${{ github.sha }}
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
           secrets: |

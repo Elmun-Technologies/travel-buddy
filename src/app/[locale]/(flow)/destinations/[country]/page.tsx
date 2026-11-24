@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -6,6 +7,7 @@ import { Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
 import { BackTo, MainAction } from "@/components/telegram-actions";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { COUNTRIES, countryName } from "@/lib/catalog";
 import { destinationFacts } from "@/lib/destinations";
 import { formatTripDates } from "@/lib/format";
@@ -19,6 +21,26 @@ import { getOwnProfile } from "@/modules/profiles/service";
 import { feedFilterSchema } from "@/modules/trips/schema";
 import { listFeed } from "@/modules/trips/service";
 import { CountryMusic, SaveDestination } from "./client";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/destinations/[country]">): Promise<Metadata> {
+  const { locale: l, country: raw } = await params;
+  const locale = asLocale(l);
+  const country = raw.toUpperCase();
+  if (!(COUNTRIES as readonly string[]).includes(country)) return {};
+  const t = await getTranslations({ locale, namespace: "destination" });
+  const name = countryName(country, locale);
+  const path = `/destinations/${country}`;
+  return {
+    title: t("metaTitle", { country: name }),
+    description: t("metaDescription", { country: name }),
+    alternates: {
+      canonical: `/${locale}${path}`,
+      languages: Object.fromEntries(routing.locales.map((x) => [x, `/${x}${path}`])),
+    },
+  };
+}
 
 export default function DestinationPage(props: PageProps<"/[locale]/destinations/[country]">) {
   return (

@@ -1,4 +1,5 @@
 // "So'zida turish" (product-decisions §9.4), run hourly by the worker:
+//  - 3 and 1 day before departure: "trip_soon" reminder to everyone approved;
 //  - 2 days before the ticket deadline and on the day: remind members who haven't marked "Oldim";
 //  - after the deadline: their place is freed (status left, chat left) and counted as no_show;
 //    the organizer is told how many places opened and how many requests are waiting;
@@ -22,6 +23,18 @@ export async function runReliability(db: Db) {
         and not exists (select 1 from notifications n
           where n.user_id = tm.user_id and n.type = 'ticket_reminder'
             and n.payload->>'tripId' = t.id::text and n.payload->>'n' = (t.ticket_deadline - ${today})::text)`);
+
+    // 3 and 1 day before departure: one reminder per person per day-count.
+    await tx.execute(sql`
+      insert into notifications (user_id, type, payload, channel)
+      select tm.user_id, 'trip_soon',
+        jsonb_build_object('tripId', t.id, 'n', (t.start_date - ${today})::text), 'telegram'
+      from trips t
+      join trip_members tm on tm.trip_id = t.id and tm.status = 'approved'
+      where t.status in ('open', 'full') and (t.start_date - ${today}) in (1, 3)
+        and not exists (select 1 from notifications n
+          where n.user_id = tm.user_id and n.type = 'trip_soon'
+            and n.payload->>'tripId' = t.id::text and n.payload->>'n' = (t.start_date - ${today})::text)`);
 
     await tx.execute(sql`
       with dropped as (

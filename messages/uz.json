@@ -291,7 +291,9 @@
     "blocked": "Bu safarga qo'shilib bo'lmaydi.",
     "age": "Yoshingiz guruh shartiga mos emas.",
     "women_only": "Bu guruh faqat ayollar uchun.",
-    "women_only_pref": "\"Faqat ayollar\" faqat profilida \"Ayol\" deb belgilaganlar uchun."
+    "women_only_pref": "\"Faqat ayollar\" faqat profilida \"Ayol\" deb belgilaganlar uchun.",
+    "size_below_members": "Guruhda hozir shuncha odam bor — joylar sonini bundan kamaytirib bo'lmaydi.",
+    "women_only_locked": "Guruhga boshqalar qo'shilib bo'lgan — endi \"Faqat ayollar\"ga o'tkazib bo'lmaydi."
   },
   "styles": {
     "mountains": "Tog' va trekking",
@@ -657,7 +659,11 @@
       "dating": "Tanishuv maqsadida",
       "unsafe": "Xavfli yoki haqoratli",
       "other": "Boshqa"
-    }
+    },
+    "block": "Bloklash",
+    "blockAsk": "Bloklasak, bir-birimizni hech qayerda ko'rmaymiz.",
+    "blockConfirm": "Ha, bloklayman",
+    "blockCancel": "Bekor qilish"
   },
   "create": {
     "cancel": "Bekor",
@@ -697,7 +703,15 @@
     "phoneText": "Safar ochgan odamga guruh ishonishi kerak. Bir bosish — va tayyor.",
     "newTrip": "Yangi safar",
     "ready": "Tayyor",
-    "close": "Yopish"
+    "close": "Yopish",
+    "editTitle": "Safarni tahrirlash",
+    "editLink": "Tahrirlash",
+    "save": "Saqlaymiz",
+    "saved": "Saqlandi",
+    "destinationFixed": "Yo'nalishni o'zgartirib bo'lmaydi: odamlar aynan shu joy uchun qo'shilgan.",
+    "sizeFloor": "Hozir guruhda {n} kishi bor — bundan kam qilib bo'lmaydi.",
+    "notEditable": "Boshlangan safarni tahrirlab bo'lmaydi.",
+    "membersNotified": "Sana o'zgarsa, guruhdagilarga o'zimiz xabar beramiz."
   },
   "room": {
     "back": "Orqaga",
@@ -994,7 +1008,9 @@
     "short_extreme": "Ekstrim",
     "short_budget": "Tejamkor",
     "short_shopping": "Xarid",
-    "match": "{n}% mos"
+    "match": "{n}% mos",
+    "metaTitle": "{country}ga sherik toping",
+    "metaDescription": "{country}ga boradigan guruhlar va sheriklar: sana, budjet va uslub bo'yicha. Tasdiqlangan sayohatchilar bilan."
   },
   "admin": {
     "title": "Admin",

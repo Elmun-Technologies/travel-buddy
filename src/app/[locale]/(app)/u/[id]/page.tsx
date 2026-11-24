@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { PageLoading } from "@/components/page-loading";
 import { ProfileCard } from "@/components/profile/profile-card";
+import { ProfileSafety } from "@/components/profile/profile-safety";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { getPublicProfile } from "@/modules/profiles/service";
 
@@ -29,6 +30,7 @@ async function PublicProfile({ params }: PageProps<"/[locale]/u/[id]">) {
   return (
     <div className="mx-auto max-w-2xl">
       <ProfileCard p={p} />
+      {p.userId !== user.id && <ProfileSafety userId={p.userId} />}
     </div>
   );
 }

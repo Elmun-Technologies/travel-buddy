@@ -49,6 +49,14 @@ const T = {
     freed: (trip: string, n: string, waiting: string) =>
       `«${trip}»: ${n} kishi muddatgacha chipta olmadi, joyi bo'shadi. Navbatda ${waiting} ta so'rov bor.`,
     tripBtn: "Safarni ochaman ↗",
+    updatedHead: "SAFAR YANGILANDI",
+    updated: (trip: string) => `«${trip}»: tashkilotchi safar tafsilotlarini yangiladi. Yangi sana va shartlarni ko'rib chiqing.`,
+    rejectedHead: "SO'ROVINGIZ BO'YICHA",
+    rejected: (trip: string) => `«${trip}» guruhi hozircha boshqa tarkibda yig'ilmoqda. Sizga mos boshqa safarlar ko'p — ko'rib chiqamizmi?`,
+    feedBtn: "Safarlarni ko'raman ↗",
+    soonHead: "SAFAR YAQINLASHDI",
+    soon: (trip: string, n: string) =>
+      `«${trip}» safariga ${n === "1" ? "1 kun" : `${n} kun`} qoldi. Hujjat, chipta va yig'ilish joyini tekshirib oling.`,
     creatorHead: "SAFARNING 2-KUNI · SIZ UCHUN",
     creator: (trip: string) =>
       `«${trip}» zo'rmi? Bir sir aytamiz: shu safardan olgan Reels'ingiz <b>1 mln ko'rish</b> yig'sa, chipta va mehmonxona xarajatingizni <b>$1 000 gacha</b> qoplab beramiz.\n\nFaqat shu safardagilar uchun. Qaytgach 30 kun ichida joylashga ulgurasiz.`,
@@ -92,6 +100,14 @@ const T = {
     freed: (trip: string, n: string, waiting: string) =>
       `«${trip}»: ${n} чел. не купили билет до срока, места освободились. Заявок в очереди: ${waiting}.`,
     tripBtn: "Открыть поездку ↗",
+    updatedHead: "ПОЕЗДКА ОБНОВЛЕНА",
+    updated: (trip: string) => `«${trip}»: организатор обновил детали поездки. Посмотрите новые даты и условия.`,
+    rejectedHead: "ПО ВАШЕЙ ЗАЯВКЕ",
+    rejected: (trip: string) => `Группа «${trip}» пока собирается в другом составе. Подходящих поездок много — посмотрим?`,
+    feedBtn: "Смотреть поездки ↗",
+    soonHead: "ПОЕЗДКА СОВСЕМ СКОРО",
+    soon: (trip: string, n: string) =>
+      `До поездки «${trip}» ${n === "1" ? "остался 1 день" : `осталось ${n} дня`}. Проверьте документы, билеты и место встречи.`,
     creatorHead: "2-Й ДЕНЬ ПОЕЗДКИ · ДЛЯ ВАС",
     creator: (trip: string) =>
       `Как «${trip}»? Открываем секрет: если ваш Reels из этой поездки наберёт <b>1 млн просмотров</b>, вернём расходы на билеты и отель <b>до $1 000</b>.\n\nТолько для участников этой поездки. Опубликовать можно в течение 30 дней после возвращения.`,
@@ -134,6 +150,14 @@ const T = {
     freed: (trip: string, n: string, waiting: string) =>
       `“${trip}”: ${n} didn't get a ticket by the deadline, so places opened up. Requests waiting: ${waiting}.`,
     tripBtn: "Open the trip ↗",
+    updatedHead: "TRIP UPDATED",
+    updated: (trip: string) => `“${trip}”: the organizer updated the trip details. Take a look at the new dates and terms.`,
+    rejectedHead: "ABOUT YOUR REQUEST",
+    rejected: (trip: string) => `The “${trip}” group is coming together with a different lineup for now. Plenty of other trips fit you — shall we look?`,
+    feedBtn: "Browse trips ↗",
+    soonHead: "TRIP IS COMING UP",
+    soon: (trip: string, n: string) =>
+      `“${trip}” is ${n === "1" ? "1 day" : `${n} days`} away. Check your documents, tickets and meeting point.`,
     creatorHead: "DAY 2 OF THE TRIP · FOR YOU",
     creator: (trip: string) =>
       `Enjoying «${trip}»? Here's a secret: if your Reel from this trip reaches <b>1M views</b>, we refund your flights and hotel <b>up to $1,000</b>.\n\nOnly for people on this trip. You have 30 days after you return to post it.`,
@@ -209,6 +233,12 @@ export function render(
         .join("\n");
       return { head: t.sosHead, body, btn: t.roomBtn, path: "/room", map };
     }
+    case "trip_updated":
+      return { head: t.updatedHead, body: t.updated(trip), btn: t.tripBtn, path: "" };
+    case "join_rejected":
+      return { head: t.rejectedHead, body: t.rejected(trip), btn: t.feedBtn, path: "", to: "/trips" };
+    case "trip_soon":
+      return { head: t.soonHead, body: t.soon(trip, r.n ?? "3"), btn: t.roomBtn, path: "/room" };
     case "creator_invite":
       return { head: t.creatorHead, body: t.creator(trip), btn: t.creatorBtn, path: "/creator" };
     case "checkin_contact":
@@ -311,7 +341,10 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
         ? new InlineKeyboard().url(T[l].mapBtn, m.map)
         : undefined
       : m.btn && appUrl.startsWith("https://")
-        ? new InlineKeyboard().webApp(m.btn, `${appUrl}/${l}/trips/${r.trip_id}${m.path}`)
+        ? new InlineKeyboard().webApp(
+            m.btn,
+            "to" in m && m.to ? `${appUrl}/${l}${m.to}` : `${appUrl}/${l}/trips/${r.trip_id}${m.path}`,
+          )
         : undefined;
     try {
       await api.sendMessage(chat, `${m.head ? `<b>${m.head}</b>\n` : ""}${m.body}${footer}`, {

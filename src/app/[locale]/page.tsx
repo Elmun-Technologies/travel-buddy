@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowIcon, CheckIcon } from "@/components/clay";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
@@ -16,8 +17,19 @@ const pill =
 const h2 = "font-display text-[clamp(36px,4vw,56px)]";
 const auto = (min: number) => ({ gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${min}px), 1fr))` });
 
+export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    alternates: {
+      canonical: `/${locale}`,
+      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
+    },
+  };
+}
+
 export default async function Landing() {
   const t = await getTranslations("landing");
+  const tl = await getTranslations("legal");
   const locale = await getLocale();
   const start = "/api/bot"; // → t.me/<bot> (runtime env)
 
@@ -372,11 +384,12 @@ export default async function Landing() {
 
         <footer className="flex flex-wrap justify-between gap-3 px-2 py-6 text-sm text-muted-foreground">
           <span>{t("footer.brand", { app: APP_NAME })}</span>
-          {/* Legal pages come with phase 9 (lawyer-reviewed); plain text until then, no dead links. */}
-          <span className="flex flex-wrap gap-4">
-            <span>{t("footer.terms")}</span>
-            <span>{t("footer.privacy")}</span>
-            <span>{t("footer.safety")}</span>
+          <span className="flex flex-wrap gap-x-4">
+            {(["terms", "privacy", "safety", "support"] as const).map((k) => (
+              <Link key={k} href={`/${k}`} className="inline-flex min-h-11 items-center underline underline-offset-2">
+                {tl(`nav.${k}`)}
+              </Link>
+            ))}
           </span>
         </footer>
       </div>

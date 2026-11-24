@@ -1,0 +1,273 @@
+{
+  "updated": "Last updated: 24 November 2026",
+  "back": "Back",
+  "operator": "Service operator",
+  "contactEmail": "Contact email",
+  "contactTelegram": "Message us on Telegram",
+  "nav": {
+    "terms": "Terms of use",
+    "privacy": "Privacy policy",
+    "safety": "Safety rules",
+    "support": "Help",
+    "label": "Documents"
+  },
+  "accept": "By continuing you accept the {terms} and the {privacy}.",
+  "terms": {
+    "title": "Terms of use",
+    "description": "The rules for using {app}: who can use it, what is and isn't allowed, and the limits of our responsibility.",
+    "lead": "These terms cover the {app} website, Telegram bot and Mini App. By using the service you agree to them.",
+    "sections": [
+      {
+        "h": "Who we are",
+        "p": [
+          "{app} helps people find travel companions and put groups together. We are an intermediary: we introduce people and give groups handy tools (chat, plan, checklists, expense tracking).",
+          "We do not sell tours, book hotels or flights, or hold your money."
+        ]
+      },
+      {
+        "h": "Who can use it",
+        "p": [
+          "You must be at least 18. Enter your real date of birth when you sign up.",
+          "One person, one account. Opening an account in someone else's name or giving false information is not allowed."
+        ]
+      },
+      {
+        "h": "Account and phone number",
+        "p": [
+          "You sign in with Telegram. To open trips and for some other actions you may need to verify your phone number through the bot.",
+          "You are responsible for the security of your account. If you notice anything suspicious, tell us."
+        ]
+      },
+      {
+        "h": "Trips and groups",
+        "p": [
+          "A trip organizer must give accurate dates, place, price and rules. The organizer decides who joins.",
+          "\"Women only\" trips can only be joined by users who have set their gender to female in their profile and verified their phone.",
+          "Joining a trip is an agreement between people. Each participant is responsible for their own travel, documents, insurance and safety."
+        ]
+      },
+      {
+        "h": "Money and expenses",
+        "p": [
+          "No payments go through {app}. The \"Costs\" section is bookkeeping only: who paid what, and who owes whom. You transfer money to each other yourselves.",
+          "Flight links lead to third-party sites and some may be affiliate links. Prices and terms are the responsibility of that site."
+        ]
+      },
+      {
+        "h": "Reference information",
+        "p": [
+          "Information about visas, documents, prices and emergency numbers is a guide and may change. Check it with the embassy, the carrier or an official source before you travel."
+        ]
+      },
+      {
+        "h": "What is not allowed",
+        "p": [
+          "Contacting people for dating or personal relationships, harassment, insults, threats, discrimination.",
+          "False listings, fraud, asking for money, advertising and spam.",
+          "Sharing other people's information without their consent.",
+          "Anything illegal, or trying to disrupt the service."
+        ]
+      },
+      {
+        "h": "Reports and actions",
+        "p": [
+          "Every profile, trip and message has \"Report\" and \"Block\" buttons. We review reports within 24 hours.",
+          "If rules are broken we may hide a listing, or suspend an account temporarily or permanently."
+        ]
+      },
+      {
+        "h": "Limits of liability",
+        "p": [
+          "The service is provided \"as is\". We are not responsible for agreements between users, how a trip goes, other people's behaviour or third-party services. To the fullest extent the law allows, our liability is limited to direct faults of the service itself.",
+          "The service may be interrupted or changed from time to time."
+        ]
+      },
+      {
+        "h": "Deleting your account",
+        "p": [
+          "You can delete your account at any time: Profile → \"Delete account\". What gets erased is described in the Privacy policy."
+        ]
+      },
+      {
+        "h": "Changes to these terms",
+        "p": [
+          "We update these terms from time to time. We will tell you about important changes in the app or through the bot. If you keep using the service after an update, you accept the new terms."
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "description": "What data {app} collects, why, who sees it, and how you can delete it.",
+    "lead": "We only collect what the service needs to work, and we do not sell your data.",
+    "sections": [
+      {
+        "h": "What we collect",
+        "p": [
+          "Through Telegram: Telegram ID, name, username (if any) and language.",
+          "From your profile: date of birth, optional gender, city and country, languages, travel styles, interests and a short bio.",
+          "Phone number: only when you press \"Share number\" in the bot yourself. It is never shown to others.",
+          "Activity: trips you open, join requests, group chat messages, polls, plans, checklists and cost records, reports and blocks.",
+          "Safety: SOS and \"All good\" marks; if you turn on location sharing yourself, your location is kept for one hour.",
+          "Technical data: IP address, device type, error reports. One essential session cookie is used."
+        ]
+      },
+      {
+        "h": "Why we use it",
+        "p": [
+          "To run your account and check your age.",
+          "To show you suitable trips and people (with a \"why it fits\" note).",
+          "To run group chat, plans and cost tracking.",
+          "To send Telegram notifications (you can turn kinds off in your profile).",
+          "For safety: reviewing reports and preventing fraud and abuse.",
+          "For overall statistics to improve the service."
+        ]
+      },
+      {
+        "h": "What others can see",
+        "p": [
+          "Other users see your name, age, city, languages, styles and bio. Gender is shown only if you agree to show it. Your date of birth and phone number are never shown.",
+          "A group's member list is visible only to its members. Blocked people never see each other anywhere.",
+          "If you create a \"Show my family\" link yourself, whoever holds it sees limited information about the trip; you can switch the link off at any time."
+        ]
+      },
+      {
+        "h": "Who we share it with",
+        "p": [
+          "We do not sell your data. To run the service we use outside providers: Telegram (sign-in and notifications), Hetzner (servers in Finland), Sentry (error tracking) and PostHog (EU, overall usage statistics).",
+          "If the law requires it, or there is a serious safety risk, we may disclose information to the competent authorities."
+        ]
+      },
+      {
+        "h": "How long we keep it",
+        "p": [
+          "Data is kept as long as your account exists. Location is not used after an hour. Expired technical records are cleaned up regularly."
+        ]
+      },
+      {
+        "h": "Deleting your account and data",
+        "p": [
+          "Profile → \"Delete account\". The account is hidden immediately and you are signed out; your open listings are closed.",
+          "If you sign in again within 30 days, the account is restored. After 30 days your personal data (profile, phone, linked Telegram account) is erased for good. Shared group records (such as message text) remain without an author.",
+          "To ask for a copy of your data or a correction, write to us through the Help page."
+        ]
+      },
+      {
+        "h": "Your rights",
+        "p": [
+          "You have the right to access, correct and delete your data and to object to its use. Use the contacts on the Help page."
+        ]
+      },
+      {
+        "h": "Children",
+        "p": [
+          "The service is not for anyone under 18. If we find an account belonging to a minor, we delete it."
+        ]
+      },
+      {
+        "h": "Changes to this policy",
+        "p": [
+          "When the policy changes, its date changes; we will tell you about important changes."
+        ]
+      }
+    ]
+  },
+  "safety": {
+    "title": "Safety rules",
+    "description": "How to protect yourself and others on {app}: meeting people, money, the trip and reporting.",
+    "lead": "Travelling with people you don't know takes trust. A few simple rules keep you safe.",
+    "sections": [
+      {
+        "h": "Before you meet",
+        "p": [
+          "Look at profile badges: Telegram, verified phone, \"N/N trips taken\".",
+          "Start in the group chat with general questions; don't rush to share personal details.",
+          "Meet in public places during the day and tell someone where you are."
+        ]
+      },
+      {
+        "h": "About money",
+        "p": [
+          "{app} does not hold money. Don't send large sums to people you don't know in advance.",
+          "Book flights and stays yourself through official sites. Who paid what is recorded in the \"Costs\" section.",
+          "Report anyone who promises a \"fast and cheap\" tour and asks for money."
+        ]
+      },
+      {
+        "h": "During the trip",
+        "p": [
+          "Holding the \"SOS\" button in the trip room for 3 seconds alerts the group and your trusted contacts.",
+          "The \"All good\" mark and the \"Show my family\" page put your relatives' minds at ease.",
+          "You can find the country's emergency number on the Help page and on the SOS screen."
+        ]
+      },
+      {
+        "h": "Respectful conduct",
+        "p": [
+          "Messaging people to date or start a personal relationship is not allowed here.",
+          "Insults, pressure, discrimination and threats have no place.",
+          "Don't share other people's photos or details without permission."
+        ]
+      },
+      {
+        "h": "Reporting and blocking",
+        "p": [
+          "Tap \"Report\" next to a profile, trip or message. Reasons \"For dating\" and \"Unsafe\" are reviewed first; every report within 24 hours.",
+          "After \"Block\" you and that person no longer see each other anywhere. Manage the list in Profile → \"Blocked\"."
+        ]
+      },
+      {
+        "h": "Minors and 18+",
+        "p": [
+          "The service is only for people over 18. If you notice a minor, report it."
+        ]
+      },
+      {
+        "h": "If you are in serious danger",
+        "p": [
+          "If your life is at risk, call the local emergency service first. Then write to us — we will help within the law."
+        ]
+      }
+    ]
+  },
+  "support": {
+    "title": "Help",
+    "description": "The {app} help centre: contact us, report someone, delete your account and emergency numbers.",
+    "lead": "A question, an idea or a problem — write to us. We usually reply within one working day.",
+    "contactTitle": "Contact us",
+    "contactNone": "Contact details will appear here soon. Until then, message our bot.",
+    "botLink": "Message the bot",
+    "faq": [
+      {
+        "h": "How do I report someone?",
+        "p": [
+          "Tap \"Report\" next to a profile, trip or chat message and choose a reason. We review it within 24 hours."
+        ]
+      },
+      {
+        "h": "How do I block someone?",
+        "p": [
+          "Choose \"Block\" on the person's profile or in a chat message menu. The list is in Profile → \"Blocked\"."
+        ]
+      },
+      {
+        "h": "How do I delete my account?",
+        "p": [
+          "Profile → \"Delete account\". The account is hidden immediately and the data is erased after 30 days. Sign in again within 30 days and it is restored."
+        ]
+      },
+      {
+        "h": "How do I verify my phone?",
+        "p": [
+          "Profile → \"Verify in the bot\" → in the bot tap \"Share number\". The number is never shown to anyone."
+        ]
+      }
+    ],
+    "emergencyTitle": "Emergency numbers",
+    "emergencyLead": "Pick a country to find the local number. If you are in danger, call it first.",
+    "all": "Single number",
+    "police": "Police",
+    "ambulance": "Ambulance",
+    "emergencyNote": "Numbers can change; check before you travel."
+  }
+}

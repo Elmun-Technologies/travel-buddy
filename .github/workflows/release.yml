@@ -1,0 +1,46 @@
+name: release
+
+# Production images. Run by hand (Actions → release → Run workflow) or by pushing a tag like v1.0.0.
+# It only BUILDS and pushes the images (:production). Nothing is deployed: the owner presses
+# "Redeploy" in Coolify (worker first, then web) after reading docs/runbooks/deploy.md.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  images:
+    # Server is ARM (Hetzner aarch64): build natively on an arm64 runner.
+    runs-on: ubuntu-24.04-arm
+    permissions: { contents: read, packages: write }
+    strategy:
+      matrix:
+        target: [web, worker]
+    steps:
+      - uses: actions/checkout@v4
+      - id: owner
+        run: echo "lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          platforms: linux/arm64
+          push: true
+          build-args: |
+            APP_NAME=${{ vars.APP_NAME }}
+            APP_URL=${{ vars.APP_URL_PRODUCTION }}
+            GIT_SHA=${{ github.sha }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN_PRODUCTION || vars.NEXT_PUBLIC_SENTRY_DSN }}
+          secrets: |
+            sa_key=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          tags: |
+            ghcr.io/${{ steps.owner.outputs.lc }}/travel-buddy-${{ matrix.target }}:production
+            ghcr.io/${{ steps.owner.outputs.lc }}/travel-buddy-${{ matrix.target }}:prod-${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}

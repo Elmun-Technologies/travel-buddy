@@ -49,9 +49,6 @@ export default async function Landing() {
             <a href="#room" className="hover:text-blue">
               {t("nav.room")}
             </a>
-            <a href="#clubs" className="hover:text-blue">
-              {t("nav.clubs")}
-            </a>
             <a href="#stories" className="hover:text-blue">
               {t("nav.stories")}
             </a>
@@ -286,29 +283,6 @@ export default async function Landing() {
           </div>
         </section>
 
-        {/* CLUBS */}
-        <section id="clubs" className="flex flex-col gap-8 rounded-panel bg-card p-6 md:p-10">
-          <SectionHead title={t("clubs.title")} lead={t("clubs.lead")} />
-          <div className="grid gap-3" style={auto(260)}>
-            {(["c1", "c2", "c3"] as const).map((c) => (
-              <div key={c} className="flex flex-col gap-5 rounded-[22px] border border-line p-6">
-                <span className={cn(tag, "self-start")}>{t("clubs.sample")}</span>
-                <div className="font-display text-[26px]">{t(`clubs.${c}`)}</div>
-                <div className="text-sm text-muted-foreground">{t(`clubs.${c}t`)}</div>
-              </div>
-            ))}
-            <a
-              href={start}
-              className="press flex flex-col justify-between gap-5 rounded-[22px] bg-ink p-6 text-white"
-            >
-              <div className="font-display text-[26px]">{t("clubs.open")}</div>
-              <span className="flex size-14 items-center justify-center self-end rounded-full bg-signal text-ink">
-                <ArrowIcon className="size-[22px]" />
-              </span>
-            </a>
-          </div>
-        </section>
-
         {/* MEMORIES */}
         <section id="stories" className="flex flex-col gap-8 rounded-panel bg-ink p-6 text-white md:p-10">
           <SectionHead title={t("stories.title")} lead={t("stories.lead")} dark />
@@ -386,7 +360,11 @@ export default async function Landing() {
           <span>{t("footer.brand", { app: APP_NAME })}</span>
           <span className="flex flex-wrap gap-x-4">
             {(["terms", "privacy", "safety", "support"] as const).map((k) => (
-              <Link key={k} href={`/${k}`} className="inline-flex min-h-11 items-center underline underline-offset-2">
+              <Link
+                key={k}
+                href={`/${k}`}
+                className="inline-flex min-h-11 items-center underline underline-offset-2"
+              >
                 {tl(`nav.${k}`)}
               </Link>
             ))}

@@ -4,6 +4,7 @@ import { authedJson, json } from "@/lib/api";
 import { fieldErrors } from "@/lib/form";
 import { formatBudget, formatTripDates } from "@/lib/format";
 import { rateLimit } from "@/lib/rate-limit";
+import { track } from "@/lib/track";
 import { bandToBudget, createTripBody, datesFor, tripSchema } from "@/modules/trips/schema";
 import { createTrip } from "@/modules/trips/service";
 import { buildTripTitle } from "@/modules/trips/title";
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
   if (!input.success) return json({ errors: fieldErrors(input.error) }, 422);
   const res = await createTrip(user.id, input.data);
   if (!res.ok) return json({ error: res.error }, 409);
+  track("trip_created", user.id, { country: b.country, size: b.size, women_only: b.womenOnly });
   const ts = await getTranslations({ locale, namespace: "share" });
   const budget = formatBudget(min == null ? null : min * 100, max == null ? null : max * 100, "USD");
   const meta = [formatTripDates(dates, locale), budget, ts("spots", { n: 1, max: b.size })]

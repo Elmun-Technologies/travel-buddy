@@ -21,7 +21,13 @@ import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { createTripConversation } from "@/modules/chat/service";
 import { visaFreeCountries } from "@/modules/destinations/service";
-import { addOrganizer, approvedCount, approvedMemberIds, countApproved, getMemberships } from "@/modules/groups/service";
+import {
+  addOrganizer,
+  approvedCount,
+  approvedMemberIds,
+  countApproved,
+  getMemberships,
+} from "@/modules/groups/service";
 import { notify } from "@/modules/notifications/service";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
@@ -200,7 +206,13 @@ export type UpdateTripResult =
   | { ok: true }
   | {
       ok: false;
-      error: "not_found" | "forbidden" | "started" | "size_below_members" | "women_only_locked" | "women_only_creator";
+      error:
+        | "not_found"
+        | "forbidden"
+        | "started"
+        | "size_below_members"
+        | "women_only_locked"
+        | "women_only_creator";
     };
 
 /**
@@ -208,7 +220,11 @@ export type UpdateTripResult =
  * The row is locked like in join/leave, so the size check and the status flip never race a join.
  * People already in the group are told when the dates change.
  */
-export async function updateTrip(userId: string, tripId: string, patch: UpdateTripPatch): Promise<UpdateTripResult> {
+export async function updateTrip(
+  userId: string,
+  tripId: string,
+  patch: UpdateTripPatch,
+): Promise<UpdateTripResult> {
   const profile = patch.womenOnly ? await getJoinProfile(userId) : null;
   return getDb().transaction(async (tx) => {
     const [t] = await tx.select().from(trips).where(eq(trips.id, tripId)).for("update");
@@ -223,10 +239,14 @@ export async function updateTrip(userId: string, tripId: string, patch: UpdateTr
       if (n > 1) return { ok: false, error: "women_only_locked" }; // others already joined a mixed group
     }
     const status = t.status === "closed" ? "closed" : n >= patch.groupSizeMax ? "full" : "open";
-    await tx.update(trips).set({ ...patch, status }).where(eq(trips.id, tripId));
+    await tx
+      .update(trips)
+      .set({ ...patch, status })
+      .where(eq(trips.id, tripId));
     const datesChanged = patch.startDate !== t.startDate || patch.endDate !== t.endDate;
     if (datesChanged)
-      for (const id of await approvedMemberIds(tx, tripId, userId)) await notify(tx, id, "trip_updated", { tripId });
+      for (const id of await approvedMemberIds(tx, tripId, userId))
+        await notify(tx, id, "trip_updated", { tripId });
     return { ok: true };
   });
 }

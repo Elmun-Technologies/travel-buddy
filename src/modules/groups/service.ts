@@ -182,7 +182,8 @@ export async function separateAfterBlock(a: string, b: string) {
       if (!trip) return;
       const mine = and(eq(tripMembers.tripId, s.tripId), eq(tripMembers.userId, s.memberId));
       const [before] = await tx.select({ status: tripMembers.status }).from(tripMembers).where(mine);
-      if (before?.status === "requested") await tx.update(tripMembers).set({ status: "rejected" }).where(mine);
+      if (before?.status === "requested")
+        await tx.update(tripMembers).set({ status: "rejected" }).where(mine);
       if (before?.status !== "approved") return;
       await tx.update(tripMembers).set({ status: "left" }).where(mine);
       await removeTripChatMember(tx, s.tripId, s.memberId);

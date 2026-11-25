@@ -20,7 +20,8 @@ export type NotificationType =
   | "creator_invite"
   | "trip_updated"
   | "join_rejected"
-  | "trip_soon";
+  | "trip_soon"
+  | "review_ask";
 
 /** What the user can turn off in the profile. Everything about them personally is "mine". */
 export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine"] as const;

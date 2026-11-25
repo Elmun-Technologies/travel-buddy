@@ -24,7 +24,10 @@ export async function POST(req: Request) {
   // The page's language (the bot opens /{chosen language}/tg), else the Telegram app language.
   const lang = typeof body?.locale === "string" ? body.locale : tg.language_code?.slice(0, 2);
   const locale = asLocale(routing.locales.find((l) => l === lang));
-  const res = await completeTelegramLogin(tg, locale);
+  // Ad campaigns open the Mini App with t.me/<bot>?startapp=src_<name>: remember where people came from.
+  const start = new URLSearchParams(initData).get("start_param") ?? "";
+  const source = /^src_([a-z0-9_]{1,30})$/.exec(start)?.[1];
+  const res = await completeTelegramLogin(tg, locale, source);
   if (!res.ok)
     return Response.json({ error: res.error }, { status: res.error === "rate_limited" ? 429 : 403 });
   // Opened from a shared link (t.me/<bot>?startapp=trip_<code>): show that trip first —

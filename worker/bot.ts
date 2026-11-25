@@ -1,8 +1,17 @@
 // grammY bot (long polling: no webhook, no public URL for the worker). Texts: Bot-Start.png.
 // No emoji (product-decisions §1): symbols only where the design has them (↗, ·).
 import { Bot, InlineKeyboard, Keyboard } from "grammy";
-import { getTelegramLocale, setTelegramLocale, verifyPhoneFromTelegram } from "@/modules/auth/service";
+import {
+  getTelegramLocale,
+  setTelegramLocale,
+  userIdByTelegram,
+  verifyPhoneFromTelegram,
+} from "@/modules/auth/service";
+import { createHash } from "node:crypto";
+import { personId, sendEvent } from "@/lib/analytics";
 import { acceptContact } from "@/modules/safety/service";
+
+const APP = process.env.APP_NAME || "Travel Buddy"; // the brand is never hardcoded in texts
 
 type Lang = "uz" | "ru" | "en";
 const LANGS: Lang[] = ["uz", "ru", "en"];
@@ -10,7 +19,7 @@ const LANGS: Lang[] = ["uz", "ru", "en"];
 const T = {
   uz: {
     welcome:
-      "<b>Salom! Men Travel Buddy — sayohatga sherik topishga yordam beraman.</b>\n" +
+      "<b>Salom! Men {app} — sayohatga sherik topishga yordam beraman.</b>\n" +
       "Qayerga borishni ayting — mos odamlar va guruhlarni topib beraman. Qolganini birga rejalaymiz.\n\n" +
       "Bepul · 18+ · 2 daqiqa vaqt oladi",
     open: "Sherik qidiramiz ↗",
@@ -37,7 +46,7 @@ const T = {
   },
   ru: {
     welcome:
-      "<b>Привет! Я Travel Buddy — помогаю найти попутчиков.</b>\n" +
+      "<b>Привет! Я {app} — помогаю найти попутчиков.</b>\n" +
       "Скажите, куда хотите поехать, — я подберу подходящих людей и группы. Остальное спланируем вместе.\n\n" +
       "Бесплатно · 18+ · займёт 2 минуты",
     open: "Найти попутчика ↗",
@@ -63,7 +72,7 @@ const T = {
   },
   en: {
     welcome:
-      "<b>Hi! I'm Travel Buddy — I help you find travel buddies.</b>\n" +
+      "<b>Hi! I'm {app} — I help you find travel buddies.</b>\n" +
       "Tell me where you want to go and I'll find the right people and groups. We'll plan the rest together.\n\n" +
       "Free · 18+ · takes 2 minutes",
     open: "Find a buddy ↗",
@@ -132,8 +141,21 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       });
       return;
     }
+    // Ad campaigns link t.me/<bot>?start=src_<name>: count bot starts per source.
+    const src = /^src_([a-z0-9_]{1,30})$/.exec(ctx.match)?.[1];
+    if (src && ctx.from)
+      void sendEvent(
+        "bot_start",
+        `tg_${createHash("sha256").update(String(ctx.from.id)).digest("hex").slice(0, 20)}`,
+        {
+          source: src,
+        },
+      );
     await setMenu(ctx.chat.id, l);
-    await ctx.reply(T[l].welcome, { parse_mode: "HTML", reply_markup: startKeyboard(l) });
+    await ctx.reply(T[l].welcome.replaceAll("{app}", APP), {
+      parse_mode: "HTML",
+      reply_markup: startKeyboard(l),
+    });
   });
 
   bot.callbackQuery("how", async (ctx) => {
@@ -160,7 +182,10 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
     await setTelegramLocale(ctx.from.id, l);
     await ctx.answerCallbackQuery({ text: T[l].languageSet });
     if (ctx.chat) await setMenu(ctx.chat.id, l);
-    await ctx.reply(T[l].welcome, { parse_mode: "HTML", reply_markup: startKeyboard(l) });
+    await ctx.reply(T[l].welcome.replaceAll("{app}", APP), {
+      parse_mode: "HTML",
+      reply_markup: startKeyboard(l),
+    });
   });
 
   bot.on("message:contact", async (ctx) => {
@@ -172,6 +197,10 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       return;
     }
     const res = await verifyPhoneFromTelegram(ctx.from.id, c.phone_number);
+    if (res === "ok") {
+      const uid = await userIdByTelegram(ctx.from.id);
+      if (uid) void sendEvent("phone_verified", personId(uid));
+    }
     const text = { ok: T[l].ok, no_user: T[l].noUser, phone_taken: T[l].taken, invalid: T[l].invalid }[res];
     await ctx.reply(text, { reply_markup: { remove_keyboard: true } });
     if ((res === "ok" || res === "no_user") && https)

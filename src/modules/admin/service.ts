@@ -91,7 +91,9 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
           .update(users)
           .set({ status: suspend ? "suspended" : "active" })
           // A reported person who deleted their own account can still be suspended (no quiet comeback).
-          .where(and(eq(users.id, op.id), inArray(users.status, suspend ? ["active", "deleted"] : ["suspended"])))
+          .where(
+            and(eq(users.id, op.id), inArray(users.status, suspend ? ["active", "deleted"] : ["suspended"])),
+          )
           .returning({ id: users.id });
         if (!r.length) return false;
         if (suspend) {

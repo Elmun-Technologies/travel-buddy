@@ -44,9 +44,7 @@ async function Blocked({ params }: PageProps<"/[locale]/me/blocked">) {
           {t("blocked.title")}
         </h2>
         {blockedIds.length === 0 ? (
-          <p className="text-[15px] text-muted-foreground">
-            {t("blocked.empty")}
-          </p>
+          <p className="text-[15px] text-muted-foreground">{t("blocked.empty")}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {blockedIds.map((blockedId: string) => (

@@ -166,9 +166,7 @@
       },
       {
         "h": "Siyosatni o'zgartirish",
-        "p": [
-          "Siyosat yangilanganda sana o'zgaradi, muhim o'zgarishlar haqida xabar beramiz."
-        ]
+        "p": ["Siyosat yangilanganda sana o'zgaradi, muhim o'zgarishlar haqida xabar beramiz."]
       }
     ]
   },
@@ -218,9 +216,7 @@
       },
       {
         "h": "Bolalar va 18+",
-        "p": [
-          "Xizmat faqat 18 yoshdan oshganlar uchun. Voyaga yetmagan odamni sezsangiz, shikoyat qiling."
-        ]
+        "p": ["Xizmat faqat 18 yoshdan oshganlar uchun. Voyaga yetmagan odamni sezsangiz, shikoyat qiling."]
       },
       {
         "h": "Jiddiy xavf bo'lsa",
@@ -258,9 +254,7 @@
       },
       {
         "h": "Telefonni qanday tasdiqlayman?",
-        "p": [
-          "Profil → «Botda tasdiqlash» → botda «Raqamni ulashish». Raqam hech kimga ko'rsatilmaydi."
-        ]
+        "p": ["Profil → «Botda tasdiqlash» → botda «Raqamni ulashish». Raqam hech kimga ko'rsatilmaydi."]
       }
     ],
     "emergencyTitle": "Favqulodda raqamlar",

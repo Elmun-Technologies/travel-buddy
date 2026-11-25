@@ -140,7 +140,8 @@
       "unblock": "Unblock",
       "confirm": "Unblock {name}?",
       "unblocked": "{name} has been unblocked"
-    }
+    },
+    "rating": "★ {avg} · {n} ratings"
   },
   "feed": {
     "title": "Trips",
@@ -545,7 +546,7 @@
     },
     "stories": {
       "title": "Memories",
-      "lead": "Back home: a shared album, stories and kind words for each other. If everyone agrees, we'll turn it into a page to show your friends.",
+      "lead": "After the trip you leave each other ratings and kind words. A shared album and story page are coming soon.",
       "s1": "Kazbegi, 7 people",
       "s1t": "Example · 48 photos · 6 stories",
       "s1alt": "A group of hikers in the mountains",
@@ -1271,5 +1272,17 @@
     "cta": "Pilot it with us",
     "deck": "Request the pilot deck",
     "foot": "Concept page. No official partnership is implied until signed. Full terms shown before registration."
+  },
+  "reviews": {
+    "title": "Rate your companions",
+    "lead": "How was your travel buddy? One tap is enough. Only the average is shown — nobody sees who rated what.",
+    "empty": "There's nobody to rate.",
+    "thanks": "Thank you!",
+    "note": "A kind word or two (optional)",
+    "send": "Send",
+    "stars": "{n} stars",
+    "error": "Couldn't send. Please try again.",
+    "cta": "Rate your companions",
+    "back": "Back to the trip"
   }
 }

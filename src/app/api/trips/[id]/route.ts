@@ -3,6 +3,7 @@ import { routing } from "@/i18n/routing";
 import { authedJson, json } from "@/lib/api";
 import { fieldErrors } from "@/lib/form";
 import { rateLimit } from "@/lib/rate-limit";
+import { track } from "@/lib/track";
 import { bandToBudget, datesFor, tripSchema, updateTripBody } from "@/modules/trips/schema";
 import { getTripView, updateTrip } from "@/modules/trips/service";
 import { buildTripTitle } from "@/modules/trips/title";
@@ -61,5 +62,6 @@ export async function PATCH(req: Request, { params }: RouteContext<"/api/trips/[
     description: d.description,
   });
   if (!res.ok) return json({ error: res.error }, res.error === "forbidden" ? 403 : 409);
+  track("trip_edited", user.id);
   return json({ ok: true });
 }

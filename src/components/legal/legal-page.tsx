@@ -127,7 +127,13 @@ async function Doc({ kind, localeRaw }: { kind: Exclude<DocKind, "support">; loc
 }
 
 /** Terms, privacy and safety share one layout. */
-export function LegalPage({ kind, params }: { kind: Exclude<DocKind, "support">; params: Promise<{ locale: string }> }) {
+export function LegalPage({
+  kind,
+  params,
+}: {
+  kind: Exclude<DocKind, "support">;
+  params: Promise<{ locale: string }>;
+}) {
   return (
     <Suspense fallback={<PageLoading />}>
       <Resolved kind={kind} params={params} />
@@ -135,6 +141,12 @@ export function LegalPage({ kind, params }: { kind: Exclude<DocKind, "support">;
   );
 }
 
-async function Resolved({ kind, params }: { kind: Exclude<DocKind, "support">; params: Promise<{ locale: string }> }) {
+async function Resolved({
+  kind,
+  params,
+}: {
+  kind: Exclude<DocKind, "support">;
+  params: Promise<{ locale: string }>;
+}) {
   return <Doc kind={kind} localeRaw={(await params).locale} />;
 }

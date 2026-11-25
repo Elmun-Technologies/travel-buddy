@@ -7,6 +7,7 @@ import { fieldErrors, formError, type FormState } from "@/lib/form";
 import { asLocale } from "@/lib/guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { destroySession, getSessionUser } from "@/lib/session";
+import { track } from "@/lib/track";
 import { decideRequest, leaveTrip } from "@/modules/groups/service";
 import { intentFromForm, intentSchema } from "@/modules/trips/schema";
 import { closeIntent, closeTrip, createIntent } from "@/modules/trips/service";
@@ -56,7 +57,10 @@ export async function closeIntentAction(f: FormData) {
 export async function decideAction(f: FormData) {
   const { user } = await authed(f);
   const [tripId, userId] = [uid(f.get("tripId")), uid(f.get("userId"))];
-  if (tripId && userId) await decideRequest(user.id, tripId, userId, f.get("decision") === "approve");
+  if (tripId && userId) {
+    const res = await decideRequest(user.id, tripId, userId, f.get("decision") === "approve");
+    if (res.ok && f.get("decision") === "approve") track("join_approved", userId);
+  }
   refresh();
 }
 

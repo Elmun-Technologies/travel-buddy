@@ -72,10 +72,15 @@ export async function runReliability(db: Db) {
       with done as (
         update trips set status = 'completed'
         where status in ('open', 'full') and end_date < ${today}
-        returning id)
-      insert into reliability (user_id, trip_id, outcome)
-      select tm.user_id, tm.trip_id, 'went' from trip_members tm
-      where tm.status = 'approved' and tm.trip_id in (select id from done)
-      on conflict (user_id, trip_id) do update set outcome = 'went'`);
+        returning id),
+      went as (
+        insert into reliability (user_id, trip_id, outcome)
+        select tm.user_id, tm.trip_id, 'went' from trip_members tm
+        where tm.status = 'approved' and tm.trip_id in (select id from done)
+        on conflict (user_id, trip_id) do update set outcome = 'went'
+        returning user_id, trip_id)
+      -- the trip is over: ask everyone who was there to rate their companions
+      insert into notifications (user_id, type, payload, channel)
+      select user_id, 'review_ask', jsonb_build_object('tripId', trip_id), 'telegram' from went`);
   });
 }

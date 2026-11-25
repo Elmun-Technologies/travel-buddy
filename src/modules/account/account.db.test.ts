@@ -74,8 +74,12 @@ describe.runIf(run)("account deletion, blocks, joins (db)", () => {
     if (!mine.ok || !theirs.ok) throw new Error("trip");
     expect(await requestJoin(leaver, theirs.id, null)).toEqual({ ok: true });
     expect(await decideRequest(organizer, theirs.id, leaver, true)).toEqual({ ok: true });
-    await db.insert(reports).values({ reporterId: leaver, targetType: "trip", targetId: theirs.id, reason: "other" });
-    await db.insert(sessions).values({ userId: leaver, tokenHash: `t${base}`, expiresAt: new Date(Date.now() + 1e6) });
+    await db
+      .insert(reports)
+      .values({ reporterId: leaver, targetType: "trip", targetId: theirs.id, reason: "other" });
+    await db
+      .insert(sessions)
+      .values({ userId: leaver, tokenHash: `t${base}`, expiresAt: new Date(Date.now() + 1e6) });
 
     await deleteAccount(leaver);
 
@@ -84,7 +88,9 @@ describe.runIf(run)("account deletion, blocks, joins (db)", () => {
     expect(await db.select().from(sessions).where(eq(sessions.userId, leaver))).toHaveLength(0);
     // their own listing is closed and gone from the feed; their seat in the other group is free
     expect((await getTripView(mine.id, reporter))?.status).toBe("closed");
-    expect((await listFeed(reporter, { page: 1, country: ["GE"] })).items.some((t) => t.id === mine.id)).toBe(false);
+    expect((await listFeed(reporter, { page: 1, country: ["GE"] })).items.some((t) => t.id === mine.id)).toBe(
+      false,
+    );
     const seat = await db.select().from(tripMembers).where(eq(tripMembers.tripId, theirs.id));
     expect(seat.find((x) => x.userId === leaver)?.status).toBe("left");
     expect(await getPublicProfile(reporter, leaver)).toBeNull();
@@ -95,7 +101,10 @@ describe.runIf(run)("account deletion, blocks, joins (db)", () => {
 
     // not yet 30 days: nothing to erase
     expect((await eraseDeletedAccounts(db, () => {})).erased).toBe(0);
-    await db.update(users).set({ deletedAt: new Date(Date.now() - 31 * 86_400_000) }).where(eq(users.id, leaver));
+    await db
+      .update(users)
+      .set({ deletedAt: new Date(Date.now() - 31 * 86_400_000) })
+      .where(eq(users.id, leaver));
     expect(await db.transaction((tx) => restoreUser(tx, leaver))).toBe(false); // too late
     const r = await eraseDeletedAccounts(db, () => {});
     expect(r).toEqual({ erased: expect.any(Number), failed: 0 });
@@ -176,7 +185,10 @@ describe.runIf(run)("account deletion, blocks, joins (db)", () => {
     // not due yet: nothing is sent
     await deliverNotifications(flaky as never, db, "https://x.test");
     expect(calls).toBe(1);
-    await db.update(notifications).set({ nextAttemptAt: new Date(Date.now() - 1000) }).where(eq(notifications.userId, organizer));
+    await db
+      .update(notifications)
+      .set({ nextAttemptAt: new Date(Date.now() - 1000) })
+      .where(eq(notifications.userId, organizer));
     await deliverNotifications(flaky as never, db, "https://x.test");
     [n] = await db.select().from(notifications).where(eq(notifications.userId, organizer));
     expect(calls).toBe(2);

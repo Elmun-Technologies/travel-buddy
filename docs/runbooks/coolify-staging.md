@@ -5,8 +5,8 @@
 
 Image'lar har safar `main` ga push qilinganda GitHub Actions'da avtomatik yig'iladi:
 
-- `ghcr.io/elmuntech/travel-buddy-web:staging`
-- `ghcr.io/elmuntech/travel-buddy-worker:staging`
+- `ghcr.io/elmun-technologies/travel-buddy-web:staging`
+- `ghcr.io/elmun-technologies/travel-buddy-worker:staging`
 
 ---
 
@@ -19,7 +19,7 @@ Image'lar shaxsiy (private). Server ularni yuklab olishi uchun **faqat o'qish hu
    - Faqat bitta belgi qo'ying: **`read:packages`**. Boshqa hech narsa belgilanmasin.
 2. Serverga SSH orqali kiring va quyidagini yozing (token so'ralganda uni joylang, ekranda ko'rinmaydi):
    ```bash
-   docker login ghcr.io -u elmuntech
+   docker login ghcr.io -u <github-login>
    ```
    Bu buyruq serverdagi Docker sozlamalariga faqat yangi kirish ma'lumotini qo'shadi, boshqa loyihalarga ta'sir qilmaydi.
 3. Tokenni hech kimga yubormang, chatga ham yozmang.
@@ -44,7 +44,7 @@ Coolify → **Projects** → **+ Add** → nomi `travel-buddy`. Ichida `staging`
 
 ## 4-qadam. Worker (birinchi bo'lib ishga tushadi)
 
-**+ New Resource** → **Docker Image** → `ghcr.io/elmuntech/travel-buddy-worker:staging`
+**+ New Resource** → **Docker Image** → `ghcr.io/elmun-technologies/travel-buddy-worker:staging`
 
 - Name: `tvb-staging-worker`. Domen **qo'yilmaydi**, port kerak emas.
 - **Environment Variables**:
@@ -58,7 +58,7 @@ Coolify → **Projects** → **+ Add** → nomi `travel-buddy`. Ichida `staging`
 
 ## 5-qadam. Web
 
-**+ New Resource** → **Docker Image** → `ghcr.io/elmuntech/travel-buddy-web:staging`
+**+ New Resource** → **Docker Image** → `ghcr.io/elmun-technologies/travel-buddy-web:staging`
 
 - Name: `tvb-staging-web`. **Ports Exposes**: `3000`.
 - **Domains**: Coolify bergan vaqtinchalik `sslip.io` manzilini qoldiring (**Generate Domain** tugmasi).

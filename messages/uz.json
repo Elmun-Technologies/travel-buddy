@@ -140,7 +140,8 @@
       "unblock": "Blokdan chiqarish",
       "confirm": "{name}ni blokdan chiqarishni istaysizmi?",
       "unblocked": "{name} blokidan chiqarildi"
-    }
+    },
+    "rating": "★ {avg} · {n} baho"
   },
   "feed": {
     "title": "Safarlar",
@@ -545,7 +546,7 @@
     },
     "stories": {
       "title": "Taassurotlar",
-      "lead": "Qaytgach — umumiy albom, hikoyalar va bir-biringizga iliq so'zlar. Hamma rozi bo'lsa, chiroyli sahifa qilib do'stlarga ko'rsatamiz.",
+      "lead": "Qaytgach — bir-biringizga baho va iliq so'zlar qoldirasiz. Umumiy albom va hikoyalar sahifasi tez orada.",
       "s1": "Kazbegi, 7 kishi",
       "s1t": "Namuna · 48 foto · 6 hikoya",
       "s1alt": "Tog'dagi sayohatchilar guruhi",
@@ -1271,5 +1272,17 @@
     "cta": "Biz bilan sinab ko'ring",
     "deck": "Pilot taqdimotini so'rash",
     "foot": "Konsept sahifa. Shartnoma imzolanmaguncha rasmiy hamkorlik nazarda tutilmaydi. To'liq shartlar ro'yxatdan o'tishdan oldin ko'rsatiladi."
+  },
+  "reviews": {
+    "title": "Birga borganlarga baho",
+    "lead": "Qanday sherik edi? Bir bosish kifoya. Baho faqat o'rtacha ko'rinishida chiqadi — kim nima deganini hech kim ko'rmaydi.",
+    "empty": "Baho beradigan odam yo'q.",
+    "thanks": "Rahmat!",
+    "note": "Bir-ikki iliq so'z (ixtiyoriy)",
+    "send": "Yuborish",
+    "stars": "{n} yulduz",
+    "error": "Yuborib bo'lmadi. Qayta urinib ko'ring.",
+    "cta": "Birga borganlarga baho beramiz",
+    "back": "Safarga qaytish"
   }
 }

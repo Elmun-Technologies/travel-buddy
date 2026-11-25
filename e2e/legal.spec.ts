@@ -12,7 +12,9 @@ for (const locale of ["uz", "ru", "en"] as const) {
       expect(text).not.toMatch(/undefined|\[object|\{app\}|\{terms\}|\{privacy\}/);
       expect(text.length).toBeGreaterThan(400);
       // 390px: no sideways scroll
-      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+      ).toBeLessThanOrEqual(0);
     });
   }
 }

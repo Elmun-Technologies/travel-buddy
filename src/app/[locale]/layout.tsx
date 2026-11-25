@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -7,6 +8,7 @@ import { routing } from "@/i18n/routing";
 import Script from "next/script";
 import { SoundRoot } from "@/components/sound";
 import { TelegramInit } from "@/components/telegram-actions";
+import { AnalyticsBeacon } from "@/components/analytics-beacon";
 import { UpdateBanner } from "@/components/update-banner";
 import { TG_SCRIPT } from "@/lib/telegram-webapp";
 import { APP_NAME } from "@/lib/config";
@@ -55,6 +57,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <UpdateBanner />
           <TelegramInit />
           <SoundRoot />
+          <Suspense fallback={null}>
+            <AnalyticsBeacon />
+          </Suspense>
         </NextIntlClientProvider>
       </body>
     </html>

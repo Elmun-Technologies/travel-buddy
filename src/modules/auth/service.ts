@@ -86,7 +86,8 @@ export async function verifyPhoneFromTelegram(
   return markPhoneVerified(acc.userId, phone);
 }
 
-async function userIdByTelegram(telegramId: number) {
+/** The account behind a Telegram id, or null if the person never opened the app. */
+export async function userIdByTelegram(telegramId: number) {
   const [acc] = await getDb()
     .select({ userId: authAccounts.userId })
     .from(authAccounts)

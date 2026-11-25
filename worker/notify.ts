@@ -50,10 +50,16 @@ const T = {
       `«${trip}»: ${n} kishi muddatgacha chipta olmadi, joyi bo'shadi. Navbatda ${waiting} ta so'rov bor.`,
     tripBtn: "Safarni ochaman ↗",
     updatedHead: "SAFAR YANGILANDI",
-    updated: (trip: string) => `«${trip}»: tashkilotchi safar tafsilotlarini yangiladi. Yangi sana va shartlarni ko'rib chiqing.`,
+    updated: (trip: string) =>
+      `«${trip}»: tashkilotchi safar tafsilotlarini yangiladi. Yangi sana va shartlarni ko'rib chiqing.`,
     rejectedHead: "SO'ROVINGIZ BO'YICHA",
-    rejected: (trip: string) => `«${trip}» guruhi hozircha boshqa tarkibda yig'ilmoqda. Sizga mos boshqa safarlar ko'p — ko'rib chiqamizmi?`,
+    rejected: (trip: string) =>
+      `«${trip}» guruhi hozircha boshqa tarkibda yig'ilmoqda. Sizga mos boshqa safarlar ko'p — ko'rib chiqamizmi?`,
     feedBtn: "Safarlarni ko'raman ↗",
+    reviewHead: "SAFAR TUGADI",
+    review: (trip: string) =>
+      `«${trip}» safari tugadi. Birga borganlarga baho bering — keyingi sayohatchilar ishonch bilan tanlaydi.`,
+    reviewBtn: "Baho beraman ↗",
     soonHead: "SAFAR YAQINLASHDI",
     soon: (trip: string, n: string) =>
       `«${trip}» safariga ${n === "1" ? "1 kun" : `${n} kun`} qoldi. Hujjat, chipta va yig'ilish joyini tekshirib oling.`,
@@ -101,10 +107,16 @@ const T = {
       `«${trip}»: ${n} чел. не купили билет до срока, места освободились. Заявок в очереди: ${waiting}.`,
     tripBtn: "Открыть поездку ↗",
     updatedHead: "ПОЕЗДКА ОБНОВЛЕНА",
-    updated: (trip: string) => `«${trip}»: организатор обновил детали поездки. Посмотрите новые даты и условия.`,
+    updated: (trip: string) =>
+      `«${trip}»: организатор обновил детали поездки. Посмотрите новые даты и условия.`,
     rejectedHead: "ПО ВАШЕЙ ЗАЯВКЕ",
-    rejected: (trip: string) => `Группа «${trip}» пока собирается в другом составе. Подходящих поездок много — посмотрим?`,
+    rejected: (trip: string) =>
+      `Группа «${trip}» пока собирается в другом составе. Подходящих поездок много — посмотрим?`,
     feedBtn: "Смотреть поездки ↗",
+    reviewHead: "ПОЕЗДКА ЗАВЕРШЕНА",
+    review: (trip: string) =>
+      `Поездка «${trip}» закончилась. Оцените попутчиков — следующие путешественники будут выбирать увереннее.`,
+    reviewBtn: "Оценить ↗",
     soonHead: "ПОЕЗДКА СОВСЕМ СКОРО",
     soon: (trip: string, n: string) =>
       `До поездки «${trip}» ${n === "1" ? "остался 1 день" : `осталось ${n} дня`}. Проверьте документы, билеты и место встречи.`,
@@ -151,10 +163,16 @@ const T = {
       `“${trip}”: ${n} didn't get a ticket by the deadline, so places opened up. Requests waiting: ${waiting}.`,
     tripBtn: "Open the trip ↗",
     updatedHead: "TRIP UPDATED",
-    updated: (trip: string) => `“${trip}”: the organizer updated the trip details. Take a look at the new dates and terms.`,
+    updated: (trip: string) =>
+      `“${trip}”: the organizer updated the trip details. Take a look at the new dates and terms.`,
     rejectedHead: "ABOUT YOUR REQUEST",
-    rejected: (trip: string) => `The “${trip}” group is coming together with a different lineup for now. Plenty of other trips fit you — shall we look?`,
+    rejected: (trip: string) =>
+      `The “${trip}” group is coming together with a different lineup for now. Plenty of other trips fit you — shall we look?`,
     feedBtn: "Browse trips ↗",
+    reviewHead: "TRIP FINISHED",
+    review: (trip: string) =>
+      `“${trip}” is over. Rate the people you travelled with — it helps future travellers choose with confidence.`,
+    reviewBtn: "Leave ratings ↗",
     soonHead: "TRIP IS COMING UP",
     soon: (trip: string, n: string) =>
       `“${trip}” is ${n === "1" ? "1 day" : `${n} days`} away. Check your documents, tickets and meeting point.`,
@@ -237,6 +255,8 @@ export function render(
       return { head: t.updatedHead, body: t.updated(trip), btn: t.tripBtn, path: "" };
     case "join_rejected":
       return { head: t.rejectedHead, body: t.rejected(trip), btn: t.feedBtn, path: "", to: "/trips" };
+    case "review_ask":
+      return { head: t.reviewHead, body: t.review(trip), btn: t.reviewBtn, path: "/reviews" };
     case "trip_soon":
       return { head: t.soonHead, body: t.soon(trip, r.n ?? "3"), btn: t.roomBtn, path: "/room" };
     case "creator_invite":
@@ -318,8 +338,7 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
     left join traveler_profiles op on op.user_id = t.owner_user_id
     left join traveler_profiles mp on mp.user_id = nullif(c.payload->>'memberId', '')::uuid`);
 
-  const done = (id: string) =>
-    db.execute(sql`update notifications set sent_at = now() where id = ${id}`);
+  const done = (id: string) => db.execute(sql`update notifications set sent_at = now() where id = ${id}`);
 
   for (const r of rows) {
     const chat = r.to_chat ?? r.chat_id;

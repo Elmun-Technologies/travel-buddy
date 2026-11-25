@@ -47,7 +47,9 @@ async function Support({ params }: PageProps<"/[locale]/support">) {
 
       <Panel tone="dark" className="flex flex-col gap-3">
         <h2 className="font-display text-2xl">{t("support.contactTitle")}</h2>
-        {!info.email && !info.telegram && <p className="text-[15px] text-white/80">{t("support.contactNone")}</p>}
+        {!info.email && !info.telegram && (
+          <p className="text-[15px] text-white/80">{t("support.contactNone")}</p>
+        )}
         <div className="flex flex-wrap gap-2">
           {info.telegram && (
             <a href={`https://t.me/${info.telegram}`} className={`${pill} bg-signal text-ink`}>

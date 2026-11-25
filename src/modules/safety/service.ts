@@ -66,7 +66,12 @@ export async function acceptContact(tok: string, chatId: string) {
     .update(trustedContacts)
     .set({ chatId })
     // Single use: once someone accepted, a later opener of the same link cannot take their place.
-    .where(and(eq(trustedContacts.token, tok), or(isNull(trustedContacts.chatId), eq(trustedContacts.chatId, chatId))))
+    .where(
+      and(
+        eq(trustedContacts.token, tok),
+        or(isNull(trustedContacts.chatId), eq(trustedContacts.chatId, chatId)),
+      ),
+    )
     .returning({ userId: trustedContacts.userId });
   if (!c) return null;
   const [p] = await getDb()

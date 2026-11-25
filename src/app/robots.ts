@@ -11,7 +11,17 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       userAgent: "*",
       allow: "/",
       // Private and personal pages: the app itself, admin, one-off links
-      disallow: ["/api/", "/*/admin", "/*/me", "/*/home", "/*/rooms", "/*/f/", "/*/1m", "/*/inbound", "/*/login"],
+      disallow: [
+        "/api/",
+        "/*/admin",
+        "/*/me",
+        "/*/home",
+        "/*/rooms",
+        "/*/f/",
+        "/*/1m",
+        "/*/inbound",
+        "/*/login",
+      ],
     },
     ...(base ? { sitemap: `${base}/sitemap.xml` } : {}),
   };

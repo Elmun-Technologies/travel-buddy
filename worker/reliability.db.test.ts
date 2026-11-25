@@ -112,7 +112,14 @@ it.runIf(run)("deadline frees unticketed places; finished trips count as went", 
   const types = notes
     .map((n) => `${n.type}:${n.userId === org ? "org" : n.userId === late ? "late" : "waiting"}`)
     .sort();
-  expect(types).toEqual(["spot_freed:org", "ticket_dropped:late", "ticket_reminder:waiting"]);
+  // the finished trip t2 asks both people who were there to rate each other
+  expect(types).toEqual([
+    "review_ask:late",
+    "review_ask:org",
+    "spot_freed:org",
+    "ticket_dropped:late",
+    "ticket_reminder:waiting",
+  ]);
   expect(notes.find((n) => n.type === "spot_freed")?.payload).toEqual({ tripId: t1, n: "1", text: "1" });
   expect(await db.select().from(reliability).where(eq(reliability.tripId, t3))).toEqual([]);
 });

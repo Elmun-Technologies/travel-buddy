@@ -166,9 +166,7 @@
       },
       {
         "h": "Changes to this policy",
-        "p": [
-          "When the policy changes, its date changes; we will tell you about important changes."
-        ]
+        "p": ["When the policy changes, its date changes; we will tell you about important changes."]
       }
     ]
   },
@@ -218,9 +216,7 @@
       },
       {
         "h": "Minors and 18+",
-        "p": [
-          "The service is only for people over 18. If you notice a minor, report it."
-        ]
+        "p": ["The service is only for people over 18. If you notice a minor, report it."]
       },
       {
         "h": "If you are in serious danger",

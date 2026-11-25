@@ -6,6 +6,7 @@ import { ageOn } from "@/lib/catalog";
 import { getDb } from "@/lib/db";
 import { hasTelegram } from "@/modules/auth/service";
 import { isBlockedBetween } from "@/modules/moderation/service";
+import { ratingsOf } from "@/modules/reviews/service";
 import { deletedAmong, getPhoneVerified, isActiveUser } from "@/modules/users/service";
 import type { ProfileInput } from "./schema";
 
@@ -59,7 +60,11 @@ export async function getPublicProfile(viewerId: string, userId: string) {
   if (viewerId !== userId && !(await isActiveUser(userId))) return null;
   const p = await getOwnProfile(userId);
   if (!p) return null;
-  const [phones, rel] = await Promise.all([getPhoneVerified([userId]), getReliability([userId])]);
+  const [phones, rel, rated] = await Promise.all([
+    getPhoneVerified([userId]),
+    getReliability([userId]),
+    ratingsOf([userId]),
+  ]);
   const phone = phones.get(userId) ?? false;
   return {
     userId,
@@ -74,6 +79,7 @@ export async function getPublicProfile(viewerId: string, userId: string) {
     bio: p.bio,
     verified: { telegram: p.telegramVerified, phone, id: p.idVerified },
     reliability: rel.get(userId) ?? null, // "N/N safarga bordi"
+    rating: rated.get(userId) ?? null, // average of 1–5, from 3 reviews on
   };
 }
 

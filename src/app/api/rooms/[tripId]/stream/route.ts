@@ -38,7 +38,9 @@ export async function GET(req: Request, { params }: RouteContext<"/api/rooms/[tr
       const unsubscribe = subscribeRoom(room.id, (e) => void onEvent(e).catch(() => {}));
       const ping = setInterval(async () => {
         // Still a member, and still a live account (suspended or deleted people are cut off).
-        const ok = await Promise.all([getRoom(user.id, tripId.data), isActiveUser(user.id)]).catch(() => null);
+        const ok = await Promise.all([getRoom(user.id, tripId.data), isActiveUser(user.id)]).catch(
+          () => null,
+        );
         if (!ok?.[0] || !ok[1]) return stop();
         await markRead(room.id, user.id).catch(() => {}); // open room = read: no chat digest
         try {

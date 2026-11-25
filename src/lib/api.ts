@@ -9,7 +9,10 @@ export const json = (body: unknown, status = 200) =>
 
 /** Client IP behind Traefik: it appends the address it saw, so the LAST entry can't be spoofed. */
 export function clientIp(h: Headers) {
-  const parts = (h.get("x-forwarded-for") ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+  const parts = (h.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
   return parts.at(-1) ?? "unknown";
 }
 

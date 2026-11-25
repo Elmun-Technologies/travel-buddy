@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, House, MessageCircle, User, Users } from "lucide-react";
+import { Compass, House, MessageCircle, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,6 @@ const TABS = [
   { href: "/home", key: "home", Icon: House },
   { href: "/trips", key: "trips", Icon: Compass },
   { href: "/rooms", key: "rooms", Icon: MessageCircle },
-  { href: "/clubs", key: "clubs", Icon: Users },
   { href: "/me", key: "profile", Icon: User },
 ] as const;
 

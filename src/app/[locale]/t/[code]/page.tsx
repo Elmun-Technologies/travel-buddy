@@ -18,13 +18,23 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/t/[code]
   const s = id ? await tripShare(id, locale) : null;
   if (!id || !s) return { robots: { index: false } };
   const base = process.env.APP_URL;
-  const image = { url: `/api/trips/${id}/story?kind=og&locale=${locale}`, width: 1200, height: 630, alt: s.trip.title };
+  const image = {
+    url: `/api/trips/${id}/story?kind=og&locale=${locale}`,
+    width: 1200,
+    height: 630,
+    alt: s.trip.title,
+  };
   return {
     ...(base ? { metadataBase: new URL(base) } : {}),
     title: s.trip.title,
     description: s.card.meta,
     openGraph: { title: s.trip.title, description: s.card.meta, images: [image], type: "website" },
-    twitter: { card: "summary_large_image", title: s.trip.title, description: s.card.meta, images: [image.url] },
+    twitter: {
+      card: "summary_large_image",
+      title: s.trip.title,
+      description: s.card.meta,
+      images: [image.url],
+    },
   };
 }
 

@@ -41,7 +41,11 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/trips/[i
   const trip = ok.success ? await getTripView(ok.data, null) : null;
   const base = process.env.APP_URL;
   return trip
-    ? { ...(base ? { metadataBase: new URL(base) } : {}), title: trip.title, openGraph: { title: trip.title } }
+    ? {
+        ...(base ? { metadataBase: new URL(base) } : {}),
+        title: trip.title,
+        openGraph: { title: trip.title },
+      }
     : {};
 }
 
@@ -335,6 +339,7 @@ async function JoinArea({
   const te = await getTranslations("errors");
   const tr = await getTranslations("room");
   const tcr = await getTranslations("create");
+  const trv = await getTranslations("reviews");
   const hidden = (name: string, value: string) => <input type="hidden" name={name} value={value} />;
   const small = "min-h-11 self-start py-2.5 text-sm text-muted-foreground underline-offset-4 hover:underline";
 
@@ -344,6 +349,9 @@ async function JoinArea({
     getMyMembership(user.id, trip.id),
   ]);
   if (!profile) return <MainAction label={t("profileToJoin")} href={`/welcome?next=/trips/${trip.id}`} />;
+
+  if (trip.isOwner && trip.status === "completed")
+    return <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />;
 
   if (trip.isOwner) {
     const requests = members?.filter((m) => m.status === "requested") ?? [];
@@ -412,6 +420,15 @@ async function JoinArea({
     </form>
   );
 
+  if (membership?.status === "approved" && trip.status === "completed")
+    return (
+      <>
+        <Panel tone="soft" className="flex flex-col gap-1">
+          <p className="text-lg font-semibold">{t("approved")}</p>
+        </Panel>
+        <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />
+      </>
+    );
   if (membership?.status === "approved")
     return (
       <>

@@ -111,7 +111,10 @@ describe.runIf(run)("organizer edits a trip (db)", () => {
     });
 
     // a trip that already started is not editable
-    await getDb().update(trips).set({ startDate: plusDays(-1) }).where(eq(trips.id, res.id));
+    await getDb()
+      .update(trips)
+      .set({ startDate: plusDays(-1) })
+      .where(eq(trips.id, res.id));
     expect(await updateTrip(owner, res.id, patch())).toEqual({ ok: false, error: "started" });
   });
 
@@ -130,7 +133,11 @@ describe.runIf(run)("organizer edits a trip (db)", () => {
     expect(await updateTrip(owner, res.id, patch({ groupSizeMax: 5 }))).toEqual({ ok: true });
     expect(await told()).toHaveLength(0);
     expect(
-      await updateTrip(owner, res.id, patch({ groupSizeMax: 5, startDate: plusDays(22), endDate: plusDays(27) })),
+      await updateTrip(
+        owner,
+        res.id,
+        patch({ groupSizeMax: 5, startDate: plusDays(22), endDate: plusDays(27) }),
+      ),
     ).toEqual({ ok: true });
     expect(await told()).toHaveLength(1);
   });

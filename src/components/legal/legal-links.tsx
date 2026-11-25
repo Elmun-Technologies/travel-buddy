@@ -7,7 +7,10 @@ const link = "inline-flex min-h-11 items-center underline underline-offset-2";
 export async function LegalLinks({ className }: { className?: string }) {
   const t = await getTranslations("legal.nav");
   return (
-    <nav aria-label={t("label")} className={className ?? "flex flex-wrap gap-x-4 text-sm text-muted-foreground"}>
+    <nav
+      aria-label={t("label")}
+      className={className ?? "flex flex-wrap gap-x-4 text-sm text-muted-foreground"}
+    >
       {(["terms", "privacy", "safety", "support"] as const).map((k) => (
         <Link key={k} href={`/${k}`} className={link}>
           {t(k)}

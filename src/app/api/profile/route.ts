@@ -1,4 +1,5 @@
 import { authedJson, json } from "@/lib/api";
+import { track } from "@/lib/track";
 import { fieldErrors } from "@/lib/form";
 import { profileSchema } from "@/modules/profiles/schema";
 import { saveProfile } from "@/modules/profiles/service";
@@ -11,5 +12,6 @@ export async function POST(req: Request) {
   const parsed = profileSchema.safeParse(r.value.body);
   if (!parsed.success) return json({ errors: fieldErrors(parsed.error) }, 422);
   await saveProfile(r.value.user.id, parsed.data);
+  track("profile_saved", r.value.user.id);
   return json({ ok: true });
 }

@@ -41,6 +41,11 @@ export async function ProfileCard({ p, actions }: { p: P; actions?: React.ReactN
             {t("went", { went: p.reliability.went, total: p.reliability.total })}
           </span>
         )}
+        {p.rating && (
+          <span className={`${chip} border-input`}>
+            {t("rating", { avg: p.rating.avg.toFixed(1), n: p.rating.count })}
+          </span>
+        )}
         {actions}
       </div>
       {p.bio && <p className="text-[15px] whitespace-pre-line">{p.bio}</p>}

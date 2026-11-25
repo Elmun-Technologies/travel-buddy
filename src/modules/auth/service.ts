@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { authAccounts } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import {
@@ -10,6 +10,7 @@ import {
   type PhoneResult,
   restoreUser,
   setAdminRole,
+  setEmail,
   setLocale,
 } from "@/modules/users/service";
 import type { TelegramUser } from "./telegram";
@@ -35,11 +36,52 @@ const syncAdminRole = (userId: string, telegramId: number) =>
   setAdminRole(userId, isAdminTelegramId(telegramId));
 
 async function findOrCreate(tg: TelegramUser, locale: string): Promise<LoginResult> {
+  return findOrCreateBy("telegram", String(tg.id), locale);
+}
+
+/** Sign in with Google: the same account for the same Google id; a verified email is kept on the user. */
+export async function loginWithGoogle(
+  sub: string,
+  email: string | null,
+  locale: string,
+): Promise<LoginResult> {
+  const res = await findOrCreateBy("google", sub, locale);
+  if (res.ok && res.isNew && email) await setEmail(res.userId, email);
+  return res;
+}
+
+/** Add a sign-in method to a signed-in account. "taken" = that identity already belongs to someone else. */
+export async function linkProvider(userId: string, provider: "telegram" | "google", uid: string) {
+  return getDb().transaction(async (tx) => {
+    const [owner] = await tx
+      .select({ userId: authAccounts.userId })
+      .from(authAccounts)
+      .where(and(eq(authAccounts.provider, provider), eq(authAccounts.providerUserId, uid)));
+    if (owner) return owner.userId === userId ? ("already" as const) : ("taken" as const);
+    const [mine] = await tx
+      .select({ id: authAccounts.id })
+      .from(authAccounts)
+      .where(and(eq(authAccounts.userId, userId), eq(authAccounts.provider, provider)));
+    if (mine) return "taken" as const; // already has a different identity of this kind
+    await tx.insert(authAccounts).values({ userId, provider, providerUserId: uid });
+    if (provider === "telegram") {
+      // the profile's Telegram badge turns on
+      await tx.execute(sql`update traveler_profiles set telegram_verified = true where user_id = ${userId}`);
+    }
+    return "ok" as const;
+  });
+}
+
+async function findOrCreateBy(
+  provider: "telegram" | "google",
+  uid: string,
+  locale: string,
+): Promise<LoginResult> {
   return getDb().transaction(async (tx) => {
     const [acc] = await tx
       .select({ userId: authAccounts.userId })
       .from(authAccounts)
-      .where(and(eq(authAccounts.provider, "telegram"), eq(authAccounts.providerUserId, String(tg.id))));
+      .where(and(eq(authAccounts.provider, provider), eq(authAccounts.providerUserId, uid)));
     if (acc) {
       const state = await getUserState(tx, acc.userId);
       if (state?.status === "deleted") {
@@ -51,7 +93,7 @@ async function findOrCreate(tg: TelegramUser, locale: string): Promise<LoginResu
       return { ok: true, userId: acc.userId, isNew: false };
     }
     const userId = await createUser(tx, locale);
-    await tx.insert(authAccounts).values({ userId, provider: "telegram", providerUserId: String(tg.id) });
+    await tx.insert(authAccounts).values({ userId, provider, providerUserId: uid });
     return { ok: true, userId, isNew: true };
   });
 }

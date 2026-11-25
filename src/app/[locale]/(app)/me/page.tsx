@@ -17,6 +17,8 @@ import { listMyIntents, listMyTrips } from "@/modules/trips/service";
 import { getNotifyOff } from "@/modules/users/service";
 import { closeIntentAction, logoutAction } from "../actions";
 import { LegalLinks } from "@/components/legal/legal-links";
+import { TelegramLoginButton } from "@/components/auth/telegram-login-button";
+import { hasTelegram } from "@/modules/auth/service";
 import { DeleteAccountTrigger } from "@/components/profile/delete-account-trigger";
 
 export default function MePage(props: PageProps<"/[locale]/me">) {
@@ -32,7 +34,7 @@ const tag = "inline-flex min-h-9 items-center rounded-full border border-input p
 const row = "flex min-h-14 items-center justify-between gap-3 border-b border-line py-3 last:border-b-0";
 
 // App-Profile.png. Real numbers only: trips and countries from memberships; rating once reviews exist.
-async function Me({ params }: PageProps<"/[locale]/me">) {
+async function Me({ params, searchParams }: PageProps<"/[locale]/me">) {
   const locale = asLocale((await params).locale);
   const { user, profile } = await requireProfile(locale);
   const [p, trips, intents, notifyOff, t, tt, tc, ta, ts, tm, tv] = await Promise.all([
@@ -49,6 +51,8 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
     getTranslations("verifyId"),
   ]);
   const bot = botUsername();
+  const tgLinked = await hasTelegram(user.id);
+  const linkTaken = (await searchParams).linked === "taken";
   const joined = trips.filter((x) => x.myStatus.status === "approved");
   const countries = new Set(joined.map((x) => x.destinationCountry));
 
@@ -79,6 +83,23 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
             </>
           }
         />
+      )}
+
+      {linkTaken && (
+        <Panel className="text-sm text-danger" role="alert">
+          {t("linkedTaken")}
+        </Panel>
+      )}
+      {!tgLinked && bot && (
+        <Panel className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold">{t("linkTelegram")}</h2>
+          <p className="text-sm text-muted-foreground">{t("linkTelegramText")}</p>
+          <TelegramLoginButton
+            bot={bot}
+            lang={locale}
+            authUrl={`${process.env.APP_URL ?? ""}/api/auth/telegram/callback?locale=${locale}`}
+          />
+        </Panel>
       )}
 
       <div className="grid grid-cols-3 gap-2">

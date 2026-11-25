@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { PageLoading } from "@/components/page-loading";
 import { ProfileCard } from "@/components/profile/profile-card";
+import { ChatStart } from "@/components/profile/chat-start";
 import { ProfileSafety } from "@/components/profile/profile-safety";
+import { canChat } from "@/modules/chat/service";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { getPublicProfile } from "@/modules/profiles/service";
 
@@ -27,9 +29,11 @@ async function PublicProfile({ params }: PageProps<"/[locale]/u/[id]">) {
         {(await getTranslations("profile"))("notFound")}
       </p>
     );
+  const canWrite = p.userId !== user.id && (await canChat(user.id, p.userId)) === "ok";
   return (
     <div className="mx-auto max-w-2xl">
       <ProfileCard p={p} />
+      {p.userId !== user.id && canWrite && <ChatStart userId={p.userId} />}
       {p.userId !== user.id && <ProfileSafety userId={p.userId} />}
     </div>
   );

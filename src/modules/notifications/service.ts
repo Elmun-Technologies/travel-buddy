@@ -21,13 +21,20 @@ export type NotificationType =
   | "trip_updated"
   | "join_rejected"
   | "trip_soon"
-  | "review_ask";
+  | "review_ask"
+  | "dm";
 
 /** What the user can turn off in the profile. Everything about them personally is "mine". */
 export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine"] as const;
 export type NotifyKind = (typeof NOTIFY_KINDS)[number];
 export const kindOf = (type: string): NotifyKind =>
-  type === "room_pin" ? "pin" : type === "room_poll" ? "poll" : type === "room_digest" ? "chat" : "mine";
+  type === "room_pin"
+    ? "pin"
+    : type === "room_poll"
+      ? "poll"
+      : type === "room_digest" || type === "dm"
+        ? "chat"
+        : "mine";
 
 /**
  * Queue a Telegram message. Written in the caller's transaction (so it exists only if the action

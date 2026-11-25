@@ -60,6 +60,9 @@ const T = {
     review: (trip: string) =>
       `«${trip}» safari tugadi. Birga borganlarga baho bering — keyingi sayohatchilar ishonch bilan tanlaydi.`,
     reviewBtn: "Baho beraman ↗",
+    dmHead: "YANGI XABAR",
+    dm: (m: string) => `<b>${m}</b> sizga yozdi.`,
+    dmBtn: "Javob beraman ↗",
     soonHead: "SAFAR YAQINLASHDI",
     soon: (trip: string, n: string) =>
       `«${trip}» safariga ${n === "1" ? "1 kun" : `${n} kun`} qoldi. Hujjat, chipta va yig'ilish joyini tekshirib oling.`,
@@ -117,6 +120,9 @@ const T = {
     review: (trip: string) =>
       `Поездка «${trip}» закончилась. Оцените попутчиков — следующие путешественники будут выбирать увереннее.`,
     reviewBtn: "Оценить ↗",
+    dmHead: "НОВОЕ СООБЩЕНИЕ",
+    dm: (m: string) => `<b>${m}</b> написал(а) вам.`,
+    dmBtn: "Ответить ↗",
     soonHead: "ПОЕЗДКА СОВСЕМ СКОРО",
     soon: (trip: string, n: string) =>
       `До поездки «${trip}» ${n === "1" ? "остался 1 день" : `осталось ${n} дня`}. Проверьте документы, билеты и место встречи.`,
@@ -173,6 +179,9 @@ const T = {
     review: (trip: string) =>
       `“${trip}” is over. Rate the people you travelled with — it helps future travellers choose with confidence.`,
     reviewBtn: "Leave ratings ↗",
+    dmHead: "NEW MESSAGE",
+    dm: (m: string) => `<b>${m}</b> wrote to you.`,
+    dmBtn: "Reply ↗",
     soonHead: "TRIP IS COMING UP",
     soon: (trip: string, n: string) =>
       `“${trip}” is ${n === "1" ? "1 day" : `${n} days`} away. Check your documents, tickets and meeting point.`,
@@ -187,6 +196,7 @@ type Row = {
   id: string;
   type: string;
   trip_id: string;
+  conv_id?: string | null;
   chat_id: string | null;
   locale: string | null;
   trip: string | null;
@@ -205,7 +215,7 @@ type Row = {
 /** Head (optional), body, button label and the path under /trips/<id> the button opens. */
 export function render(
   r: Pick<Row, "type" | "trip" | "organizer" | "member" | "text" | "n"> &
-    Partial<Pick<Row, "lat" | "lng" | "country">>,
+    Partial<Pick<Row, "lat" | "lng" | "country" | "conv_id">>,
   l: Lang,
 ) {
   const t = T[l];
@@ -257,6 +267,14 @@ export function render(
       return { head: t.rejectedHead, body: t.rejected(trip), btn: t.feedBtn, path: "", to: "/trips" };
     case "review_ask":
       return { head: t.reviewHead, body: t.review(trip), btn: t.reviewBtn, path: "/reviews" };
+    case "dm":
+      return {
+        head: t.dmHead,
+        body: t.dm(member),
+        btn: t.dmBtn,
+        path: "",
+        to: r.conv_id ? `/chats/${r.conv_id}` : "/rooms",
+      };
     case "trip_soon":
       return { head: t.soonHead, body: t.soon(trip, r.n ?? "3"), btn: t.roomBtn, path: "/room" };
     case "creator_invite":
@@ -321,13 +339,13 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
           and (next_attempt_at is null or next_attempt_at <= now())
         order by (type in ('sos', 'sos_contact')) desc, created_at limit 20 for update skip locked)
       returning id, user_id, type, payload)
-    select c.id, c.type, c.payload->>'tripId' as trip_id,
+    select c.id, c.type, c.payload->>'tripId' as trip_id, c.payload->>'convId' as conv_id,
       c.payload->>'text' as text, c.payload->>'n' as n, c.payload->>'chatId' as to_chat,
       c.payload->>'lat' as lat, c.payload->>'lng' as lng, t.destination_country as country,
       -- SOS and messages to trusted contacts can never be turned off
       (case when c.type in ('sos', 'sos_contact', 'checkin_contact') then 'always'
         when c.type = 'room_pin' then 'pin' when c.type = 'room_poll' then 'poll'
-        when c.type = 'room_digest' then 'chat' else 'mine' end) = any(u.notify_off) as off,
+        when c.type in ('room_digest', 'dm') then 'chat' else 'mine' end) = any(u.notify_off) as off,
       (u.status <> 'active') as inactive,
       a.provider_user_id as chat_id, u.locale, t.title as trip,
       op.display_name as organizer, mp.display_name as member
@@ -343,7 +361,7 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
   for (const r of rows) {
     const chat = r.to_chat ?? r.chat_id;
     // Nothing to send: no Telegram (sample users), deleted trip, turned off, or the person is gone.
-    if (!chat || !r.trip || r.off || r.inactive) {
+    if (!chat || (!r.trip && r.type !== "dm") || r.off || r.inactive) {
       await done(r.id);
       continue;
     }

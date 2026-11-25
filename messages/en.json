@@ -72,7 +72,8 @@
     "suspended": "This account is suspended. Please contact support.",
     "tgLoading": "Logging in with Telegram...",
     "tgOutside": "This page must be opened inside Telegram.",
-    "notConfigured": "Telegram login is not configured yet."
+    "notConfigured": "Telegram login is not configured yet.",
+    "google": "Sign in with Google"
   },
   "profile": {
     "onboardingTitle": "Complete your profile",
@@ -153,7 +154,10 @@
       "error_not_image": "Please upload a JPG, PNG or WebP photo.",
       "error_unreadable": "We couldn't read that photo. Please pick another.",
       "error_uploads_off": "Photo upload is unavailable right now."
-    }
+    },
+    "linkTelegram": "Connect Telegram",
+    "linkTelegramText": "Telegram is needed to verify your phone and get notifications. Connect it — your account stays the same.",
+    "linkedTaken": "This Telegram is already connected to another account."
   },
   "feed": {
     "title": "Trips",
@@ -1358,5 +1362,16 @@
     "done": "Sent",
     "chooseDoc": "Choose a document photo",
     "chooseSelfie": "Choose a selfie"
+  },
+  "chats": {
+    "title": "Messages",
+    "someone": "Someone",
+    "write": "Message",
+    "empty": "Your conversation with {name} starts here. Say hi!",
+    "cantWrite": "You can't write to this person right now.",
+    "none": "No private chats yet. Tap \"Message\" on the profile of someone you travel with.",
+    "unread": "new",
+    "lead": "Agency",
+    "photo": "Photo"
   }
 }

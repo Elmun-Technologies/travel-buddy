@@ -72,7 +72,8 @@
     "suspended": "Akkaunt bloklangan. Qo'llab-quvvatlash xizmatiga yozing.",
     "tgLoading": "Telegram orqali kirilmoqda...",
     "tgOutside": "Bu sahifa Telegram ichida ochilishi kerak.",
-    "notConfigured": "Telegram kirish hali sozlanmagan."
+    "notConfigured": "Telegram kirish hali sozlanmagan.",
+    "google": "Google bilan kirish"
   },
   "profile": {
     "onboardingTitle": "Profilingizni to'ldiring",
@@ -153,7 +154,10 @@
       "error_not_image": "Faqat JPG, PNG yoki WebP rasm yuklang.",
       "error_unreadable": "Bu rasmni o'qib bo'lmadi. Boshqasini tanlang.",
       "error_uploads_off": "Rasm yuklash hozircha ishlamayapti."
-    }
+    },
+    "linkTelegram": "Telegramni ulash",
+    "linkTelegramText": "Telefonni tasdiqlash va xabarlar olish uchun Telegram kerak. Ulang — hisobingiz o'zgarmaydi.",
+    "linkedTaken": "Bu Telegram boshqa hisobga ulangan."
   },
   "feed": {
     "title": "Safarlar",
@@ -1358,5 +1362,16 @@
     "done": "Yuborildi",
     "chooseDoc": "Hujjat rasmini tanlash",
     "chooseSelfie": "Selfini tanlash"
+  },
+  "chats": {
+    "title": "Xabarlar",
+    "someone": "Suhbatdosh",
+    "write": "Yozish",
+    "empty": "{name} bilan suhbat shu yerdan boshlanadi. Salom deng!",
+    "cantWrite": "Bu odamga hozir yozib bo'lmaydi.",
+    "none": "Hali shaxsiy suhbat yo'q. Birga borgan odamning profilidan \"Yozish\"ni bosing.",
+    "unread": "yangi",
+    "lead": "Agentlik",
+    "photo": "Rasm"
   }
 }

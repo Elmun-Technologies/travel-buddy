@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, eq, inArray, or } from "drizzle-orm";
+import { and, count, eq, inArray, or, sql } from "drizzle-orm";
 import { tripMembers, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
@@ -190,6 +190,14 @@ export async function separateAfterBlock(a: string, b: string) {
       if (trip.status === "full") await setTripStatus(tx, s.tripId, "open");
     });
   }
+}
+
+/** Were these two people both approved members of at least one trip? (The condition for writing to each other.) */
+export async function sharedApprovedTrip(a: string, b: string) {
+  const rows = await getDb().execute<{ n: number }>(sql`
+    select 1 as n from trip_members x join trip_members y on y.trip_id = x.trip_id
+    where x.user_id = ${a} and y.user_id = ${b} and x.status = 'approved' and y.status = 'approved' limit 1`);
+  return rows.length > 0;
 }
 
 /** Account deleted: free the person's seats and pending requests in other people's trips. */

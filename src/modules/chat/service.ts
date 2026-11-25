@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, count, desc, eq, inArray, isNull, lt, notInArray, sql } from "drizzle-orm";
 import { conversationMembers, conversations, messages, pollOptions, polls, pollVotes } from "@/db/schema";
+import { sharedApprovedTrip } from "@/modules/groups/service";
 import { isActiveUser } from "@/modules/users/service";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { getBlockedIds } from "@/modules/moderation/service";
@@ -318,4 +319,145 @@ export async function getPolls(conversationId: string, pollIds: string[], viewer
     };
   }
   return out;
+}
+
+// ---------- direct chats (1:1) ----------
+
+export type DirectAllowed = "ok" | "blocked" | "no_shared_trip" | "inactive" | "self";
+
+/** Two people may write to each other after being in one approved group, never across a block. */
+export async function canChat(a: string, b: string): Promise<DirectAllowed> {
+  if (a === b) return "self";
+  if (!(await isActiveUser(a)) || !(await isActiveUser(b))) return "inactive";
+  if ((await getBlockedIds(a)).includes(b)) return "blocked";
+  if (!(await sharedApprovedTrip(a, b))) return "no_shared_trip";
+  return "ok";
+}
+
+const pairKey = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`);
+
+/** The one conversation of this pair; created on first use. */
+export async function openDirect(userId: string, otherId: string) {
+  const allowed = await canChat(userId, otherId);
+  if (allowed !== "ok") return { ok: false as const, error: allowed };
+  const key = pairKey(userId, otherId);
+  const id = await getDb().transaction(async (tx) => {
+    const [found] = await tx
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(eq(conversations.directKey, key));
+    if (found) {
+      await tx
+        .update(conversationMembers)
+        .set({ leftAt: null })
+        .where(and(eq(conversationMembers.conversationId, found.id), eq(conversationMembers.userId, userId)));
+      return found.id;
+    }
+    const [c] = await tx
+      .insert(conversations)
+      .values({ kind: "direct", directKey: key })
+      .onConflictDoNothing()
+      .returning({ id: conversations.id });
+    const convId =
+      c?.id ??
+      (
+        await tx.select({ id: conversations.id }).from(conversations).where(eq(conversations.directKey, key))
+      )[0].id;
+    await tx
+      .insert(conversationMembers)
+      .values([
+        { conversationId: convId, userId },
+        { conversationId: convId, userId: otherId },
+      ])
+      .onConflictDoNothing();
+    return convId;
+  });
+  return { ok: true as const, id };
+}
+
+/**
+ * A 1:1 or lead conversation as seen by one member: who the other side is and whether writing is allowed.
+ * Null if the person is not a member.
+ */
+export async function getChat(userId: string, conversationId: string) {
+  const [c] = await getDb()
+    .select({
+      id: conversations.id,
+      kind: conversations.kind,
+      directKey: conversations.directKey,
+      leadId: conversations.leadId,
+    })
+    .from(conversations)
+    .innerJoin(conversationMembers, eq(conversationMembers.conversationId, conversations.id))
+    .where(
+      and(
+        eq(conversations.id, conversationId),
+        inArray(conversations.kind, ["direct", "lead"]),
+        eq(conversationMembers.userId, userId),
+        isNull(conversationMembers.leftAt),
+      ),
+    );
+  if (!c) return null;
+  const others = (
+    await getDb()
+      .select({ id: conversationMembers.userId })
+      .from(conversationMembers)
+      .where(and(eq(conversationMembers.conversationId, conversationId), isNull(conversationMembers.leftAt)))
+  )
+    .map((r) => r.id)
+    .filter((id) => id !== userId);
+  const [other] = others;
+  let canWrite = true;
+  if (c.kind === "direct") canWrite = !!other && (await canChat(userId, other)) === "ok";
+  return { ...c, otherId: other ?? null, canWrite };
+}
+
+/** My direct chats, newest first, with the other person's name and whether something is unread. */
+export async function listDirect(userId: string) {
+  const rows = await getDb().execute<{
+    id: string;
+    other_id: string;
+    last_at: Date | null;
+    unread: boolean;
+    preview: string | null;
+    kind: string;
+  }>(sql`
+    select c.id, c.kind, o.user_id as other_id, c.last_message_at as last_at,
+      (c.last_message_at is not null and (me.last_read_at is null or me.last_read_at < c.last_message_at)) as unread,
+      (select case when m.kind = 'image' then '' else left(m.body, 80) end
+         from messages m where m.conversation_id = c.id and m.hidden_at is null order by m.created_at desc limit 1) as preview
+    from conversations c
+    join conversation_members me on me.conversation_id = c.id and me.user_id = ${userId} and me.left_at is null
+    join conversation_members o on o.conversation_id = c.id and o.user_id <> ${userId} and o.left_at is null
+    where c.kind in ('direct', 'lead')
+    order by c.last_message_at desc nulls last
+    limit 50`);
+  const blocked = new Set(await getBlockedIds(userId));
+  const visible = rows.filter((r) => !blocked.has(r.other_id));
+  const names = await getDisplayNames(visible.map((r) => r.other_id));
+  return visible.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    otherId: r.other_id,
+    name: names.get(r.other_id) ?? "—",
+    lastAt: r.last_at ? new Date(r.last_at).toISOString() : null,
+    unread: r.unread,
+    preview: r.preview ?? "",
+  }));
+}
+
+/** One short "X wrote to you" per conversation per 10 minutes, so a busy chat is not a stream of pings. */
+export async function notifyDirect(conversationId: string, senderId: string) {
+  await getDb().execute(sql`
+    insert into notifications (user_id, type, payload, channel)
+    select cm.user_id, 'dm', jsonb_build_object('convId', ${conversationId}::text, 'memberId', ${senderId}::text), 'telegram'
+    from conversation_members cm
+    where cm.conversation_id = ${conversationId} and cm.user_id <> ${senderId} and cm.left_at is null
+      and (cm.last_read_at is null or cm.last_read_at < now() - interval '1 minute')
+      and not exists (select 1 from notifications n
+        where n.user_id = cm.user_id and n.type = 'dm' and n.payload->>'convId' = ${conversationId}::text
+          and n.created_at > now() - interval '10 minutes')
+      and not exists (select 1 from blocks b
+        where (b.blocker_id = cm.user_id and b.blocked_id = ${senderId})
+           or (b.blocker_id = ${senderId} and b.blocked_id = cm.user_id))`);
 }

@@ -60,7 +60,8 @@ export async function getMyMembership(userId: string, tripId: string) {
   return m ?? null;
 }
 
-export type JoinResult = { ok: true } | { ok: false; error: JoinDenied | "profile_required" | "not_found" };
+export type JoinResult =
+  { ok: true } | { ok: false; error: JoinDenied | "profile_required" | "not_found" | "agency_trip" };
 
 export async function requestJoin(
   userId: string,
@@ -72,6 +73,7 @@ export async function requestJoin(
   return getDb().transaction(async (tx) => {
     const trip = await lockTripForJoin(tx, tripId);
     if (!trip) return { ok: false, error: "not_found" };
+    if (trip.kind === "agency") return { ok: false, error: "agency_trip" }; // those take a request to the agency
     const [state, mine, blocked, n] = await Promise.all([
       getUserState(tx, userId),
       tx

@@ -20,6 +20,7 @@ import { travelIntents, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { createTripConversation } from "@/modules/chat/service";
+import { seatsTaken } from "@/modules/agencies/service";
 import { visaFreeCountries } from "@/modules/destinations/service";
 import {
   addOrganizer,
@@ -60,14 +61,16 @@ const cardFields = {
   ageMax: trips.ageMax,
 };
 
-async function withCounts<T extends { id: string; ownerUserId: string | null }>(rows: T[]) {
-  const [counts, names] = await Promise.all([
+async function withCounts<T extends { id: string; ownerUserId: string | null; kind?: string }>(rows: T[]) {
+  const [counts, names, taken] = await Promise.all([
     countApproved(rows.map((r) => r.id)),
     getDisplayNames(rows.flatMap((r) => (r.ownerUserId ? [r.ownerUserId] : []))),
+    // agency tours fill by booked seats, not by group members
+    seatsTaken(rows.filter((r) => r.kind === "agency").map((r) => r.id)),
   ]);
   return rows.map((r) => ({
     ...r,
-    approvedCount: counts.get(r.id) ?? 0,
+    approvedCount: r.kind === "agency" ? (taken.get(r.id) ?? 0) : (counts.get(r.id) ?? 0),
     ownerName: r.ownerUserId ? (names.get(r.ownerUserId) ?? null) : null,
   }));
 }
@@ -76,7 +79,11 @@ export type CreateTripResult =
   | { ok: true; id: string; code: string }
   | { ok: false; error: "phone_required" | "profile_required" | "women_only_creator" };
 
-export async function createTrip(userId: string, input: TripInput): Promise<CreateTripResult> {
+export async function createTrip(
+  userId: string,
+  input: TripInput,
+  clubId?: string,
+): Promise<CreateTripResult> {
   const db = getDb();
   const [state, profile] = await Promise.all([getUserState(db, userId), getJoinProfile(userId)]);
   if (!profile) return { ok: false, error: "profile_required" };
@@ -88,6 +95,7 @@ export async function createTrip(userId: string, input: TripInput): Promise<Crea
       .values({
         ...input,
         kind: "independent",
+        clubId: clubId ?? null,
         ownerUserId: userId,
         status: "open",
         isTest: isTestEnv(),
@@ -303,6 +311,7 @@ export async function lockTripForJoin(tx: DbOrTx, tripId: string) {
       ageMin: trips.ageMin,
       ageMax: trips.ageMax,
       womenOnly: trips.womenOnly,
+      kind: trips.kind,
       ticketDeadline: trips.ticketDeadline,
     })
     .from(trips)

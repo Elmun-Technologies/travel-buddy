@@ -422,18 +422,21 @@ export async function listDirect(userId: string) {
     preview: string | null;
     kind: string;
   }>(sql`
-    select c.id, c.kind, o.user_id as other_id, c.last_message_at as last_at,
+    select c.id, c.kind,
+      (select o.user_id from conversation_members o
+         where o.conversation_id = c.id and o.user_id <> ${userId} and o.left_at is null
+         order by o.created_at, o.id limit 1) as other_id,
+      c.last_message_at as last_at,
       (c.last_message_at is not null and (me.last_read_at is null or me.last_read_at < c.last_message_at)) as unread,
       (select case when m.kind = 'image' then '' else left(m.body, 80) end
          from messages m where m.conversation_id = c.id and m.hidden_at is null order by m.created_at desc limit 1) as preview
     from conversations c
     join conversation_members me on me.conversation_id = c.id and me.user_id = ${userId} and me.left_at is null
-    join conversation_members o on o.conversation_id = c.id and o.user_id <> ${userId} and o.left_at is null
     where c.kind in ('direct', 'lead')
     order by c.last_message_at desc nulls last
     limit 50`);
   const blocked = new Set(await getBlockedIds(userId));
-  const visible = rows.filter((r) => !blocked.has(r.other_id));
+  const visible = rows.filter((r) => r.other_id && !blocked.has(r.other_id));
   const names = await getDisplayNames(visible.map((r) => r.other_id));
   return visible.map((r) => ({
     id: r.id,

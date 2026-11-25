@@ -13,6 +13,8 @@ const NAV = [
   "reports",
   "users",
   "ids",
+  "clubs",
+  "agencies",
   "trips",
   "requests",
   "visa",

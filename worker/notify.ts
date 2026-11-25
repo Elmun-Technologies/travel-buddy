@@ -63,6 +63,26 @@ const T = {
     dmHead: "YANGI XABAR",
     dm: (m: string) => `<b>${m}</b> sizga yozdi.`,
     dmBtn: "Javob beraman ↗",
+    clubReqHead: "KLUBGA SO'ROV",
+    clubReq: (m: string, club: string) => `<b>${m}</b> «${club}» klubiga qo'shilmoqchi.`,
+    clubApprHead: "KLUBGA QABUL QILINDINGIZ",
+    clubAppr: (club: string) => `«${club}» klubiga xush kelibsiz! Yangiliklar va safarlar shu yerda.`,
+    clubBtn: "Klubni ochaman ↗",
+    matchHead: "SIZGA MOS SAFAR",
+    match: (trip: string, n: string) =>
+      `«${trip}» — ${n}% mos. Sana, joy va uslub sizning rejalaringizga yaqin.`,
+    inviteHead: "SAFARGA TAKLIF",
+    invite: (m: string, trip: string) => `<b>${m}</b> sizni «${trip}» safariga taklif qildi.`,
+    leadNewHead: "YANGI ARIZA",
+    leadNew: (m: string, tour: string) => `<b>${m}</b> «${tour}» turiga ariza qoldirdi.`,
+    leadNewBtn: "Arizalarni ko'raman ↗",
+    leadOkHead: "ARIZANGIZ QABUL QILINDI",
+    leadOk: (tour: string) =>
+      `«${tour}» bo'yicha agentlik arizangizni qabul qildi. Savollaringiz bo'lsa, chatda yozing.`,
+    leadOkBtn: "Chatni ochaman ↗",
+    leadNoHead: "ARIZA BO'YICHA",
+    leadNo: (tour: string) =>
+      `Afsuski, «${tour}» turida hozir joy yo'q. Boshqa takliflarni ko'rib chiqamizmi?`,
     soonHead: "SAFAR YAQINLASHDI",
     soon: (trip: string, n: string) =>
       `«${trip}» safariga ${n === "1" ? "1 kun" : `${n} kun`} qoldi. Hujjat, chipta va yig'ilish joyini tekshirib oling.`,
@@ -123,6 +143,25 @@ const T = {
     dmHead: "НОВОЕ СООБЩЕНИЕ",
     dm: (m: string) => `<b>${m}</b> написал(а) вам.`,
     dmBtn: "Ответить ↗",
+    clubReqHead: "ЗАЯВКА В КЛУБ",
+    clubReq: (m: string, club: string) => `<b>${m}</b> хочет вступить в клуб «${club}».`,
+    clubApprHead: "ВАС ПРИНЯЛИ В КЛУБ",
+    clubAppr: (club: string) => `Добро пожаловать в клуб «${club}»! Новости и поездки — здесь.`,
+    clubBtn: "Открыть клуб ↗",
+    matchHead: "ПОДХОДЯЩАЯ ПОЕЗДКА",
+    match: (trip: string, n: string) =>
+      `«${trip}» — совпадение ${n}%. Даты, место и стиль близки к вашим планам.`,
+    inviteHead: "ПРИГЛАШЕНИЕ В ПОЕЗДКУ",
+    invite: (m: string, trip: string) => `<b>${m}</b> приглашает вас в поездку «${trip}».`,
+    leadNewHead: "НОВАЯ ЗАЯВКА",
+    leadNew: (m: string, tour: string) => `<b>${m}</b> оставил(а) заявку на тур «${tour}».`,
+    leadNewBtn: "Открыть заявки ↗",
+    leadOkHead: "ЗАЯВКА ПРИНЯТА",
+    leadOk: (tour: string) =>
+      `Агентство приняло вашу заявку на тур «${tour}». Если есть вопросы — пишите в чате.`,
+    leadOkBtn: "Открыть чат ↗",
+    leadNoHead: "ПО ВАШЕЙ ЗАЯВКЕ",
+    leadNo: (tour: string) => `К сожалению, на тур «${tour}» сейчас нет мест. Посмотрим другие предложения?`,
     soonHead: "ПОЕЗДКА СОВСЕМ СКОРО",
     soon: (trip: string, n: string) =>
       `До поездки «${trip}» ${n === "1" ? "остался 1 день" : `осталось ${n} дня`}. Проверьте документы, билеты и место встречи.`,
@@ -182,6 +221,24 @@ const T = {
     dmHead: "NEW MESSAGE",
     dm: (m: string) => `<b>${m}</b> wrote to you.`,
     dmBtn: "Reply ↗",
+    clubReqHead: "CLUB REQUEST",
+    clubReq: (m: string, club: string) => `<b>${m}</b> wants to join the “${club}” club.`,
+    clubApprHead: "YOU'RE IN THE CLUB",
+    clubAppr: (club: string) => `Welcome to “${club}”! News and trips are there.`,
+    clubBtn: "Open the club ↗",
+    matchHead: "A TRIP THAT FITS YOU",
+    match: (trip: string, n: string) =>
+      `“${trip}” — ${n}% match. Dates, place and style are close to your plans.`,
+    inviteHead: "TRIP INVITATION",
+    invite: (m: string, trip: string) => `<b>${m}</b> invited you to “${trip}”.`,
+    leadNewHead: "NEW REQUEST",
+    leadNew: (m: string, tour: string) => `<b>${m}</b> sent a request for “${tour}”.`,
+    leadNewBtn: "Open requests ↗",
+    leadOkHead: "REQUEST ACCEPTED",
+    leadOk: (tour: string) => `The agency accepted your request for “${tour}”. Questions? Write in the chat.`,
+    leadOkBtn: "Open the chat ↗",
+    leadNoHead: "ABOUT YOUR REQUEST",
+    leadNo: (tour: string) => `Sorry, “${tour}” has no seats right now. Shall we look at other offers?`,
     soonHead: "TRIP IS COMING UP",
     soon: (trip: string, n: string) =>
       `“${trip}” is ${n === "1" ? "1 day" : `${n} days`} away. Check your documents, tickets and meeting point.`,
@@ -197,6 +254,7 @@ type Row = {
   type: string;
   trip_id: string;
   conv_id?: string | null;
+  club_id?: string | null;
   chat_id: string | null;
   locale: string | null;
   trip: string | null;
@@ -215,7 +273,7 @@ type Row = {
 /** Head (optional), body, button label and the path under /trips/<id> the button opens. */
 export function render(
   r: Pick<Row, "type" | "trip" | "organizer" | "member" | "text" | "n"> &
-    Partial<Pick<Row, "lat" | "lng" | "country" | "conv_id">>,
+    Partial<Pick<Row, "lat" | "lng" | "country" | "conv_id" | "club_id">>,
   l: Lang,
 ) {
   const t = T[l];
@@ -275,6 +333,44 @@ export function render(
         path: "",
         to: r.conv_id ? `/chats/${r.conv_id}` : "/rooms",
       };
+    case "club_requested":
+      return {
+        head: t.clubReqHead,
+        body: t.clubReq(member, text),
+        btn: t.clubBtn,
+        path: "",
+        to: r.club_id ? `/clubs/${r.club_id}` : "/clubs",
+      };
+    case "club_approved":
+      return {
+        head: t.clubApprHead,
+        body: t.clubAppr(text),
+        btn: t.clubBtn,
+        path: "",
+        to: r.club_id ? `/clubs/${r.club_id}` : "/clubs",
+      };
+    case "lead_new":
+      return {
+        head: t.leadNewHead,
+        body: t.leadNew(member, text),
+        btn: t.leadNewBtn,
+        path: "",
+        to: "/agency",
+      };
+    case "lead_accepted":
+      return {
+        head: t.leadOkHead,
+        body: t.leadOk(text),
+        btn: t.leadOkBtn,
+        path: "",
+        to: r.conv_id ? `/chats/${r.conv_id}` : "/rooms",
+      };
+    case "lead_rejected":
+      return { head: t.leadNoHead, body: t.leadNo(text), btn: t.feedBtn, path: "", to: "/trips" };
+    case "match_trip":
+      return { head: t.matchHead, body: t.match(trip, r.n ?? "0"), btn: t.tripBtn, path: "" };
+    case "trip_invite":
+      return { head: t.inviteHead, body: t.invite(member, trip), btn: t.tripBtn, path: "" };
     case "trip_soon":
       return { head: t.soonHead, body: t.soon(trip, r.n ?? "3"), btn: t.roomBtn, path: "/room" };
     case "creator_invite":
@@ -313,6 +409,16 @@ export async function queueDigests(db: Db) {
     select user_id, 'room_digest', jsonb_build_object('tripId', trip_id, 'n', n::text), 'telegram' from due`);
 }
 
+/** Messages that are about something other than a trip. */
+const TRIPLESS = new Set([
+  "dm",
+  "club_requested",
+  "club_approved",
+  "lead_new",
+  "lead_accepted",
+  "lead_rejected",
+]);
+
 /** Up to this many tries per message; the wait grows: 1, 2, 4, 8, 16 minutes. */
 const MAX_ATTEMPTS = 6;
 const LEASE_MINUTES = 2;
@@ -339,13 +445,13 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
           and (next_attempt_at is null or next_attempt_at <= now())
         order by (type in ('sos', 'sos_contact')) desc, created_at limit 20 for update skip locked)
       returning id, user_id, type, payload)
-    select c.id, c.type, c.payload->>'tripId' as trip_id, c.payload->>'convId' as conv_id,
+    select c.id, c.type, c.payload->>'tripId' as trip_id, c.payload->>'convId' as conv_id, c.payload->>'clubId' as club_id,
       c.payload->>'text' as text, c.payload->>'n' as n, c.payload->>'chatId' as to_chat,
       c.payload->>'lat' as lat, c.payload->>'lng' as lng, t.destination_country as country,
       -- SOS and messages to trusted contacts can never be turned off
       (case when c.type in ('sos', 'sos_contact', 'checkin_contact') then 'always'
         when c.type = 'room_pin' then 'pin' when c.type = 'room_poll' then 'poll'
-        when c.type in ('room_digest', 'dm') then 'chat' else 'mine' end) = any(u.notify_off) as off,
+        when c.type in ('room_digest', 'dm') then 'chat' when c.type = 'match_trip' then 'match' else 'mine' end) = any(u.notify_off) as off,
       (u.status <> 'active') as inactive,
       a.provider_user_id as chat_id, u.locale, t.title as trip,
       op.display_name as organizer, mp.display_name as member
@@ -361,7 +467,7 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
   for (const r of rows) {
     const chat = r.to_chat ?? r.chat_id;
     // Nothing to send: no Telegram (sample users), deleted trip, turned off, or the person is gone.
-    if (!chat || (!r.trip && r.type !== "dm") || r.off || r.inactive) {
+    if (!chat || (!r.trip && !TRIPLESS.has(r.type)) || r.off || r.inactive) {
       await done(r.id);
       continue;
     }

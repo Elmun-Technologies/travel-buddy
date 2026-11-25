@@ -24,6 +24,12 @@ import { joinDenied } from "@/modules/groups/rules";
 import { getPrices, getVisaRule } from "@/modules/destinations/service";
 import { getMyMembership, listMembers } from "@/modules/groups/service";
 import { getJoinProfile, getPublicProfile } from "@/modules/profiles/service";
+import { getOffer, bumpViews, myLeadFor } from "@/modules/agencies/service";
+import { LeadForm } from "@/components/trips/lead-form";
+import { Candidates } from "@/components/trips/candidates";
+import { getDb } from "@/lib/db";
+import { candidatesForTrip } from "@/modules/matching/jobs";
+import { clubName } from "@/modules/clubs/service";
 import { getTripView } from "@/modules/trips/service";
 import { closeTripAction, decideAction, leaveAction } from "../../actions";
 
@@ -65,9 +71,14 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
   const user = await getSessionUser();
   const tripId = z.uuid().safeParse(id);
   const trip = tripId.success ? await getTripView(tripId.data, user?.id ?? null) : null;
-  const [t, ts] = await Promise.all([getTranslations("trip"), getTranslations("styles")]);
+  const [t, ts, tclub] = await Promise.all([
+    getTranslations("trip"),
+    getTranslations("styles"),
+    getTranslations("clubsUi"),
+  ]);
   if (!trip) return <p className="py-16 text-center text-muted-foreground">{t("notFound")}</p>;
 
+  const club = trip.clubId ? await clubName(trip.clubId) : null;
   const days = Math.round((Date.parse(trip.endDate) - Date.parse(trip.startDate)) / 864e5) + 1;
   const [organizer, members, visa, prices] = await Promise.all([
     trip.ownerUserId ? getPublicProfile(user?.id ?? trip.ownerUserId, trip.ownerUserId) : null,
@@ -116,6 +127,14 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         </p>
         <Display className="text-[32px]">{trip.title}</Display>
         <div className="mt-1 flex flex-wrap gap-1.5">
+          {club && trip.clubId && (
+            <Link
+              href={`/clubs/${trip.clubId}`}
+              className={cn(tag, "border-blue bg-blue-soft text-blue-ink")}
+            >
+              {tclub("byClub", { name: club })}
+            </Link>
+          )}
           {trip.womenOnly && (
             <span className={cn(tag, "border-ink bg-ink text-white")}>{t("womenOnlyBadge")}</span>
           )}
@@ -251,13 +270,17 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         {user && !trip.isOwner && <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />}
       </Panel>
 
-      <JoinArea
-        trip={trip}
-        user={user}
-        locale={locale}
-        members={members}
-        organizer={organizer?.displayName ?? null}
-      />
+      {trip.kind === "agency" ? (
+        <AgencyTour trip={trip} user={user} />
+      ) : (
+        <JoinArea
+          trip={trip}
+          user={user}
+          locale={locale}
+          members={members}
+          organizer={organizer?.displayName ?? null}
+        />
+      )}
     </div>
   );
 }
@@ -321,6 +344,113 @@ function Avatars({ names, count }: { names: string[] | null; count: number }) {
   );
 }
 
+// A tour sold by a verified agency: price, what is included, the programme, and "send a request".
+async function AgencyTour({ trip, user }: { trip: Trip; user: SessionUser | null }) {
+  const t = await getTranslations("agency");
+  const row = await getOffer(trip.id);
+  if (!row) return null;
+  const { offer } = row;
+  const mine = user ? await myLeadFor(user.id, trip.id) : null;
+  if (!mine || !user) void bumpViews(trip.id);
+  const itinerary = offer.itinerary as { title: string; text: string }[];
+  const price = `${trip.currency === "USD" ? "$" : ""}${Math.round(offer.price / 100)}${trip.currency === "USD" ? "" : ` ${trip.currency}`}`;
+  return (
+    <>
+      <Panel className="flex flex-col gap-2">
+        <span className={label}>{t("tour")}</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <span className="font-display text-[28px]">{t("pricePer", { price })}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("seats", { left: offer.seatsAvailable, total: offer.seatsTotal })}
+          </span>
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {t("byAgency", { name: row.agencyName })}
+          {row.website && (
+            <>
+              {" · "}
+              <a href={row.website} target="_blank" rel="noreferrer noopener nofollow" className="underline">
+                {new URL(row.website).hostname}
+              </a>
+            </>
+          )}
+        </span>
+      </Panel>
+      {(offer.includes.length > 0 || offer.excludes.length > 0) && (
+        <Panel className="grid gap-4 sm:grid-cols-2">
+          {offer.includes.length > 0 && (
+            <div>
+              <span className={label}>{t("includes")}</span>
+              <ul className="mt-1 list-disc pl-5 text-[15px]">
+                {offer.includes.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {offer.excludes.length > 0 && (
+            <div>
+              <span className={label}>{t("excludes")}</span>
+              <ul className="mt-1 list-disc pl-5 text-[15px]">
+                {offer.excludes.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Panel>
+      )}
+      {itinerary.length > 0 && (
+        <Panel className="flex flex-col gap-2">
+          <span className={label}>{t("itinerary")}</span>
+          {itinerary.map((d, i) => (
+            <div key={i} className="flex gap-3 border-t border-line pt-2 first:border-t-0 first:pt-0">
+              <span className="font-display text-xl text-muted-foreground">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <div className="font-semibold">{d.title}</div>
+                {d.text && <p className="text-sm text-muted-foreground">{d.text}</p>}
+              </div>
+            </div>
+          ))}
+        </Panel>
+      )}
+      {offer.refundPolicy && (
+        <Panel className="flex flex-col gap-1">
+          <span className={label}>{t("refund")}</span>
+          <p className="text-[15px] whitespace-pre-line">{offer.refundPolicy}</p>
+        </Panel>
+      )}
+      {!user ? (
+        <MainAction label={t("loginToLead")} href="/login" />
+      ) : mine && (mine.status === "new" || mine.status === "accepted" || mine.status === "booked") ? (
+        <Panel tone="soft" className="flex flex-col gap-2">
+          <p className="font-semibold">
+            {mine.status === "new"
+              ? t("leadSent")
+              : mine.status === "accepted"
+                ? t("leadAccepted")
+                : t("leadBooked")}
+          </p>
+          {mine.conversationId && (
+            <Link
+              href={`/chats/${mine.conversationId}`}
+              className="press inline-flex min-h-11 items-center self-start rounded-full bg-ink px-5 text-sm font-medium text-white"
+            >
+              {t("leadOpenChat")}
+            </Link>
+          )}
+        </Panel>
+      ) : trip.status === "open" && offer.seatsAvailable > 0 ? (
+        <LeadForm tripId={trip.id} maxPeople={offer.seatsAvailable} />
+      ) : (
+        <Panel>{t("leadClosed")}</Panel>
+      )}
+    </>
+  );
+}
+
 async function JoinArea({
   trip,
   user,
@@ -365,9 +495,17 @@ async function JoinArea({
 
   if (trip.isOwner) {
     const requests = members?.filter((m) => m.status === "requested") ?? [];
+    const fits = trip.status === "open" ? await candidatesForTrip(getDb(), user.id, trip.id) : [];
     return (
       <>
         <MainAction label={tr("enter")} href={`/trips/${trip.id}/room`} />
+        {fits.length > 0 && (
+          <Panel className="flex flex-col gap-3">
+            <span className={label}>{t("fitsTitle")}</span>
+            <p className="text-sm text-muted-foreground">{t("fitsHint")}</p>
+            <Candidates tripId={trip.id} items={fits} />
+          </Panel>
+        )}
         <Panel className="flex flex-col gap-3">
           <span className={label}>{t("requests")}</span>
           {requests.length === 0 && <p className="text-sm text-muted-foreground">{t("noRequests")}</p>}

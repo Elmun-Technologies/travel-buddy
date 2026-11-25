@@ -68,6 +68,7 @@ export function CreateWizard({
   styles: profileStyles,
   canWomenOnly,
   bot,
+  clubId,
 }: {
   locale: string;
   today: string;
@@ -77,6 +78,7 @@ export function CreateWizard({
   styles: string[];
   canWomenOnly: boolean;
   bot: string;
+  clubId?: string;
 }) {
   const t = useTranslations("create");
   const to = useTranslations("onboarding");
@@ -153,6 +155,7 @@ export function CreateWizard({
         styles,
         womenOnly,
         note: note || undefined,
+        clubId,
       }),
     }).catch(() => null);
     setPending(false);

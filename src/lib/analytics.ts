@@ -17,6 +17,7 @@ export type EventName =
   | "join_approved"
   | "message_sent"
   | "review_submitted"
+  | "lead_submitted"
   | "share_clicked"
   | "account_deleted";
 

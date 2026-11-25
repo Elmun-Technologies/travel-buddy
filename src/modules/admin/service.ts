@@ -19,6 +19,8 @@ import {
 } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { emit } from "@/modules/chat/service";
+import { decideAgency } from "@/modules/agencies/service";
+import { setClubStatus } from "@/modules/clubs/service";
 import { decideId } from "@/modules/verification/service";
 import type { AdminOp } from "./schema";
 
@@ -82,6 +84,24 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
           .returning({ id: trips.id });
         if (!r.length) return false;
         if (op.op === "trip.hide") await closeReport(tx, op.reportId, adminId);
+        target = op.id;
+        break;
+      }
+      case "agencyorg.verify":
+      case "agencyorg.suspend": {
+        const ok = await decideAgency(
+          tx,
+          adminId,
+          op.id,
+          op.op === "agencyorg.verify" ? "verified" : "suspended",
+        );
+        if (!ok) return false;
+        target = op.id;
+        break;
+      }
+      case "club.hide":
+      case "club.restore": {
+        if (!(await setClubStatus(op.id, op.op === "club.hide" ? "hidden" : "active", tx))) return false;
         target = op.id;
         break;
       }

@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { createBot } from "./bot";
 import { deliverNotifications, queueDigests } from "./notify";
 import { queueCreatorInvites } from "./creator";
+import { runMatching } from "@/modules/matching/jobs";
 import { runReliability } from "./reliability";
 import { eraseDeletedAccounts } from "@/modules/account/service";
 import { purgeStale } from "@/modules/housekeeping/service";
@@ -65,6 +66,7 @@ let delivering = false;
 let lastDigest = 0;
 let lastReliability = 0;
 let lastCleanup = 0;
+let lastMatching = 0;
 let inFlight: Promise<unknown> = Promise.resolve();
 
 /** Jobs that do not need Telegram (they must keep running if the bot token is missing or the bot is down). */
@@ -73,6 +75,10 @@ async function housekeeping() {
     lastReliability = Date.now();
     await runReliability(getDb()); // ticket deadlines, "N/N safarga bordi"
     if (process.env.CREATOR_ENABLED === "1") await queueCreatorInvites(getDb()); // 1M Safar, day 2
+  }
+  if (Date.now() - lastMatching > 900_000) {
+    lastMatching = Date.now();
+    await runMatching(getDb()); // new trips ↔ people whose plans fit (≤ 3 bot messages a day each)
   }
   if (Date.now() - lastCleanup > 86_400_000) {
     lastCleanup = Date.now();

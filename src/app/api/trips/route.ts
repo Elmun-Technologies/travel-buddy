@@ -6,6 +6,7 @@ import { formatBudget, formatTripDates } from "@/lib/format";
 import { rateLimit } from "@/lib/rate-limit";
 import { track } from "@/lib/track";
 import { bandToBudget, createTripBody, datesFor, tripSchema } from "@/modules/trips/schema";
+import { isClubOrganizer } from "@/modules/clubs/service";
 import { createTrip } from "@/modules/trips/service";
 import { buildTripTitle } from "@/modules/trips/title";
 
@@ -43,7 +44,8 @@ export async function POST(req: Request) {
     description: b.note ?? "",
   });
   if (!input.success) return json({ errors: fieldErrors(input.error) }, 422);
-  const res = await createTrip(user.id, input.data);
+  if (b.clubId && !(await isClubOrganizer(user.id, b.clubId))) return json({ error: "forbidden" }, 403);
+  const res = await createTrip(user.id, input.data, b.clubId);
   if (!res.ok) return json({ error: res.error }, 409);
   track("trip_created", user.id, { country: b.country, size: b.size, women_only: b.womenOnly });
   const ts = await getTranslations({ locale, namespace: "share" });

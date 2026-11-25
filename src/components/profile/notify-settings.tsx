@@ -6,7 +6,7 @@ import { Panel } from "@/components/clay";
 import { haptic } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 
-const KINDS = ["pin", "poll", "mine", "chat"] as const;
+const KINDS = ["pin", "poll", "mine", "chat", "match"] as const;
 
 /** Profile → Bildirishnomalar: each kind of bot message can be turned off. Saved on every tap. */
 export function NotifySettings({ initialOff }: { initialOff: string[] }) {

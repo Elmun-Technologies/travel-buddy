@@ -26,13 +26,11 @@ describe.runIf(run)("SMS fallback when the bot is blocked", () => {
         .values({ locale: "uz", phone: `+9989000${n}0000`, phoneVerified: true, smsConsent: consent })
         .returning({ id: users.id });
       made.push(u.id);
-      await db
-        .insert(authAccounts)
-        .values({
-          userId: u.id,
-          provider: "telegram",
-          providerUserId: String(8_000_000 + n + Math.floor(Math.random() * 1e6)),
-        });
+      await db.insert(authAccounts).values({
+        userId: u.id,
+        provider: "telegram",
+        providerUserId: String(8_000_000 + n + Math.floor(Math.random() * 1e6)),
+      });
       return u.id;
     };
     const [agreed, refused] = [await mk(true, 1), await mk(false, 2)];

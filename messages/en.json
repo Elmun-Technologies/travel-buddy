@@ -568,7 +568,7 @@
     },
     "stories": {
       "title": "Memories",
-      "lead": "After the trip you leave each other ratings and kind words. A shared album and story page are coming soon.",
+      "lead": "After the trip — a shared album, short stories and ratings for each other. Only the group sees it all.",
       "s1": "Kazbegi, 7 people",
       "s1t": "Example · 48 photos · 6 stories",
       "s1alt": "A group of hikers in the mountains",
@@ -1179,7 +1179,8 @@
     "exportTitle": "Requests and bookings (CSV)",
     "exportGo": "Download",
     "exportFrom": "From",
-    "exportTo": "To"
+    "exportTo": "To",
+    "hide": "Hide"
   },
   "creator": {
     "back": "Back",
@@ -1389,7 +1390,8 @@
     "none": "No private chats yet. Tap \"Message\" on the profile of someone you travel with.",
     "unread": "new",
     "lead": "Agency",
-    "photo": "Photo"
+    "photo": "Photo",
+    "placeholder": "Write a message"
   },
   "clubsUi": {
     "title": "Clubs",

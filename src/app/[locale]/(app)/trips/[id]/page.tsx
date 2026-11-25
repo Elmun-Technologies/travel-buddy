@@ -205,19 +205,23 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         </Panel>
       )}
 
-      <Panel className="flex flex-col gap-3">
-        <div className="flex justify-between gap-3">
-          <span className={label}>
-            {t("membersLabel")}
-            {trip.groupSizeMax ? ` · ${trip.approvedCount}/${trip.groupSizeMax}` : ` · ${trip.approvedCount}`}
-          </span>
-          {left != null && (
-            <span className="text-sm text-muted-foreground">{t("spotsLeft", { n: left })}</span>
-          )}
-        </div>
-        <Avatars names={approved?.map((m) => m.name) ?? null} count={trip.approvedCount} />
-        {!approved && <p className="text-[13px] text-muted-foreground">{t("membersNote")}</p>}
-      </Panel>
+      {trip.kind !== "agency" && (
+        <Panel className="flex flex-col gap-3">
+          <div className="flex justify-between gap-3">
+            <span className={label}>
+              {t("membersLabel")}
+              {trip.groupSizeMax
+                ? ` · ${trip.approvedCount}/${trip.groupSizeMax}`
+                : ` · ${trip.approvedCount}`}
+            </span>
+            {left != null && (
+              <span className="text-sm text-muted-foreground">{t("spotsLeft", { n: left })}</span>
+            )}
+          </div>
+          <Avatars names={approved?.map((m) => m.name) ?? null} count={trip.approvedCount} />
+          {!approved && <p className="text-[13px] text-muted-foreground">{t("membersNote")}</p>}
+        </Panel>
+      )}
 
       {links && trip.status === "open" && <ShareFriendCard {...links} />}
 
@@ -262,13 +266,17 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         </Panel>
       )}
 
-      <Panel tone="dark" className="flex flex-col gap-3">
-        <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
-          {t("rulesLabel")}
-        </span>
-        <p className="text-[15px] leading-relaxed">{t("rules")}</p>
-        {user && !trip.isOwner && <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />}
-      </Panel>
+      {trip.kind !== "agency" && (
+        <Panel tone="dark" className="flex flex-col gap-3">
+          <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
+            {t("rulesLabel")}
+          </span>
+          <p className="text-[15px] leading-relaxed">{t("rules")}</p>
+          {user && !trip.isOwner && (
+            <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />
+          )}
+        </Panel>
+      )}
 
       {trip.kind === "agency" ? (
         <AgencyTour trip={trip} user={user} />
@@ -447,6 +455,7 @@ async function AgencyTour({ trip, user }: { trip: Trip; user: SessionUser | null
       ) : (
         <Panel>{t("leadClosed")}</Panel>
       )}
+      {user && <ReportLink targetType="trip" targetId={trip.id} className="px-2 text-muted-foreground" />}
     </>
   );
 }

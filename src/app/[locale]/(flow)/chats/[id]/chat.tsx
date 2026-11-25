@@ -222,7 +222,7 @@ export function ChatView({
               </>
             )}
             <label htmlFor="chat-input" className="sr-only">
-              {tr("placeholder")}
+              {t("placeholder")}
             </label>
             <input
               id="chat-input"
@@ -230,7 +230,7 @@ export function ChatView({
               onChange={(e) => setText(e.target.value)}
               maxLength={2000}
               autoComplete="off"
-              placeholder={tr("placeholder")}
+              placeholder={t("placeholder")}
               className="min-h-12 flex-1 rounded-full bg-background px-5 text-base outline-none"
             />
             <button

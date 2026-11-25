@@ -60,15 +60,13 @@ export async function listClubs(viewerId: string, q = "") {
       city: clubs.city,
       privacy: clubs.privacy,
       owner: clubs.ownerUserId,
-      members: sql<number>`(select count(*)::int from club_members m where m.club_id = ${clubs.id} and m.status = 'approved')`,
-      completed: sql<number>`(select count(*)::int from trips t where t.club_id = ${clubs.id} and t.status = 'completed')`,
+      members: sql<number>`(select count(*)::int from club_members m where m.club_id = clubs.id and m.status = 'approved')`,
+      completed: sql<number>`(select count(*)::int from trips t where t.club_id = clubs.id and t.status = 'completed')`,
     })
     .from(clubs)
     .where(and(eq(clubs.status, "active"), q.trim() ? sql`${clubs.name} ilike ${term}` : undefined))
     .orderBy(
-      desc(
-        sql`(select count(*) from club_members m where m.club_id = ${clubs.id} and m.status = 'approved')`,
-      ),
+      desc(sql`(select count(*) from club_members m where m.club_id = clubs.id and m.status = 'approved')`),
       desc(clubs.createdAt),
     )
     .limit(60);

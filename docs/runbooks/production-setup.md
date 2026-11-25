@@ -44,16 +44,17 @@ GitHub → **Actions** → **release** → **Run workflow**. 5–8 daqiqada `ghc
 
 Environment Variables:
 
-| Kalit                | Qiymat                                                           |
-| -------------------- | ---------------------------------------------------------------- |
-| `DATABASE_URL`       | 3-qadamdagi internal URL                                         |
-| `APP_ENV`            | `production` (**aniq shunday**; bo'lmasa worker ishga tushmaydi) |
-| `APP_URL`            | `https://<domen>`                                                |
-| `RUN_MIGRATIONS`     | `false` (production'da migratsiya qo'lda: `deploy.md`)           |
-| `TELEGRAM_BOT_TOKEN` | production bot tokeni                                            |
-| `SENTRY_DSN`         | Sentry DSN                                                       |
-| `POSTHOG_KEY`        | PostHog kaliti (bo'lsa)                                          |
-| `CREATOR_ENABLED`    | **qo'ymang** (1M Safar yopiq qoladi)                             |
+| Kalit                                                                           | Qiymat                                                              |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `DATABASE_URL`                                                                  | 3-qadamdagi internal URL                                            |
+| `APP_ENV`                                                                       | `production` (**aniq shunday**; bo'lmasa worker ishga tushmaydi)    |
+| `APP_URL`                                                                       | `https://<domen>`                                                   |
+| `RUN_MIGRATIONS`                                                                | `false` (production'da migratsiya qo'lda: `deploy.md`)              |
+| `TELEGRAM_BOT_TOKEN`                                                            | production bot tokeni                                               |
+| `SENTRY_DSN`                                                                    | Sentry DSN                                                          |
+| `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_FILES`, `S3_REGION` | rasmlar ombori (eski fayllarni o'chirish uchun worker'da ham kerak) |
+| `POSTHOG_KEY`                                                                   | PostHog kaliti (bo'lsa)                                             |
+| `CREATOR_ENABLED`                                                               | **qo'ymang** (1M Safar yopiq qoladi)                                |
 
 **Birinchi ishga tushirishdan oldin** migratsiya: Coolify → worker → **Terminal** → `node dist/migrate.mjs` → `migrations applied`. Keyin **Deploy**; logda `worker started` va `bot @<nom> polling` chiqadi.
 
@@ -61,18 +62,20 @@ Environment Variables:
 
 **+ New Resource → Docker Image** → `ghcr.io/elmun-technologies/travel-buddy-web:production`. Port `3000`. Domain: `https://<domen>`. Health check: `/api/health` (port 3000). Memory `768m`.
 
-| Kalit                                                                | Qiymat                                                          |
-| -------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `DATABASE_URL`                                                       | internal URL                                                    |
-| `APP_ENV`                                                            | `production`                                                    |
-| `APP_URL`                                                            | `https://<domen>`                                               |
-| `TELEGRAM_BOT_TOKEN`                                                 | production bot tokeni                                           |
-| `TELEGRAM_BOT_USERNAME`                                              | botning nomi, `@`siz                                            |
-| `ADMIN_TELEGRAM_IDS`                                                 | adminlarning Telegram ID'lari, vergul bilan (`add-admin.md`)    |
-| `SENTRY_DSN`                                                         | Sentry DSN                                                      |
-| `POSTHOG_KEY`                                                        | PostHog kaliti (bo'lsa)                                         |
-| `TRAVELPAYOUTS_MARKER`                                               | Aviasales hamkor belgisi (bo'lsa)                               |
-| `LEGAL_ENTITY`, `LEGAL_ADDRESS`, `SUPPORT_EMAIL`, `SUPPORT_TELEGRAM` | hujjat va yordam sahifalari uchun (bo'lmaganini tashlab keting) |
+| Kalit                                                                           | Qiymat                                                          |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `DATABASE_URL`                                                                  | internal URL                                                    |
+| `APP_ENV`                                                                       | `production`                                                    |
+| `APP_URL`                                                                       | `https://<domen>`                                               |
+| `TELEGRAM_BOT_TOKEN`                                                            | production bot tokeni                                           |
+| `TELEGRAM_BOT_USERNAME`                                                         | botning nomi, `@`siz                                            |
+| `ADMIN_TELEGRAM_IDS`                                                            | adminlarning Telegram ID'lari, vergul bilan (`add-admin.md`)    |
+| `SENTRY_DSN`                                                                    | Sentry DSN                                                      |
+| `POSTHOG_KEY`                                                                   | PostHog kaliti (bo'lsa)                                         |
+| `TRAVELPAYOUTS_MARKER`                                                          | Aviasales hamkor belgisi (bo'lsa)                               |
+| `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_FILES`, `S3_REGION` | rasmlar ombori (profil, chat, albom, ID)                        |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                      | "Google bilan kirish" (ixtiyoriy)                               |
+| `LEGAL_ENTITY`, `LEGAL_ADDRESS`, `SUPPORT_EMAIL`, `SUPPORT_TELEGRAM`            | hujjat va yordam sahifalari uchun (bo'lmaganini tashlab keting) |
 
 Deploy. Tekshiruv: `https://<domen>/api/health` → `{"status":"ok","env":"production"}`. Agar `env` boshqa so'z chiqsa — `APP_ENV` xato, to'xtating va tuzating.
 

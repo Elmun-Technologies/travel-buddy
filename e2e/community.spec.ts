@@ -96,7 +96,7 @@ test.describe("community", () => {
     await expect(b).toHaveURL(/\/uz\/chats\/[0-9a-f-]{36}$/);
     const chatUrl = b.url();
     await b.waitForLoadState("networkidle");
-    await b.getByLabel("Guruhga yozing").fill("Salom, Nodira!");
+    await b.getByLabel("Xabar yozing").fill("Salom, Nodira!");
     const sent = b.waitForResponse((r) => r.url().includes("/messages") && r.request().method() === "POST");
     await b.getByRole("button", { name: "Yuborish", exact: true }).click();
     expect((await sent).status()).toBe(200);
@@ -104,7 +104,7 @@ test.describe("community", () => {
     await a.waitForLoadState("networkidle");
     await expect(a.getByText("Salom, Nodira!")).toBeVisible();
     // live: her answer reaches him without reloading
-    await a.getByLabel("Guruhga yozing").fill("Salom, Bobur!");
+    await a.getByLabel("Xabar yozing").fill("Salom, Bobur!");
     await a.getByRole("button", { name: "Yuborish", exact: true }).click();
     await expect(b.getByText("Salom, Bobur!")).toBeVisible();
 

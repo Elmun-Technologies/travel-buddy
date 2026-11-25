@@ -100,6 +100,8 @@ describe.runIf(run)("clubs (db)", () => {
     // leaving; organizers cannot leave; hidden clubs vanish
     expect(await leaveClub(joiner, open.id)).toEqual({ ok: true });
     expect(await leaveClub(owner, open.id)).toEqual({ ok: false, error: "forbidden" });
+    const row = (await listClubs(outsider)).find((c) => c.id === closed.id);
+    expect(row?.members).toBe(2); // the organizer and the approved joiner
     expect((await listClubs(outsider)).some((c) => c.id === open.id)).toBe(true);
     await setClubStatus(open.id, "hidden");
     expect((await listClubs(outsider)).some((c) => c.id === open.id)).toBe(false);

@@ -568,7 +568,7 @@
     },
     "stories": {
       "title": "Taassurotlar",
-      "lead": "Qaytgach — bir-biringizga baho va iliq so'zlar qoldirasiz. Umumiy albom va hikoyalar sahifasi tez orada.",
+      "lead": "Qaytgach — umumiy albom, qisqa hikoyalar va bir-biringizga baho. Hammasini faqat guruhdagilar ko'radi.",
       "s1": "Kazbegi, 7 kishi",
       "s1t": "Namuna · 48 foto · 6 hikoya",
       "s1alt": "Tog'dagi sayohatchilar guruhi",
@@ -1179,7 +1179,8 @@
     "exportTitle": "Arizalar va bronlar (CSV)",
     "exportGo": "Yuklab olish",
     "exportFrom": "Dan",
-    "exportTo": "Gacha"
+    "exportTo": "Gacha",
+    "hide": "Yashirish"
   },
   "creator": {
     "back": "Orqaga",
@@ -1389,7 +1390,8 @@
     "none": "Hali shaxsiy suhbat yo'q. Birga borgan odamning profilidan \"Yozish\"ni bosing.",
     "unread": "yangi",
     "lead": "Agentlik",
-    "photo": "Rasm"
+    "photo": "Rasm",
+    "placeholder": "Xabar yozing"
   },
   "clubsUi": {
     "title": "Klublar",

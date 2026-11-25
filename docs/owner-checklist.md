@@ -37,7 +37,10 @@
 - `TRAVELPAYOUTS_MARKER` — Aviasales hamkor daromadi uchun.
 - `CREATOR_ENABLED` — 1M Safar'ni **hozir yoqmang** (Meta tekshiruvi, soliq va oferta yurist ko'rigidan keyin).
 - GitHub `COOLIFY_TOKEN` + webhook'lar — staging avtomatik deploy uchun (majburiy emas).
-- Kodda hali yo'q: Telegram guruhni safarga bog'lash, SMS orqali xabar, ochiq "hikoya" sahifasi (har bir a'zoning roziligi bilan), pullik ID xizmati (MyID/eKYC — shartnoma va pul talab qiladi), klub reytingi (baho to'planguncha).
+- **SMS (Eskiz.uz)**: akkaunt oching, balans to'ldiring (pulli — qaror sizniki), keyin worker'ga `SMS_PROVIDER=eskiz`, `ESKIZ_EMAIL`, `ESKIZ_PASSWORD` yozing. Yozmasangiz SMS o'chiq turadi, boshqa hamma narsa ishlayveradi. SMS faqat SOS va yaratuvchi taklifi uchun, rozilik bergan odamga.
+- **Telegram guruh bog'lash**: pul yoki akkaunt kerak emas. Faqat tashkilotchilarga aytib qo'ying: botni guruhga **administrator** qilib qo'shish va `/link KOD` yozish (`uploads-and-verification.md`). Ikkita haqiqiy guruhda bir marta sinab ko'ring.
+- Ochiq hikoya sahifasi va klub reytingi tayyor, hech narsa qilish shart emas: hikoya hamma a'zo rozi bo'lgandagina ochiladi, reyting 3 ta bahodan keyin chiqadi.
+- Kodda yo'q: pullik ID xizmati (MyID/eKYC — shartnoma va pul talab qiladi); hozir ID qo'lda tekshiriladi.
 
 ## D. Reklama havolalari
 

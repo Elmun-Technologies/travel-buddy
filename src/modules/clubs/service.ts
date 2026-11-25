@@ -1,10 +1,11 @@
 import "server-only";
 import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
-import { clubMembers, clubPosts, clubs, trips } from "@/db/schema";
+import { clubMembers, clubPosts, clubs, reviews, trips } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { notify } from "@/modules/notifications/service";
 import { getDisplayNames } from "@/modules/profiles/service";
+import { MIN_REVIEWS_SHOWN } from "@/modules/reviews/service";
 import { getUserState } from "@/modules/users/service";
 
 export const MAX_CLUBS_OWNED = 3;
@@ -48,6 +49,25 @@ export async function createClub(userId: string, input: ClubInput): Promise<Crea
   });
 }
 
+/**
+ * What people who went on a club's finished trips gave each other (visible reviews only).
+ * A number is returned only from MIN_REVIEWS_SHOWN reviews on; before that the club shows trips taken, no score.
+ */
+export async function clubRatings(clubIds: string[]) {
+  const out = new Map<string, { avg: number; count: number }>();
+  if (!clubIds.length) return out;
+  const rows = await getDb()
+    .select({ id: trips.clubId, avg: sql<string>`avg(${reviews.rating})`, n: count() })
+    .from(reviews)
+    .innerJoin(trips, eq(trips.id, reviews.tripId))
+    .where(and(inArray(trips.clubId, clubIds), eq(trips.status, "completed"), isNull(reviews.hiddenAt)))
+    .groupBy(trips.clubId);
+  for (const r of rows)
+    if (r.id && r.n >= MIN_REVIEWS_SHOWN)
+      out.set(r.id, { avg: Math.round(Number(r.avg) * 10) / 10, count: r.n });
+  return out;
+}
+
 /** Active clubs with member counts; clubs of people you blocked (or who blocked you) are not shown. */
 export async function listClubs(viewerId: string, q = "") {
   const blocked = await getBlockedIds(viewerId);
@@ -75,9 +95,10 @@ export async function listClubs(viewerId: string, q = "") {
     .from(clubMembers)
     .where(eq(clubMembers.userId, viewerId));
   const m = new Map(mine.map((x) => [x.clubId, x.status]));
+  const ratings = await clubRatings(rows.map((r) => r.id));
   return rows
     .filter((r) => !r.owner || !blocked.includes(r.owner))
-    .map((r) => ({ ...r, myStatus: m.get(r.id) ?? null }));
+    .map((r) => ({ ...r, myStatus: m.get(r.id) ?? null, rating: ratings.get(r.id) ?? null }));
 }
 
 export async function myClubIds(userId: string) {
@@ -135,6 +156,7 @@ export async function getClub(viewerId: string, clubId: string) {
     isOrganizer,
     memberCount: approved.length,
     completedTrips: clubTrips.filter((t) => t.status === "completed").length,
+    rating: (await clubRatings([clubId])).get(clubId) ?? null,
     members: visibleMembers.map((m) => ({ ...m, name: names.get(m.userId) ?? "—" })),
     requests: requests.map((m) => ({ userId: m.userId, name: names.get(m.userId) ?? "—" })),
     posts: posts

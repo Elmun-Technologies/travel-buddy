@@ -5,6 +5,8 @@ import type { Api } from "grammy";
 import { InlineKeyboard } from "grammy";
 import type { Db } from "@/lib/db";
 import { mainNumber } from "@/lib/emergency";
+import { rateLimit } from "@/lib/rate-limit";
+import { smsProvider } from "@/lib/sms";
 
 type Lang = "uz" | "ru" | "en";
 const lang = (l?: string | null): Lang => (l === "ru" || l === "en" ? l : "uz");
@@ -68,6 +70,9 @@ const T = {
     clubApprHead: "KLUBGA QABUL QILINDINGIZ",
     clubAppr: (club: string) => `«${club}» klubiga xush kelibsiz! Yangiliklar va safarlar shu yerda.`,
     clubBtn: "Klubni ochaman ↗",
+    gpPin: "YANGI E'LON",
+    gpPoll: "YANGI SO'ROVNOMA",
+    gpUpdate: "SAFAR YANGILANDI",
     matchHead: "SIZGA MOS SAFAR",
     match: (trip: string, n: string) =>
       `«${trip}» — ${n}% mos. Sana, joy va uslub sizning rejalaringizga yaqin.`,
@@ -148,6 +153,9 @@ const T = {
     clubApprHead: "ВАС ПРИНЯЛИ В КЛУБ",
     clubAppr: (club: string) => `Добро пожаловать в клуб «${club}»! Новости и поездки — здесь.`,
     clubBtn: "Открыть клуб ↗",
+    gpPin: "НОВОЕ ОБЪЯВЛЕНИЕ",
+    gpPoll: "НОВЫЙ ОПРОС",
+    gpUpdate: "ПОЕЗДКА ОБНОВЛЕНА",
     matchHead: "ПОДХОДЯЩАЯ ПОЕЗДКА",
     match: (trip: string, n: string) =>
       `«${trip}» — совпадение ${n}%. Даты, место и стиль близки к вашим планам.`,
@@ -226,6 +234,9 @@ const T = {
     clubApprHead: "YOU'RE IN THE CLUB",
     clubAppr: (club: string) => `Welcome to “${club}”! News and trips are there.`,
     clubBtn: "Open the club ↗",
+    gpPin: "NEW ANNOUNCEMENT",
+    gpPoll: "NEW POLL",
+    gpUpdate: "TRIP UPDATED",
     matchHead: "A TRIP THAT FITS YOU",
     match: (trip: string, n: string) =>
       `“${trip}” — ${n}% match. Dates, place and style are close to your plans.`,
@@ -255,6 +266,12 @@ type Row = {
   trip_id: string;
   conv_id?: string | null;
   club_id?: string | null;
+  user_id?: string;
+  phone?: string | null;
+  phone_ok?: boolean;
+  sms?: boolean;
+  kind?: string | null;
+  link?: string | null;
   chat_id: string | null;
   locale: string | null;
   trip: string | null;
@@ -273,7 +290,7 @@ type Row = {
 /** Head (optional), body, button label and the path under /trips/<id> the button opens. */
 export function render(
   r: Pick<Row, "type" | "trip" | "organizer" | "member" | "text" | "n"> &
-    Partial<Pick<Row, "lat" | "lng" | "country" | "conv_id" | "club_id">>,
+    Partial<Pick<Row, "lat" | "lng" | "country" | "conv_id" | "club_id" | "kind" | "link">>,
   l: Lang,
 ) {
   const t = T[l];
@@ -371,6 +388,14 @@ export function render(
       return { head: t.matchHead, body: t.match(trip, r.n ?? "0"), btn: t.tripBtn, path: "" };
     case "trip_invite":
       return { head: t.inviteHead, body: t.invite(member, trip), btn: t.tripBtn, path: "" };
+    case "group_post":
+      return {
+        head: r.kind === "pin" ? t.gpPin : r.kind === "poll" ? t.gpPoll : t.gpUpdate,
+        body: `«${trip}»: ${text}`,
+        btn: t.tripBtn,
+        path: "",
+        url: r.link ?? null,
+      };
     case "trip_soon":
       return { head: t.soonHead, body: t.soon(trip, r.n ?? "3"), btn: t.roomBtn, path: "/room" };
     case "creator_invite":
@@ -434,6 +459,37 @@ function isTerminal(e: unknown) {
  * next_attempt_at later) and only marked sent after Telegram accepted it. A crash, a network error
  * or a 429 therefore means "try again later", never "lost". SOS goes first, always.
  */
+/** Only these may become a text message, and only for people who agreed to it. */
+const SMS_TYPES = new Set(["sos", "creator_invite"]);
+const SMS = {
+  uz: {
+    sos: (m: string, trip: string) => `${m} «${trip}» safarida yordam so'ramoqda. Telegram'ni oching.`,
+    creator: (trip: string, url: string) => `«${trip}» safaringiz uchun shaxsiy taklif: ${url}`,
+  },
+  ru: {
+    sos: (m: string, trip: string) => `${m} просит о помощи в поездке «${trip}». Откройте Telegram.`,
+    creator: (trip: string, url: string) => `Личное предложение для вашей поездки «${trip}»: ${url}`,
+  },
+  en: {
+    sos: (m: string, trip: string) => `${m} is asking for help on the “${trip}” trip. Open Telegram.`,
+    creator: (trip: string, url: string) => `A personal offer for your “${trip}” trip: ${url}`,
+  },
+} as const;
+
+/** The bot cannot reach this person: for SOS and the prepared offer, text them (consent, verified phone, max 3 a day). */
+async function smsFallback(r: Row, l: Lang) {
+  const provider = smsProvider();
+  if (!provider || !SMS_TYPES.has(r.type) || !r.sms || !r.phone_ok || !r.phone || r.to_chat || !r.trip)
+    return;
+  if (!(await rateLimit(`sms:user:${r.user_id}`, 3, 86_400))) return;
+  const plain = (s: string | null) => (s ?? "").replace(/[<>]/g, "");
+  const text =
+    r.type === "sos"
+      ? SMS[l].sos(plain(r.member), plain(r.trip))
+      : SMS[l].creator(plain(r.trip), `${process.env.APP_URL ?? ""}/${l}/trips/${r.trip_id}/creator`);
+  await provider.send(r.phone, text);
+}
+
 export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
   const rows = await db.execute<Row>(sql`
     with claimed as (
@@ -445,14 +501,15 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
           and (next_attempt_at is null or next_attempt_at <= now())
         order by (type in ('sos', 'sos_contact')) desc, created_at limit 20 for update skip locked)
       returning id, user_id, type, payload)
-    select c.id, c.type, c.payload->>'tripId' as trip_id, c.payload->>'convId' as conv_id, c.payload->>'clubId' as club_id,
+    select c.id, c.user_id, c.type, c.payload->>'tripId' as trip_id, c.payload->>'convId' as conv_id, c.payload->>'clubId' as club_id, c.payload->>'kind' as kind, c.payload->>'link' as link,
       c.payload->>'text' as text, c.payload->>'n' as n, c.payload->>'chatId' as to_chat,
       c.payload->>'lat' as lat, c.payload->>'lng' as lng, t.destination_country as country,
       -- SOS and messages to trusted contacts can never be turned off
-      (case when c.type in ('sos', 'sos_contact', 'checkin_contact') then 'always'
+      (case when c.type in ('sos', 'sos_contact', 'checkin_contact', 'group_post') then 'always'
         when c.type = 'room_pin' then 'pin' when c.type = 'room_poll' then 'poll'
         when c.type in ('room_digest', 'dm') then 'chat' when c.type = 'match_trip' then 'match' else 'mine' end) = any(u.notify_off) as off,
       (u.status <> 'active') as inactive,
+      u.phone, u.phone_verified as phone_ok, u.sms_consent as sms,
       a.provider_user_id as chat_id, u.locale, t.title as trip,
       op.display_name as organizer, mp.display_name as member
     from claimed c
@@ -482,7 +539,9 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
     const kb = r.to_chat
       ? "map" in m && m.map
         ? new InlineKeyboard().url(T[l].mapBtn, m.map)
-        : undefined
+        : "url" in m && m.url && m.btn
+          ? new InlineKeyboard().url(m.btn, m.url)
+          : undefined
       : m.btn && appUrl.startsWith("https://")
         ? new InlineKeyboard().webApp(
             m.btn,
@@ -501,6 +560,7 @@ export async function deliverNotifications(api: Api, db: Db, appUrl: string) {
       if (isTerminal(e)) {
         // The user blocked the bot or the chat is gone: nothing to retry.
         console.error(`notification ${r.id} dropped: ${e instanceof Error ? e.message : e}`);
+        await smsFallback(r, l);
         await done(r.id);
       } else {
         const wait = err.error_code === 429 ? (err.parameters?.retry_after ?? 5) : null;

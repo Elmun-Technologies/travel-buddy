@@ -3,7 +3,7 @@ import { and, count, desc, eq, inArray, isNull, lte, or } from "drizzle-orm";
 import { tripPhotos, tripStories, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { getDb } from "@/lib/db";
-import { approvedMemberIds, getMemberships } from "@/modules/groups/service";
+import { approvedMemberIds, getMemberships, setStoryConsent, storyConsent } from "@/modules/groups/service";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { getDisplayNames } from "@/modules/profiles/service";
 import { isActiveUser } from "@/modules/users/service";
@@ -104,6 +104,83 @@ export async function photoKeyFor(viewerId: string, photoId: string) {
 /** Hide a photo from the album (moderation); the file stays until the account is erased. */
 export async function hidePhoto(photoId: string) {
   await getDb().update(tripPhotos).set({ hiddenAt: new Date() }).where(eq(tripPhotos.id, photoId));
+}
+
+export async function setConsent(userId: string, tripId: string, on: boolean) {
+  const access = await albumAccess(userId, tripId);
+  if (!access || access.status !== "completed") return false; // only finished trips can go public
+  return setStoryConsent(userId, tripId, on);
+}
+
+/** Album panel data: my choice, the group's count, and the public link once everybody agreed. */
+export async function consentState(userId: string, tripId: string) {
+  const [c, [t]] = await Promise.all([
+    storyConsent(tripId, userId),
+    getDb().select({ code: trips.publicCode, status: trips.status }).from(trips).where(eq(trips.id, tripId)),
+  ]);
+  return {
+    finished: t?.status === "completed",
+    total: c.total,
+    agreed: c.agreed,
+    mine: c.mine,
+    code: c.everyone && t?.status === "completed" ? t.code : null,
+  };
+}
+
+/**
+ * The public "hikoya" page: a finished trip whose approved members ALL agreed (at least two).
+ * Anyone who withdraws takes the whole page offline. No contact data, only names, photos and stories.
+ */
+export async function publicStory(code: string) {
+  if (!/^[0-9A-Z]{6,8}$/.test(code)) return null;
+  const [t] = await getDb()
+    .select({
+      id: trips.id,
+      title: trips.title,
+      country: trips.destinationCountry,
+      city: trips.destinationCity,
+      start: trips.startDate,
+      end: trips.endDate,
+      status: trips.status,
+      kind: trips.kind,
+    })
+    .from(trips)
+    .where(eq(trips.publicCode, code));
+  if (!t || t.status !== "completed" || t.kind !== "independent") return null;
+  const c = await storyConsent(t.id, null);
+  if (!c.everyone) return null;
+  const [photos, stories] = await Promise.all([
+    getDb()
+      .select({ id: tripPhotos.id, caption: tripPhotos.caption })
+      .from(tripPhotos)
+      .where(and(eq(tripPhotos.tripId, t.id), isNull(tripPhotos.hiddenAt)))
+      .orderBy(desc(tripPhotos.createdAt))
+      .limit(24),
+    getDb()
+      .select({ userId: tripStories.userId, body: tripStories.body })
+      .from(tripStories)
+      .where(eq(tripStories.tripId, t.id)),
+  ]);
+  const names = await getDisplayNames(c.names);
+  return {
+    ...t,
+    people: c.names.map((id) => names.get(id)).filter((n): n is string => !!n),
+    photos,
+    stories: stories.flatMap((s) =>
+      names.get(s.userId) ? [{ name: names.get(s.userId)!, body: s.body }] : [],
+    ),
+  };
+}
+
+/** A photo of a trip whose story is public (no login needed). */
+export async function publicPhotoKey(photoId: string) {
+  const [p] = await getDb()
+    .select({ key: tripPhotos.key, tripId: tripPhotos.tripId })
+    .from(tripPhotos)
+    .where(and(eq(tripPhotos.id, photoId), isNull(tripPhotos.hiddenAt)));
+  if (!p) return null;
+  const [t] = await getDb().select({ code: trips.publicCode }).from(trips).where(eq(trips.id, p.tripId));
+  return t?.code && (await publicStory(t.code)) ? p.key : null;
 }
 
 export async function saveStory(userId: string, tripId: string, body: string) {

@@ -2,11 +2,12 @@ import { z } from "zod";
 import { authedJson, json } from "@/lib/api";
 import { rateLimit } from "@/lib/rate-limit";
 import { deleteFile } from "@/lib/storage";
-import { albumAccess, removePhoto, saveStory } from "@/modules/memories/service";
+import { albumAccess, removePhoto, saveStory, setConsent } from "@/modules/memories/service";
 
 const body = z.discriminatedUnion("op", [
   z.object({ op: z.literal("story"), body: z.string().trim().min(2).max(600) }),
   z.object({ op: z.literal("photo.delete"), id: z.uuid() }),
+  z.object({ op: z.literal("consent"), on: z.boolean() }),
 ]);
 
 // Stories and photo removal for the album.
@@ -24,6 +25,10 @@ export async function POST(req: Request, { params }: RouteContext<"/api/trips/[i
     await saveStory(user.id, tripId.data, b.data.body);
     return json({ ok: true });
   }
+  if (b.data.op === "consent")
+    return (await setConsent(user.id, tripId.data, b.data.on))
+      ? json({ ok: true })
+      : json({ error: "forbidden" }, 403);
   const key = await removePhoto(user.id, tripId.data, b.data.id);
   if (!key) return json({ error: "forbidden" }, 403);
   await deleteFile(key);

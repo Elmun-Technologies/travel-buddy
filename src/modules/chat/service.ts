@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, count, desc, eq, inArray, isNull, lt, notInArray, sql } from "drizzle-orm";
 import { conversationMembers, conversations, messages, pollOptions, polls, pollVotes } from "@/db/schema";
+import { queueGroupPost, shareLink } from "@/modules/telegram-group/service";
 import { sharedApprovedTrip } from "@/modules/groups/service";
 import { isActiveUser } from "@/modules/users/service";
 import { type DbOrTx, getDb } from "@/lib/db";
@@ -210,11 +211,11 @@ export async function messageImageKey(viewerId: string, messageId: string) {
 
 export async function setPinned(conversationId: string, text: string | null, byUserId: string) {
   await getDb().transaction(async (tx) => {
-    if (text)
-      await notifyRoom(tx, conversationId, byUserId, "room_pin", {
-        tripId: await tripOf(tx, conversationId),
-        text,
-      });
+    if (text) {
+      const tripId = await tripOf(tx, conversationId);
+      await notifyRoom(tx, conversationId, byUserId, "room_pin", { tripId, text });
+      await queueGroupPost(tx, tripId, "pin", text, await shareLink(tx, tripId));
+    }
     await tx
       .update(conversations)
       .set({ pinnedText: text, pinnedAt: text ? new Date() : null })
@@ -246,10 +247,9 @@ export async function createPoll(
       .set({ lastMessageAt: new Date() })
       .where(eq(conversations.id, conversationId));
     await emit(tx, { t: "message", c: conversationId, id: m.id });
-    await notifyRoom(tx, conversationId, userId, "room_poll", {
-      tripId: await tripOf(tx, conversationId),
-      text: question,
-    });
+    const pollTrip = await tripOf(tx, conversationId);
+    await notifyRoom(tx, conversationId, userId, "room_poll", { tripId: pollTrip, text: question });
+    await queueGroupPost(tx, pollTrip, "poll", question, await shareLink(tx, pollTrip));
     return p.id;
   });
 }

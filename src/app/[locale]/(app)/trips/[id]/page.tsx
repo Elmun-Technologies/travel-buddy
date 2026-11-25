@@ -479,6 +479,7 @@ async function JoinArea({
   const tcr = await getTranslations("create");
   const trv = await getTranslations("reviews");
   const tal = await getTranslations("album");
+  const ttg = await getTranslations("tgGroup");
   const hidden = (name: string, value: string) => <input type="hidden" name={name} value={value} />;
   const small = "min-h-11 self-start py-2.5 text-sm text-muted-foreground underline-offset-4 hover:underline";
 
@@ -552,6 +553,9 @@ async function JoinArea({
               </div>
             </div>
           ))}
+          <Link href={`/trips/${trip.id}/telegram`} className={small}>
+            {ttg("link")}
+          </Link>
           {["open", "full", "closed"].includes(trip.status) && trip.startDate > todayISO() && (
             <Link href={`/trips/${trip.id}/edit`} className={small}>
               {tcr("editTitle")}
@@ -597,6 +601,9 @@ async function JoinArea({
       <>
         <Panel tone="soft" className="flex flex-col gap-1">
           <p className="text-lg font-semibold">{t("approved")}</p>
+          <Link href={`/trips/${trip.id}/telegram`} className={small}>
+            {ttg("link")}
+          </Link>
           {leaveForm(t("leave"))}
         </Panel>
         <MainAction label={tr("enter")} href={`/trips/${trip.id}/room`} />

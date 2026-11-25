@@ -46,6 +46,7 @@ async function Club({ params }: PageProps<"/[locale]/clubs/[id]">) {
         <div className="flex flex-wrap gap-x-4 text-sm text-white/80">
           <span>{t("members", { n: c.memberCount })}</span>
           <span>{t("rate", { n: c.completedTrips })}</span>
+          {c.rating && <span>{t("rating", { avg: c.rating.avg.toFixed(1), n: c.rating.count })}</span>}
         </div>
         <ClubActions
           clubId={c.id}

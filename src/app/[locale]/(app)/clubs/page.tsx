@@ -58,6 +58,7 @@ async function Clubs({ params, searchParams }: PageProps<"/[locale]/clubs">) {
             <div className="mt-auto flex flex-wrap gap-x-3 text-xs text-muted-foreground">
               <span>{t("members", { n: c.members })}</span>
               {c.completed > 0 && <span>{t("trips", { n: c.completed })}</span>}
+              {c.rating && <span>{t("rating", { avg: c.rating.avg.toFixed(1), n: c.rating.count })}</span>}
               {c.city && <span>{c.city}</span>}
               {c.myStatus === "approved" && <span className="font-semibold text-ink">{t("member")}</span>}
             </div>

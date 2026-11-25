@@ -7,7 +7,13 @@ import { PageLoading } from "@/components/page-loading";
 import { BackTo } from "@/components/telegram-actions";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { storageEnabled } from "@/lib/storage";
-import { albumAccess, listAlbum, MAX_PHOTOS_PER_PERSON, myStory } from "@/modules/memories/service";
+import {
+  albumAccess,
+  consentState,
+  listAlbum,
+  MAX_PHOTOS_PER_PERSON,
+  myStory,
+} from "@/modules/memories/service";
 import { Album } from "./album";
 
 export default function AlbumPage(props: PageProps<"/[locale]/trips/[id]/album">) {
@@ -25,10 +31,11 @@ async function AlbumView({ params }: PageProps<"/[locale]/trips/[id]/album">) {
   const tripId = z.uuid().safeParse(id);
   const trip = tripId.success ? await albumAccess(user.id, tripId.data) : null;
   if (!tripId.success || !trip) notFound();
-  const [t, data, story] = await Promise.all([
+  const [t, data, story, consent] = await Promise.all([
     getTranslations("album"),
     listAlbum(user.id, tripId.data),
     myStory(user.id, tripId.data),
+    consentState(user.id, tripId.data),
   ]);
   return (
     <>
@@ -50,6 +57,10 @@ async function AlbumView({ params }: PageProps<"/[locale]/trips/[id]/album">) {
         photos={data.photos.map((p) => ({ id: p.id, userId: p.userId, name: p.name }))}
         stories={data.stories}
         myStory={story}
+        consent={{
+          ...consent,
+          link: consent.code ? `${process.env.APP_URL ?? ""}/${l}/s/${consent.code}` : null,
+        }}
       />
     </>
   );

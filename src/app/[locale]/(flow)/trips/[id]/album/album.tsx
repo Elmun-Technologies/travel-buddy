@@ -19,6 +19,7 @@ export function Album({
   photos,
   stories,
   myStory,
+  consent,
 }: {
   tripId: string;
   me: string;
@@ -28,6 +29,7 @@ export function Album({
   photos: Photo[];
   stories: Story[];
   myStory: string;
+  consent: { finished: boolean; total: number; agreed: number; mine: boolean; link: string | null };
 }) {
   const t = useTranslations("album");
   const router = useRouter();
@@ -36,6 +38,7 @@ export function Album({
   const [error, setError] = useState<string | null>(null);
   const [story, setStory] = useState(myStory);
   const [saved, setSaved] = useState(false);
+  const [agree, setAgree] = useState(consent.mine);
 
   async function upload(files: File[]) {
     setError(null);
@@ -136,6 +139,38 @@ export function Album({
             </figure>
           ))}
         </div>
+      )}
+
+      {consent.finished && consent.total >= 2 && (
+        <Panel tone="soft" className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold">{t("publicTitle")}</h2>
+          <p className="text-sm">{t("publicHint")}</p>
+          <label className="flex min-h-11 items-center gap-3 text-[15px] font-medium">
+            <input
+              type="checkbox"
+              className="size-5"
+              checked={agree}
+              onChange={async (e) => {
+                const on = e.target.checked;
+                setAgree(on); // show the choice at once; undo if the server said no
+                if ((await post({ op: "consent", on }))?.ok) router.refresh();
+                else setAgree(!on);
+              }}
+            />
+            {t("publicAgree")}
+          </label>
+          <p className="text-sm">{t("publicCount", { n: consent.agreed, m: consent.total })}</p>
+          {consent.link ? (
+            <a
+              href={consent.link}
+              className="min-h-11 text-[15px] font-semibold break-all text-blue underline"
+            >
+              {consent.link}
+            </a>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("publicWaiting")}</p>
+          )}
+        </Panel>
       )}
 
       <Panel className="flex flex-col gap-3">

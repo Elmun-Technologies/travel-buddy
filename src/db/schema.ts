@@ -65,6 +65,8 @@ export const users = pgTable(
     deletedAt: ts("deleted_at"),
     // Bot notification kinds the user turned off: pin | poll | chat | mine.
     notifyOff: textArray("notify_off"),
+    // Agrees to a text message (SMS) when the bot cannot reach them, for safety and trip messages only.
+    smsConsent: boolean("sms_consent").notNull().default(false),
   },
   // One verified phone = one account (anti-abuse).
   (t) => [
@@ -229,6 +231,11 @@ export const trips = pgTable(
     datePrecision: text("date_precision").notNull().default("exact"),
     // Yig'amiz: everyone marks "Oldim" before this day (set by the organizer).
     ticketDeadline: date("ticket_deadline"),
+    // The group's own Telegram chat (optional): the bot joined it and the organizer linked it with a one-time code.
+    tgChatId: text("tg_chat_id"),
+    tgChatTitle: text("tg_chat_title"),
+    tgLinkCode: text("tg_link_code"),
+    tgLinkExpires: ts("tg_link_expires"),
   },
   (t) => [index("trips_dest_start_status").on(t.destinationCountry, t.startDate, t.status)],
 );
@@ -246,6 +253,8 @@ export const tripMembers = pgTable(
     role: tripMemberRole("role").notNull().default("member"),
     status: tripMemberStatus("status").notNull().default("requested"),
     message: text("message"),
+    // "Hikoyani ochiq qilamiz": this person agrees that the finished trip's story page is public.
+    storyConsentAt: ts("story_consent_at"),
   },
   (t) => [uniqueIndex("trip_members_unique").on(t.tripId, t.userId)],
 );

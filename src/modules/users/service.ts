@@ -74,6 +74,15 @@ export async function setLocale(userId: string, locale: string) {
   await getDb().update(users).set({ locale }).where(eq(users.id, userId));
 }
 
+export async function setSmsConsent(userId: string, on: boolean) {
+  await getDb().update(users).set({ smsConsent: on }).where(eq(users.id, userId));
+}
+
+export async function getSmsConsent(userId: string) {
+  const [u] = await getDb().select({ on: users.smsConsent }).from(users).where(eq(users.id, userId));
+  return u?.on ?? false;
+}
+
 export async function getNotifyOff(userId: string) {
   const [u] = await getDb().select({ off: users.notifyOff }).from(users).where(eq(users.id, userId));
   return u?.off ?? [];

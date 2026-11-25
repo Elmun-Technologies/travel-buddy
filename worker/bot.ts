@@ -10,6 +10,7 @@ import {
 import { createHash } from "node:crypto";
 import { personId, sendEvent } from "@/lib/analytics";
 import { acceptContact } from "@/modules/safety/service";
+import { completeLink } from "@/modules/telegram-group/service";
 
 const APP = process.env.APP_NAME || "Travel Buddy"; // the brand is never hardcoded in texts
 
@@ -41,6 +42,13 @@ const T = {
     trusted:
       'Siz <b>{n}</b>ning ishonchli odamisiz. Safar paytida favqulodda holat bo\'lsa yoki "Hammasi joyida" deb belgilasa, shu yerga xabar keladi.',
     trustedBad: "Havola eskirgan yoki o'chirilgan. Yangi havolani so'rang.",
+    groupHello:
+      'Salom! Bu guruhni safarga ulash uchun ilovada safarning "Telegram guruh" bo\'limidan kodni oling va shu yerga yozing: /link KOD',
+    linkOk: `Tayyor! Bu guruh «{trip}» safariga ulandi. Muhim e'lonlar, so'rovnomalar va sana o'zgarishlari shu yerga yoziladi.`,
+    linkBad: "Kod noto'g'ri yoki eskirgan (30 daqiqa amal qiladi). Ilovadan yangisini oling.",
+    linkNotOrg: "Guruhni faqat safar tashkilotchisi ulay oladi (ilovaga kirgan Telegram akkaunt bilan).",
+    linkTaken: "Bu guruh boshqa safarga ulangan.",
+    linkGroupOnly: "Bu buyruq guruhda ishlaydi: botni safar guruhingizga qo'shing.",
     taken: "Bu raqam boshqa akkauntga bog'langan. Qo'llab-quvvatlash xizmatiga yozing.",
     invalid: "Raqamni tanib bo'lmadi. Qaytadan urinib ko'ring.",
   },
@@ -67,6 +75,14 @@ const T = {
     trusted:
       "Вы — доверенный контакт <b>{n}</b>. Если в поездке что-то случится или придёт отметка «Всё в порядке», сообщение придёт сюда.",
     trustedBad: "Ссылка устарела или отключена. Попросите новую.",
+    groupHello:
+      "Привет! Чтобы привязать эту группу к поездке, возьмите код в разделе «Telegram-группа» поездки в приложении и напишите сюда: /link КОД",
+    linkOk: `Готово! Группа привязана к поездке «{trip}». Важные объявления, опросы и изменения дат будут появляться здесь.`,
+    linkBad: "Код неверный или устарел (действует 30 минут). Возьмите новый в приложении.",
+    linkNotOrg:
+      "Группу может привязать только организатор поездки (с того Telegram-аккаунта, которым он вошёл в приложение).",
+    linkTaken: "Эта группа уже привязана к другой поездке.",
+    linkGroupOnly: "Эта команда работает в группе: добавьте бота в группу поездки.",
     taken: "Этот номер привязан к другому аккаунту. Напишите в поддержку.",
     invalid: "Не удалось распознать номер. Попробуйте ещё раз.",
   },
@@ -93,6 +109,14 @@ const T = {
     trusted:
       "You're <b>{n}</b>'s trusted contact. If something happens on the trip, or they mark \"All good\", you'll get a message here.",
     trustedBad: "This link has expired or was switched off. Ask for a new one.",
+    groupHello:
+      'Hi! To link this group to a trip, get the code in the trip\'s "Telegram group" section in the app and send it here: /link CODE',
+    linkOk: `Done! This group is linked to “{trip}”. Important notices, polls and date changes will appear here.`,
+    linkBad: "The code is wrong or expired (it lasts 30 minutes). Get a new one in the app.",
+    linkNotOrg:
+      "Only the trip organizer can link a group (from the Telegram account used to sign in to the app).",
+    linkTaken: "This group is already linked to another trip.",
+    linkGroupOnly: "This command works in a group: add the bot to your trip's group.",
     taken: "This number is linked to another account. Please contact support.",
     invalid: "Couldn't read the number. Please try again.",
   },
@@ -209,6 +233,38 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       });
   });
 
+  // "/link CODE" in the trip's own Telegram group
+  bot.command("link", async (ctx) => {
+    const l = await langOf(ctx.from);
+    if (ctx.chat.type !== "group" && ctx.chat.type !== "supergroup") {
+      await ctx.reply(T[l].linkGroupOnly);
+      return;
+    }
+    const code = ctx.match.trim().toUpperCase();
+    const res =
+      /^[2-9A-HJKMNP-Z]{8}$/.test(code) && ctx.from
+        ? await completeLink(code, String(ctx.chat.id), ctx.chat.title ?? "", ctx.from.id)
+        : ({ ok: false, error: "bad_code" } as const);
+    await ctx.reply(
+      res.ok
+        ? T[l].linkOk.replace("{trip}", res.tripTitle.replace(/[<>&]/g, ""))
+        : res.error === "not_organizer"
+          ? T[l].linkNotOrg
+          : res.error === "chat_taken"
+            ? T[l].linkTaken
+            : T[l].linkBad,
+    );
+  });
+  // The bot was added to a group: say how to link it (once per addition).
+  bot.on("my_chat_member", async (ctx) => {
+    const c = ctx.myChatMember;
+    const joined =
+      ["member", "administrator"].includes(c.new_chat_member.status) &&
+      ["left", "kicked"].includes(c.old_chat_member.status);
+    if ((c.chat.type === "group" || c.chat.type === "supergroup") && joined)
+      await ctx.reply(T[await langOf(c.from)].groupHello).catch(() => {});
+  });
+
   bot.catch((err) => console.error("bot error", err.error));
 
   return {
@@ -223,7 +279,10 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       const me = await bot.api.getMe();
       console.log(`bot @${me.username} polling`);
       // start() deletes any webhook and long-polls; one instance per token.
-      return bot.start({ allowed_updates: ["message", "callback_query"], drop_pending_updates: false });
+      return bot.start({
+        allowed_updates: ["message", "callback_query", "my_chat_member"],
+        drop_pending_updates: false,
+      });
     },
   };
 }

@@ -30,6 +30,7 @@ import {
   getMemberships,
 } from "@/modules/groups/service";
 import { notify } from "@/modules/notifications/service";
+import { queueGroupPost, shareLink } from "@/modules/telegram-group/service";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
 import { getUserState } from "@/modules/users/service";
@@ -252,9 +253,17 @@ export async function updateTrip(
       .set({ ...patch, status })
       .where(eq(trips.id, tripId));
     const datesChanged = patch.startDate !== t.startDate || patch.endDate !== t.endDate;
-    if (datesChanged)
+    if (datesChanged) {
       for (const id of await approvedMemberIds(tx, tripId, userId))
         await notify(tx, id, "trip_updated", { tripId });
+      await queueGroupPost(
+        tx,
+        tripId,
+        "update",
+        `${patch.startDate} – ${patch.endDate}`,
+        await shareLink(tx, tripId),
+      );
+    }
     return { ok: true };
   });
 }

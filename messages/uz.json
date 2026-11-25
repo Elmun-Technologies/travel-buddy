@@ -893,7 +893,9 @@
     "chatHint": "Soatiga ko'pi bilan bitta: \"Guruhda N ta yangi xabar\"",
     "failed": "Saqlab bo'lmadi. Qayta urinib ko'ring.",
     "match": "Mos safarlar",
-    "matchHint": "Sizga mos yangi safar chiqsa (kuniga 3 tagacha)"
+    "matchHint": "Sizga mos yangi safar chiqsa (kuniga 3 tagacha)",
+    "sms": "SMS ham yuborilsin",
+    "smsHint": "Bot sizga yetib bormasa, faqat xavfsizlik (SOS) va shaxsiy takliflar haqida, kuniga 3 tagacha"
   },
   "sos": {
     "back": "Orqaga",
@@ -1356,7 +1358,12 @@
     "errOff": "Rasm yuklash hozircha ishlamayapti.",
     "photoAlt": "Safar albomidan rasm",
     "open": "Albom ({n} rasm)",
-    "mine": "Albom va hikoyalar"
+    "mine": "Albom va hikoyalar",
+    "publicTitle": "Ochiq hikoya sahifasi",
+    "publicHint": "Safar tugagan. Hamma a'zo rozi bo'lsa, rasmlar va hikoyalar kirishsiz ochiladigan havolada chiqadi. Bitta odam rozilikni qaytarsa, sahifa darrov yopiladi.",
+    "publicAgree": "Men roziman: ismim, rasmlarim va hikoyam ochiq sahifada ko'rinsin",
+    "publicCount": "Rozi: {n} / {m}",
+    "publicWaiting": "Hamma rozi bo'lgach, havola shu yerda chiqadi."
   },
   "verifyId": {
     "title": "ID tasdiqlash",
@@ -1440,7 +1447,8 @@
     "byClub": "Klub: {name}",
     "rate": "{n} ta safar o'tkazilgan",
     "mine": "Mening klublarim",
-    "all": "Barcha klublar"
+    "all": "Barcha klublar",
+    "rating": "Baho {avg} ({n} ta fikr)"
   },
   "agency": {
     "title": "Agentlik kabineti",
@@ -1537,5 +1545,35 @@
     "leadPhone": "Ariza uchun telefonni tasdiqlang.",
     "contactNote": "Telefon raqamingiz arizani qabul qilgandan keyingina agentlikka ko'rinadi.",
     "loginToLead": "Kirish va ariza qoldirish"
+  },
+  "tgGroup": {
+    "title": "Telegram guruh",
+    "lead": "Safar guruhingiz allaqachon Telegram'da bo'lsa, botni shu guruhga ulang: muhim e'lonlar va sana o'zgarishlari u yerga ham yoziladi.",
+    "back": "Safarga qaytish",
+    "step1": "1. Telegram guruhingizga {bot} botini qo'shing (a'zolarni taklif qila oladigan administrator qiling).",
+    "step2": "2. Bu yerdan kod oling.",
+    "step3": "3. Guruhga kodni shu ko'rinishda yozing: /link KOD",
+    "codeLabel": "Guruhga yozing",
+    "codeNote": "Kod 30 daqiqa amal qiladi. Faqat siz — safar tashkilotchisi — ulay olasiz.",
+    "getCode": "Kod olish",
+    "newCode": "Yangi kod",
+    "check": "Ulandimi? Tekshirish",
+    "linked": "Guruh ulangan",
+    "whatPosts": "Qadalgan e'lonlar, so'rovnomalar va sana o'zgarishlari guruhga ham yoziladi.",
+    "join": "Telegram guruhga kirish",
+    "joinHint": "Havola faqat sizga, bir martalik va 1 kun amal qiladi. Uni boshqalarga yubormang.",
+    "unlink": "Guruhni uzish",
+    "notYet": "Tashkilotchi hali Telegram guruhni ulamagan.",
+    "errAdmin": "Bot guruhda administrator emas, havola yarata olmadi. Tashkilotchiga ayting.",
+    "errGeneric": "Bajarib bo'lmadi. Keyinroq urinib ko'ring.",
+    "link": "Telegram guruh"
+  },
+  "story": {
+    "metaTitle": "{place}: safar hikoyasi",
+    "people": "safardoshlar: {names}",
+    "photoAlt": "{place} safaridan rasm",
+    "ctaTitle": "Siz ham shunday safarga chiqmoqchimisiz?",
+    "cta": "Sherik topish",
+    "consentNote": "Bu sahifa safardagi barcha odamlarning roziligi bilan ochilgan."
   }
 }

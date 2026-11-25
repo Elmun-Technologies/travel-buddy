@@ -194,6 +194,34 @@ export async function separateAfterBlock(a: string, b: string) {
   }
 }
 
+/** Per-person "my trip story may be public" switch of an approved member. */
+export async function setStoryConsent(userId: string, tripId: string, on: boolean) {
+  const r = await getDb()
+    .update(tripMembers)
+    .set({ storyConsentAt: on ? new Date() : null })
+    .where(
+      and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId), eq(tripMembers.status, "approved")),
+    )
+    .returning({ id: tripMembers.id });
+  return r.length > 0;
+}
+
+/** How many of the approved members agreed, and did this person? Everyone must agree for a public page. */
+export async function storyConsent(tripId: string, userId: string | null) {
+  const rows = await getDb()
+    .select({ userId: tripMembers.userId, at: tripMembers.storyConsentAt })
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.status, "approved")));
+  const agreed = rows.filter((r) => r.at).length;
+  return {
+    total: rows.length,
+    agreed,
+    mine: !!rows.find((r) => r.userId === userId)?.at,
+    everyone: rows.length >= 2 && agreed === rows.length,
+    names: rows.map((r) => r.userId),
+  };
+}
+
 /** Were these two people both approved members of at least one trip? (The condition for writing to each other.) */
 export async function sharedApprovedTrip(a: string, b: string) {
   const rows = await getDb().execute<{ n: number }>(sql`

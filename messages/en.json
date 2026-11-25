@@ -893,7 +893,9 @@
     "chatHint": "At most once an hour: \"N new messages in the group\"",
     "failed": "Couldn't save. Please try again.",
     "match": "Matching trips",
-    "matchHint": "When a trip that fits you appears (up to 3 a day)"
+    "matchHint": "When a trip that fits you appears (up to 3 a day)",
+    "sms": "Also send an SMS",
+    "smsHint": "If the bot can't reach you — only safety (SOS) and personal offers, up to 3 a day"
   },
   "sos": {
     "back": "Back",
@@ -1356,7 +1358,12 @@
     "errOff": "Photo upload is unavailable right now.",
     "photoAlt": "Photo from the trip album",
     "open": "Album ({n} photos)",
-    "mine": "Album and stories"
+    "mine": "Album and stories",
+    "publicTitle": "Public story page",
+    "publicHint": "The trip is over. If every member agrees, the photos and stories appear on a link that opens without signing in. If anyone withdraws, the page closes at once.",
+    "publicAgree": "I agree: my name, photos and story may be shown on the public page",
+    "publicCount": "Agreed: {n} of {m}",
+    "publicWaiting": "The link will appear here once everyone has agreed."
   },
   "verifyId": {
     "title": "Verify your identity",
@@ -1440,7 +1447,8 @@
     "byClub": "Club: {name}",
     "rate": "{n} trips taken",
     "mine": "My clubs",
-    "all": "All clubs"
+    "all": "All clubs",
+    "rating": "Rated {avg} ({n} reviews)"
   },
   "agency": {
     "title": "Agency cabinet",
@@ -1537,5 +1545,35 @@
     "leadPhone": "Verify your phone to send a request.",
     "contactNote": "The agency sees your phone number only after it accepts your request.",
     "loginToLead": "Sign in and send a request"
+  },
+  "tgGroup": {
+    "title": "Telegram group",
+    "lead": "If your trip group already lives in Telegram, link the bot to it: important notices and date changes are posted there too.",
+    "back": "Back to the trip",
+    "step1": "1. Add the bot {bot} to your Telegram group (make it an administrator who can invite people).",
+    "step2": "2. Get a code here.",
+    "step3": "3. Send this in the group: /link CODE",
+    "codeLabel": "Send in the group",
+    "codeNote": "The code lasts 30 minutes. Only you — the trip organizer — can link it.",
+    "getCode": "Get a code",
+    "newCode": "New code",
+    "check": "Linked? Check",
+    "linked": "Group linked",
+    "whatPosts": "Pinned notices, polls and date changes are posted to the group too.",
+    "join": "Join the Telegram group",
+    "joinHint": "The link is only for you, single-use, valid for 1 day. Don't forward it.",
+    "unlink": "Unlink the group",
+    "notYet": "The organizer hasn't linked a Telegram group yet.",
+    "errAdmin": "The bot isn't an administrator of the group and couldn't create a link. Tell the organizer.",
+    "errGeneric": "Couldn't do that. Try again later.",
+    "link": "Telegram group"
+  },
+  "story": {
+    "metaTitle": "{place}: trip story",
+    "people": "travel buddies: {names}",
+    "photoAlt": "Photo from the {place} trip",
+    "ctaTitle": "Want to travel like this?",
+    "cta": "Find travel buddies",
+    "consentNote": "This page is public with the agreement of everyone on the trip."
   }
 }

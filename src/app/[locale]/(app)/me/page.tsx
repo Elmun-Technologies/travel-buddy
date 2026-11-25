@@ -14,7 +14,8 @@ import { botUsername, formatDateRange } from "@/lib/format";
 import { asLocale, requireProfile } from "@/lib/guard";
 import { getPublicProfile } from "@/modules/profiles/service";
 import { listMyIntents, listMyTrips } from "@/modules/trips/service";
-import { getNotifyOff } from "@/modules/users/service";
+import { smsEnabled } from "@/lib/sms";
+import { getSmsConsent, getNotifyOff } from "@/modules/users/service";
 import { closeIntentAction, logoutAction } from "../actions";
 import { LegalLinks } from "@/components/legal/legal-links";
 import { TelegramLoginButton } from "@/components/auth/telegram-login-button";
@@ -235,7 +236,10 @@ async function Me({ params, searchParams }: PageProps<"/[locale]/me">) {
           </Link>
         </div>
       </Panel>
-      <NotifySettings initialOff={notifyOff} />
+      <NotifySettings
+        initialOff={notifyOff}
+        sms={smsEnabled() && user.phoneVerified ? { on: await getSmsConsent(user.id) } : undefined}
+      />
       <LegalLinks className="flex flex-wrap gap-x-4 px-2 pb-2 text-sm text-muted-foreground" />
     </div>
   );

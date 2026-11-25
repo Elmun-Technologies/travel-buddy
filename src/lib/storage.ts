@@ -11,7 +11,8 @@ import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } fro
 const bucket = () => process.env.S3_BUCKET_FILES || "tb-files";
 const configured = () =>
   !!(process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY);
-const localDir = () => resolve(process.env.LOCAL_UPLOAD_DIR || ".local/uploads");
+// turbopackIgnore: the folder is chosen at run time; without it the bundler traces the whole project.
+const localDir = () => resolve(/* turbopackIgnore: true */ process.env.LOCAL_UPLOAD_DIR || ".local/uploads");
 const localAllowed = () => process.env.APP_ENV !== "production";
 
 let client: S3Client | null = null;
@@ -46,7 +47,7 @@ export async function putFile(key: string, body: Buffer, contentType: string) {
     return;
   }
   if (!localAllowed()) throw new Error("storage is not configured");
-  const path = join(localDir(), key);
+  const path = join(/* turbopackIgnore: true */ localDir(), key);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, body);
 }
@@ -60,7 +61,10 @@ export async function getFile(key: string): Promise<{ body: Buffer; contentType:
       return { body, contentType: r.ContentType || "application/octet-stream" };
     }
     if (!localAllowed()) return null;
-    return { body: await readFile(join(localDir(), key)), contentType: "image/webp" };
+    return {
+      body: await readFile(join(/* turbopackIgnore: true */ localDir(), key)),
+      contentType: "image/webp",
+    };
   } catch {
     return null;
   }
@@ -71,7 +75,7 @@ export async function deleteFile(key: string | null | undefined) {
   try {
     safe(key);
     if (configured()) await s3().send(new DeleteObjectCommand({ Bucket: bucket(), Key: key }));
-    else if (localAllowed()) await rm(join(localDir(), key), { force: true });
+    else if (localAllowed()) await rm(join(/* turbopackIgnore: true */ localDir(), key), { force: true });
   } catch {
     // a file that is already gone is fine
   }

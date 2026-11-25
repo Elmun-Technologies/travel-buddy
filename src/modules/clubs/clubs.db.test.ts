@@ -1,7 +1,7 @@
 // Integration test against a real Postgres (runs when DATABASE_URL is set).
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
-import { clubs, users } from "@/db/schema";
+import { clubs, reviews, trips, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { loginWithTelegram, verifyPhoneFromTelegram } from "@/modules/auth/service";
 import { saveProfile } from "@/modules/profiles/service";
@@ -52,6 +52,8 @@ const input = (name: string, privacy: "open" | "closed" = "open") => ({
 
 describe.runIf(run)("clubs (db)", () => {
   afterAll(async () => {
+    await getDb().delete(reviews).where(inArray(reviews.authorId, created));
+    await getDb().delete(trips).where(inArray(trips.ownerUserId, created));
     await getDb().delete(clubs).where(inArray(clubs.ownerUserId, created));
     await getDb().delete(users).where(inArray(users.id, created));
   });
@@ -106,5 +108,41 @@ describe.runIf(run)("clubs (db)", () => {
     await setClubStatus(open.id, "hidden");
     expect((await listClubs(outsider)).some((c) => c.id === open.id)).toBe(false);
     expect(await getClub(outsider, open.id)).toBeNull();
+  });
+
+  it("shows a club rating only from 3 visible reviews on its finished trips", async () => {
+    const db = getDb();
+    const [owner, a, b, c] = await Promise.all([1, 2, 3, 4].map((n) => newUser(900 + n)));
+    const club = await createClub(owner, input("TEST rating club"));
+    if (!club.ok) throw new Error("club");
+    const [trip] = await db
+      .insert(trips)
+      .values({
+        kind: "independent",
+        ownerUserId: owner,
+        clubId: club.id,
+        title: "TEST club trip",
+        destinationCountry: "GE",
+        startDate: "2026-01-01",
+        endDate: "2026-01-05",
+        status: "completed",
+        isTest: true,
+      })
+      .returning({ id: trips.id });
+    const rate = (authorId: string, subjectUserId: string, rating: number) =>
+      db.insert(reviews).values({ tripId: trip.id, authorId, subjectUserId, rating });
+
+    expect((await getClub(owner, club.id))?.rating).toBeNull(); // nothing yet: no invented number
+    await rate(a, owner, 5);
+    await rate(b, owner, 4);
+    expect((await getClub(owner, club.id))?.rating).toBeNull(); // 2 reviews: still not shown
+    expect((await listClubs(owner)).find((x) => x.id === club.id)?.rating).toBeNull();
+
+    await rate(c, owner, 3);
+    expect((await getClub(owner, club.id))?.rating).toEqual({ avg: 4, count: 3 });
+    expect((await listClubs(owner)).find((x) => x.id === club.id)?.rating).toEqual({ avg: 4, count: 3 });
+
+    await db.update(reviews).set({ hiddenAt: new Date() }).where(eq(reviews.authorId, c)); // hidden ones do not count
+    expect((await getClub(owner, club.id))?.rating).toBeNull();
   });
 });

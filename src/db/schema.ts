@@ -65,6 +65,8 @@ export const users = pgTable(
     deletedAt: ts("deleted_at"),
     // Bot notification kinds the user turned off: pin | poll | chat | mine.
     notifyOff: textArray("notify_off"),
+    // Agrees to a text message (SMS) when the bot cannot reach them, for safety and trip messages only.
+    smsConsent: boolean("sms_consent").notNull().default(false),
   },
   // One verified phone = one account (anti-abuse).
   (t) => [
@@ -145,7 +147,7 @@ export const idVerifications = pgTable("id_verifications", {
   // Private bucket keys; nulled after files are purged (30 days after decision).
   documentKey: text("document_key"),
   selfieKey: text("selfie_key"),
-  reviewedBy: uuid("reviewed_by").references(() => users.id),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
   reviewedAt: ts("reviewed_at"),
   filesPurgedAt: ts("files_purged_at"),
 });
@@ -189,7 +191,7 @@ export const agencyVerifications = pgTable("agency_verifications", {
   documentKeys: textArray("document_keys"),
   status: verificationStatus("status").notNull().default("pending"),
   note: text("note"),
-  reviewedBy: uuid("reviewed_by").references(() => users.id),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
   reviewedAt: ts("reviewed_at"),
 });
 
@@ -199,7 +201,10 @@ export const trips = pgTable(
   {
     ...base,
     kind: tripKind("kind").notNull(),
-    ownerUserId: uuid("owner_user_id").references(() => users.id),
+    // Null once the organizer's account is erased: the group keeps its history.
+    ownerUserId: uuid("owner_user_id").references(() => users.id, { onDelete: "set null" }),
+    // A trip opened in the name of a club (shown on the club page and in the feed).
+    clubId: uuid("club_id"),
     agencyId: uuid("agency_id").references(() => agencies.id),
     title: text("title").notNull(),
     destinationCountry: text("destination_country").notNull(),
@@ -226,6 +231,11 @@ export const trips = pgTable(
     datePrecision: text("date_precision").notNull().default("exact"),
     // Yig'amiz: everyone marks "Oldim" before this day (set by the organizer).
     ticketDeadline: date("ticket_deadline"),
+    // The group's own Telegram chat (optional): the bot joined it and the organizer linked it with a one-time code.
+    tgChatId: text("tg_chat_id"),
+    tgChatTitle: text("tg_chat_title"),
+    tgLinkCode: text("tg_link_code"),
+    tgLinkExpires: ts("tg_link_expires"),
   },
   (t) => [index("trips_dest_start_status").on(t.destinationCountry, t.startDate, t.status)],
 );
@@ -243,6 +253,8 @@ export const tripMembers = pgTable(
     role: tripMemberRole("role").notNull().default("member"),
     status: tripMemberStatus("status").notNull().default("requested"),
     message: text("message"),
+    // "Hikoyani ochiq qilamiz": this person agrees that the finished trip's story page is public.
+    storyConsentAt: ts("story_consent_at"),
   },
   (t) => [uniqueIndex("trip_members_unique").on(t.tripId, t.userId)],
 );
@@ -326,7 +338,7 @@ export const leads = pgTable(
       .references(() => agencies.id),
     userId: uuid("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     message: text("message"),
     people: integer("people").notNull().default(1),
     status: leadStatus("status").notNull().default("new"),
@@ -358,6 +370,8 @@ export const conversations = pgTable("conversations", {
   tripId: uuid("trip_id").references(() => trips.id, { onDelete: "cascade" }),
   leadId: uuid("lead_id").references(() => leads.id, { onDelete: "cascade" }),
   lastMessageAt: ts("last_message_at"),
+  // "<smaller user id>:<larger user id>" for direct chats: one conversation per pair.
+  directKey: text("direct_key").unique(),
   // Organizer's announcement pinned on top of the room chat ("E'LON · Uchrashuv: 06:00, aeroport").
   pinnedText: text("pinned_text"),
   pinnedAt: ts("pinned_at"),
@@ -390,8 +404,9 @@ export const messages = pgTable(
       .references(() => conversations.id, { onDelete: "cascade" }),
     senderId: uuid("sender_id").references(() => users.id, { onDelete: "set null" }),
     body: text("body").notNull(),
-    kind: text("kind").notNull().default("text"), // text | poll
+    kind: text("kind").notNull().default("text"), // text | poll | image
     pollId: uuid("poll_id"),
+    imageKey: text("image_key"), // private object key; served through /api/media/message/<id>
     hiddenAt: ts("hidden_at"),
   },
   (t) => [index("messages_conv_created").on(t.conversationId, t.createdAt)],
@@ -699,29 +714,32 @@ export const reviews = pgTable(
       .references(() => trips.id),
     authorId: uuid("author_id")
       .notNull()
-      .references(() => users.id),
-    subjectUserId: uuid("subject_user_id").references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectUserId: uuid("subject_user_id").references(() => users.id, { onDelete: "cascade" }),
     subjectAgencyId: uuid("subject_agency_id").references(() => agencies.id),
     rating: integer("rating").notNull(), // 1..5
     body: text("body"),
     hiddenAt: ts("hidden_at"),
   },
-  (t) => [index("reviews_subject_user").on(t.subjectUserId)],
+  (t) => [
+    index("reviews_subject_user").on(t.subjectUserId),
+    // One review per companion per trip (editing replaces it).
+    uniqueIndex("reviews_once").on(t.tripId, t.authorId, t.subjectUserId),
+  ],
 );
 
 export const reports = pgTable(
   "reports",
   {
     ...base,
-    reporterId: uuid("reporter_id")
-      .notNull()
-      .references(() => users.id),
+    // Kept (without the reporter) after the reporter's account is erased.
+    reporterId: uuid("reporter_id").references(() => users.id, { onDelete: "set null" }),
     targetType: reportTarget("target_type").notNull(),
     targetId: uuid("target_id").notNull(),
     reason: text("reason").notNull(),
     details: text("details"),
     status: reportStatus("status").notNull().default("open"),
-    resolvedBy: uuid("resolved_by").references(() => users.id),
+    resolvedBy: uuid("resolved_by").references(() => users.id, { onDelete: "set null" }),
     resolvedAt: ts("resolved_at"),
   },
   (t) => [index("reports_status").on(t.status, t.createdAt)],
@@ -755,15 +773,23 @@ export const notifications = pgTable(
     channel: text("channel").notNull().default("in_app"), // in_app | telegram | email
     sentAt: ts("sent_at"),
     readAt: ts("read_at"),
+    // Delivery retries (worker): tries so far and when the next one is due.
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: ts("next_attempt_at"),
   },
-  (t) => [index("notifications_user").on(t.userId, t.createdAt)],
+  (t) => [
+    index("notifications_user").on(t.userId, t.createdAt),
+    index("notifications_unsent")
+      .on(t.createdAt)
+      .where(sql`${t.sentAt} is null`),
+  ],
 );
 
 // Post-MVP billing; intentionally unused for now.
 export const subscriptions = pgTable("subscriptions", {
   ...base,
   agencyId: uuid("agency_id").references(() => agencies.id),
-  userId: uuid("user_id").references(() => users.id),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   plan: text("plan").notNull(),
   status: text("status").notNull(),
   currentPeriodEnd: ts("current_period_end"),
@@ -773,7 +799,7 @@ export const auditLogs = pgTable(
   "audit_logs",
   {
     ...base,
-    actorId: uuid("actor_id").references(() => users.id),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
     action: text("action").notNull(),
     targetType: text("target_type"),
     targetId: uuid("target_id"),
@@ -803,3 +829,85 @@ export const waitlist = pgTable("waitlist", {
   source: text("source"), // utm_source
   isTest: boolean("is_test").notNull().default(false),
 });
+
+// ---------- memories: photo album and stories (after / during a trip) ----------
+export const tripPhotos = pgTable(
+  "trip_photos",
+  {
+    ...base,
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    caption: text("caption"),
+    hiddenAt: ts("hidden_at"),
+  },
+  (t) => [index("trip_photos_trip").on(t.tripId, t.createdAt)],
+);
+
+/** One short story per person per trip ("hikoya"). */
+export const tripStories = pgTable(
+  "trip_stories",
+  {
+    ...base,
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+  },
+  (t) => [uniqueIndex("trip_stories_once").on(t.tripId, t.userId)],
+);
+
+// ---------- clubs ----------
+export const clubs = pgTable(
+  "clubs",
+  {
+    ...base,
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    rules: text("rules"),
+    city: text("city"),
+    // open: anyone joins at once; closed: join by request
+    privacy: text("privacy").notNull().default("open"),
+    status: text("status").notNull().default("active"), // active | hidden
+    ownerUserId: uuid("owner_user_id").references(() => users.id, { onDelete: "set null" }),
+  },
+  (t) => [index("clubs_status").on(t.status, t.createdAt)],
+);
+
+export const clubMembers = pgTable(
+  "club_members",
+  {
+    ...base,
+    clubId: uuid("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"), // organizer | member
+    status: text("status").notNull().default("approved"), // requested | approved | rejected | left
+  },
+  (t) => [uniqueIndex("club_members_unique").on(t.clubId, t.userId), index("club_members_user").on(t.userId)],
+);
+
+export const clubPosts = pgTable(
+  "club_posts",
+  {
+    ...base,
+    clubId: uuid("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    body: text("body").notNull(),
+    hiddenAt: ts("hidden_at"),
+  },
+  (t) => [index("club_posts_club").on(t.clubId, t.createdAt)],
+);

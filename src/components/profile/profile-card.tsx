@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { Avatar } from "@/components/avatar";
 import { CheckIcon, Display, Panel } from "@/components/clay";
 import { languageName } from "@/lib/catalog";
 import type { getPublicProfile } from "@/modules/profiles/service";
@@ -22,9 +23,7 @@ export async function ProfileCard({ p, actions }: { p: P; actions?: React.ReactN
   return (
     <Panel className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
-        <span className="flex size-[88px] flex-none items-center justify-center rounded-full bg-[#c9d4e3] text-3xl font-semibold">
-          {p.displayName.slice(0, 1)}
-        </span>
+        <Avatar userId={p.userId} name={p.displayName} version={p.avatar} className="size-[88px] text-3xl" />
         <div className="min-w-0">
           <Display className="text-[32px]">
             {p.displayName}, {p.age}
@@ -39,6 +38,11 @@ export async function ProfileCard({ p, actions }: { p: P; actions?: React.ReactN
         {p.reliability && (
           <span className={`${chip} border-input`}>
             {t("went", { went: p.reliability.went, total: p.reliability.total })}
+          </span>
+        )}
+        {p.rating && (
+          <span className={`${chip} border-input`}>
+            {t("rating", { avg: p.rating.avg.toFixed(1), n: p.rating.count })}
           </span>
         )}
         {actions}

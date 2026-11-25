@@ -1,4 +1,5 @@
 // "So'zida turish" (product-decisions §9.4), run hourly by the worker:
+//  - 3 and 1 day before departure: "trip_soon" reminder to everyone approved;
 //  - 2 days before the ticket deadline and on the day: remind members who haven't marked "Oldim";
 //  - after the deadline: their place is freed (status left, chat left) and counted as no_show;
 //    the organizer is told how many places opened and how many requests are waiting;
@@ -23,12 +24,26 @@ export async function runReliability(db: Db) {
           where n.user_id = tm.user_id and n.type = 'ticket_reminder'
             and n.payload->>'tripId' = t.id::text and n.payload->>'n' = (t.ticket_deadline - ${today})::text)`);
 
+    // 3 and 1 day before departure: one reminder per person per day-count.
+    await tx.execute(sql`
+      insert into notifications (user_id, type, payload, channel)
+      select tm.user_id, 'trip_soon',
+        jsonb_build_object('tripId', t.id, 'n', (t.start_date - ${today})::text), 'telegram'
+      from trips t
+      join trip_members tm on tm.trip_id = t.id and tm.status = 'approved'
+      where t.status in ('open', 'full') and (t.start_date - ${today}) in (1, 3)
+        and not exists (select 1 from notifications n
+          where n.user_id = tm.user_id and n.type = 'trip_soon'
+            and n.payload->>'tripId' = t.id::text and n.payload->>'n' = (t.start_date - ${today})::text)`);
+
     await tx.execute(sql`
       with dropped as (
         update trip_members tm set status = 'left'
         from trips t
         where t.id = tm.trip_id and t.status in ('open', 'full') and t.ticket_deadline < ${today}
           and tm.status = 'approved' and tm.role = 'member'
+          -- someone approved after the deadline passed is not punished for missing it
+          and (tm.updated_at at time zone 'Asia/Tashkent')::date <= t.ticket_deadline
           and not exists (select 1 from trip_tickets k where k.trip_id = t.id and k.user_id = tm.user_id)
         returning tm.trip_id, tm.user_id),
       outcome as (
@@ -57,10 +72,15 @@ export async function runReliability(db: Db) {
       with done as (
         update trips set status = 'completed'
         where status in ('open', 'full') and end_date < ${today}
-        returning id)
-      insert into reliability (user_id, trip_id, outcome)
-      select tm.user_id, tm.trip_id, 'went' from trip_members tm
-      where tm.status = 'approved' and tm.trip_id in (select id from done)
-      on conflict do nothing`);
+        returning id),
+      went as (
+        insert into reliability (user_id, trip_id, outcome)
+        select tm.user_id, tm.trip_id, 'went' from trip_members tm
+        where tm.status = 'approved' and tm.trip_id in (select id from done)
+        on conflict (user_id, trip_id) do update set outcome = 'went'
+        returning user_id, trip_id)
+      -- the trip is over: ask everyone who was there to rate their companions
+      insert into notifications (user_id, type, payload, channel)
+      select user_id, 'review_ask', jsonb_build_object('tripId', trip_id), 'telegram' from went`);
   });
 }

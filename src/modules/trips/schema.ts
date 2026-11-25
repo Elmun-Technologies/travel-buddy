@@ -15,7 +15,7 @@ const money = z.coerce
   .number()
   .int()
   .min(0)
-  .max(100_000_000)
+  .max(10_000_000) // x100 must stay inside a 32-bit column
   .transform((v) => v * 100)
   .nullable()
   .catch(null);
@@ -122,8 +122,13 @@ export const createTripBody = z.object({
   styles: z.array(z.enum(TRAVEL_STYLES)).max(6).default([]),
   womenOnly: z.boolean().default(false),
   note: z.string().trim().max(280).optional(),
+  clubId: z.uuid().optional(), // a trip opened in the name of a club (organizers only)
 });
 export type CreateTripBody = z.output<typeof createTripBody>;
+
+/** Editing an open trip: everything from creation except where it goes. */
+export const updateTripBody = createTripBody.omit({ country: true, city: true, clubId: true });
+export type UpdateTripBody = z.output<typeof updateTripBody>;
 
 const BAND: Record<CreateTripBody["band"], [number | null, number | null]> = {
   lt300: [null, 300],

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json } from "@/lib/api";
 import { rateLimit } from "@/lib/rate-limit";
+import { track } from "@/lib/track";
 import { roomJson } from "@/lib/room-api";
 import { sendMessage } from "@/modules/chat/service";
 
@@ -12,5 +13,7 @@ export async function POST(req: Request, { params }: RouteContext<"/api/rooms/[t
   const b = body.safeParse(r.body);
   if (!b.success) return json({ error: "invalid" }, 422);
   if (!(await rateLimit(`msg:user:${r.user.id}`, 30, 60))) return json({ error: "rate_limited" }, 429);
-  return json({ id: await sendMessage(r.room.id, r.user.id, b.data.body) });
+  const id = await sendMessage(r.room.id, r.user.id, b.data.body);
+  track("message_sent", r.user.id);
+  return json({ id });
 }

@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import { z } from "zod";
+import { isClubOrganizer } from "@/modules/clubs/service";
 import { PageLoading } from "@/components/page-loading";
 import { PhoneGate } from "@/components/phone-gate";
 import { COUNTRIES, countryName, todayISO } from "@/lib/catalog";
@@ -19,7 +21,12 @@ async function NewTrip({ params, searchParams }: PageProps<"/[locale]/trips/new"
   const locale = asLocale((await params).locale);
   const { user, profile } = await requireProfile(locale);
   if (!user.phoneVerified) return <PhoneGate bot={botUsername()} />;
-  const pre = (await searchParams).country;
+  const sp = await searchParams;
+  const pre = sp.country;
+  // ?club=<id>: open the trip in a club's name (only if I organize that club)
+  const clubParam = z.uuid().safeParse(sp.club);
+  const clubId =
+    clubParam.success && (await isClubOrganizer(user.id, clubParam.data)) ? clubParam.data : undefined;
   const name = (c: string) => countryName(c, locale);
   const tiles: Tile[] = [
     { country: "GE", label: name("GE"), photo: "gergeti" },
@@ -43,6 +50,7 @@ async function NewTrip({ params, searchParams }: PageProps<"/[locale]/trips/new"
       styles={profile.travelStyles}
       canWomenOnly={profile.gender === "female"}
       bot={botUsername()}
+      clubId={clubId}
     />
   );
 }

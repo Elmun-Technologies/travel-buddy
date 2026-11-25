@@ -11,6 +11,7 @@ import {
   isNull,
   lt,
   lte,
+  ne,
   notInArray,
   or,
   sql,
@@ -19,8 +20,17 @@ import { travelIntents, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { createTripConversation } from "@/modules/chat/service";
+import { seatsTaken } from "@/modules/agencies/service";
 import { visaFreeCountries } from "@/modules/destinations/service";
-import { addOrganizer, countApproved, getMemberships } from "@/modules/groups/service";
+import {
+  addOrganizer,
+  approvedCount,
+  approvedMemberIds,
+  countApproved,
+  getMemberships,
+} from "@/modules/groups/service";
+import { notify } from "@/modules/notifications/service";
+import { queueGroupPost, shareLink } from "@/modules/telegram-group/service";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { getDisplayNames, getJoinProfile } from "@/modules/profiles/service";
 import { getUserState } from "@/modules/users/service";
@@ -52,14 +62,16 @@ const cardFields = {
   ageMax: trips.ageMax,
 };
 
-async function withCounts<T extends { id: string; ownerUserId: string | null }>(rows: T[]) {
-  const [counts, names] = await Promise.all([
+async function withCounts<T extends { id: string; ownerUserId: string | null; kind?: string }>(rows: T[]) {
+  const [counts, names, taken] = await Promise.all([
     countApproved(rows.map((r) => r.id)),
     getDisplayNames(rows.flatMap((r) => (r.ownerUserId ? [r.ownerUserId] : []))),
+    // agency tours fill by booked seats, not by group members
+    seatsTaken(rows.filter((r) => r.kind === "agency").map((r) => r.id)),
   ]);
   return rows.map((r) => ({
     ...r,
-    approvedCount: counts.get(r.id) ?? 0,
+    approvedCount: r.kind === "agency" ? (taken.get(r.id) ?? 0) : (counts.get(r.id) ?? 0),
     ownerName: r.ownerUserId ? (names.get(r.ownerUserId) ?? null) : null,
   }));
 }
@@ -68,7 +80,11 @@ export type CreateTripResult =
   | { ok: true; id: string; code: string }
   | { ok: false; error: "phone_required" | "profile_required" | "women_only_creator" };
 
-export async function createTrip(userId: string, input: TripInput): Promise<CreateTripResult> {
+export async function createTrip(
+  userId: string,
+  input: TripInput,
+  clubId?: string,
+): Promise<CreateTripResult> {
   const db = getDb();
   const [state, profile] = await Promise.all([getUserState(db, userId), getJoinProfile(userId)]);
   if (!profile) return { ok: false, error: "profile_required" };
@@ -80,6 +96,7 @@ export async function createTrip(userId: string, input: TripInput): Promise<Crea
       .values({
         ...input,
         kind: "independent",
+        clubId: clubId ?? null,
         ownerUserId: userId,
         status: "open",
         isTest: isTestEnv(),
@@ -180,11 +197,111 @@ export async function listMyTrips(userId: string) {
   return (await withCounts(rows)).map((t) => ({ ...t, myStatus: memberships.get(t.id)! }));
 }
 
+export type UpdateTripPatch = Pick<
+  TripInput,
+  | "title"
+  | "startDate"
+  | "endDate"
+  | "datePrecision"
+  | "dateFlexDays"
+  | "budgetMin"
+  | "budgetMax"
+  | "travelStyles"
+  | "groupSizeMax"
+  | "womenOnly"
+  | "description"
+>;
+export type UpdateTripResult =
+  | { ok: true }
+  | {
+      ok: false;
+      error:
+        | "not_found"
+        | "forbidden"
+        | "started"
+        | "size_below_members"
+        | "women_only_locked"
+        | "women_only_creator";
+    };
+
+/**
+ * The organizer edits an open trip (not where it goes: people joined for the destination).
+ * The row is locked like in join/leave, so the size check and the status flip never race a join.
+ * People already in the group are told when the dates change.
+ */
+export async function updateTrip(
+  userId: string,
+  tripId: string,
+  patch: UpdateTripPatch,
+): Promise<UpdateTripResult> {
+  const profile = patch.womenOnly ? await getJoinProfile(userId) : null;
+  return getDb().transaction(async (tx) => {
+    const [t] = await tx.select().from(trips).where(eq(trips.id, tripId)).for("update");
+    if (!t) return { ok: false, error: "not_found" };
+    if (t.ownerUserId !== userId) return { ok: false, error: "forbidden" };
+    if (!["open", "full", "closed"].includes(t.status) || t.startDate <= todayISO())
+      return { ok: false, error: "started" };
+    const n = await approvedCount(tx, tripId);
+    if (patch.groupSizeMax < n) return { ok: false, error: "size_below_members" };
+    if (patch.womenOnly && !t.womenOnly) {
+      if (profile?.gender !== "female") return { ok: false, error: "women_only_creator" };
+      if (n > 1) return { ok: false, error: "women_only_locked" }; // others already joined a mixed group
+    }
+    const status = t.status === "closed" ? "closed" : n >= patch.groupSizeMax ? "full" : "open";
+    await tx
+      .update(trips)
+      .set({ ...patch, status })
+      .where(eq(trips.id, tripId));
+    const datesChanged = patch.startDate !== t.startDate || patch.endDate !== t.endDate;
+    if (datesChanged) {
+      for (const id of await approvedMemberIds(tx, tripId, userId))
+        await notify(tx, id, "trip_updated", { tripId });
+      await queueGroupPost(
+        tx,
+        tripId,
+        "update",
+        `${patch.startDate} – ${patch.endDate}`,
+        await shareLink(tx, tripId),
+      );
+    }
+    return { ok: true };
+  });
+}
+
+/** Open public trips for the sitemap (never test samples, never hidden or closed ones). */
+export async function listPublicTripsForSitemap(limit: number) {
+  return getDb()
+    .select({ id: trips.id, updatedAt: trips.updatedAt })
+    .from(trips)
+    .where(
+      and(
+        inArray(trips.status, ["open", "full"]),
+        eq(trips.visibility, "public"),
+        eq(trips.isTest, false),
+        gte(trips.startDate, todayISO()),
+      ),
+    )
+    .orderBy(desc(trips.updatedAt))
+    .limit(limit);
+}
+
 export async function closeTrip(userId: string, tripId: string) {
   await getDb()
     .update(trips)
     .set({ status: "closed" })
     .where(and(eq(trips.id, tripId), eq(trips.ownerUserId, userId)));
+}
+
+/** Account deleted: the person's open listings stop taking people; their intents close. */
+export async function closeOwnedListings(tx: DbOrTx, userId: string) {
+  await tx
+    .update(trips)
+    .set({ status: "closed" })
+    .where(and(eq(trips.ownerUserId, userId), inArray(trips.status, ["draft", "open", "full"])));
+  await tx
+    .update(travelIntents)
+    .set({ status: "closed" })
+    .where(and(eq(travelIntents.userId, userId), ne(travelIntents.status, "closed")));
 }
 
 export async function setTicketDeadline(tx: DbOrTx, tripId: string, day: string | null) {
@@ -203,6 +320,7 @@ export async function lockTripForJoin(tx: DbOrTx, tripId: string) {
       ageMin: trips.ageMin,
       ageMax: trips.ageMax,
       womenOnly: trips.womenOnly,
+      kind: trips.kind,
       ticketDeadline: trips.ticketDeadline,
     })
     .from(trips)

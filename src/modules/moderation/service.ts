@@ -1,7 +1,7 @@
 import "server-only";
 import { and, eq, or } from "drizzle-orm";
-import { blocks, reports } from "@/db/schema";
-import { getDb } from "@/lib/db";
+import { blocks, reports, users } from "@/db/schema";
+import { type DbOrTx, getDb } from "@/lib/db";
 
 /** Users hidden from `userId` everywhere: blocked by them or blocking them. */
 export async function getBlockedIds(userId: string | null): Promise<string[]> {
@@ -13,8 +13,8 @@ export async function getBlockedIds(userId: string | null): Promise<string[]> {
   return rows.map((r) => (r.a === userId ? r.b : r.a));
 }
 
-export async function isBlockedBetween(a: string, b: string) {
-  const [row] = await getDb()
+export async function isBlockedBetween(a: string, b: string, db: DbOrTx = getDb()) {
+  const [row] = await db
     .select({ id: blocks.id })
     .from(blocks)
     .where(
@@ -45,9 +45,14 @@ export async function createReport(
   if (!dup) await db.insert(reports).values({ reporterId, targetType, targetId, reason });
 }
 
+/** False when there is no such person to block (unknown id). */
 export async function block(blockerId: string, blockedId: string) {
-  if (blockerId === blockedId) return;
-  await getDb().insert(blocks).values({ blockerId, blockedId }).onConflictDoNothing();
+  if (blockerId === blockedId) return false;
+  const db = getDb();
+  const [target] = await db.select({ id: users.id }).from(users).where(eq(users.id, blockedId));
+  if (!target) return false;
+  await db.insert(blocks).values({ blockerId, blockedId }).onConflictDoNothing();
+  return true;
 }
 
 export async function unblock(blockerId: string, blockedId: string) {

@@ -1,6 +1,6 @@
 import "server-only";
-import { and, count, eq, inArray } from "drizzle-orm";
-import { tripMembers } from "@/db/schema";
+import { and, count, eq, inArray, or, sql } from "drizzle-orm";
+import { tripMembers, trips } from "@/db/schema";
 import { todayISO } from "@/lib/catalog";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { addTripChatMember, removeTripChatMember } from "@/modules/chat/service";
@@ -16,12 +16,21 @@ export async function addOrganizer(tx: DbOrTx, tripId: string, userId: string) {
   await tx.insert(tripMembers).values({ tripId, userId, role: "organizer", status: "approved" });
 }
 
-async function approvedCount(tx: DbOrTx, tripId: string) {
+export async function approvedCount(tx: DbOrTx, tripId: string) {
   const [r] = await tx
     .select({ n: count() })
     .from(tripMembers)
     .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.status, "approved")));
   return r.n;
+}
+
+/** Approved members of a trip except one person (the organizer), for fan-out notifications. */
+export async function approvedMemberIds(tx: DbOrTx, tripId: string, exceptId: string) {
+  const rows = await tx
+    .select({ id: tripMembers.userId })
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.status, "approved")));
+  return rows.map((r) => r.id).filter((id) => id !== exceptId);
 }
 
 export async function countApproved(tripIds: string[]) {
@@ -51,7 +60,8 @@ export async function getMyMembership(userId: string, tripId: string) {
   return m ?? null;
 }
 
-export type JoinResult = { ok: true } | { ok: false; error: JoinDenied | "profile_required" | "not_found" };
+export type JoinResult =
+  { ok: true } | { ok: false; error: JoinDenied | "profile_required" | "not_found" | "agency_trip" };
 
 export async function requestJoin(
   userId: string,
@@ -63,13 +73,15 @@ export async function requestJoin(
   return getDb().transaction(async (tx) => {
     const trip = await lockTripForJoin(tx, tripId);
     if (!trip) return { ok: false, error: "not_found" };
+    if (trip.kind === "agency") return { ok: false, error: "agency_trip" }; // those take a request to the agency
     const [state, mine, blocked, n] = await Promise.all([
       getUserState(tx, userId),
       tx
         .select({ status: tripMembers.status })
         .from(tripMembers)
         .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId))),
-      trip.ownerUserId ? isBlockedBetween(userId, trip.ownerUserId) : false,
+      // Same connection as the row lock: a second pool connection here can deadlock the pool.
+      trip.ownerUserId ? isBlockedBetween(userId, trip.ownerUserId, tx) : false,
       approvedCount(tx, tripId),
     ]);
     const denied = joinDenied(
@@ -113,8 +125,13 @@ export async function decideRequest(
     );
     if (!approve) {
       const r = await tx.update(tripMembers).set({ status: "rejected" }).where(where).returning();
-      return r.length ? { ok: true } : { ok: false, error: "not_pending" };
+      if (!r.length) return { ok: false, error: "not_pending" };
+      // A gentle note, no "rejected" word (product-decisions §1); blocked pairs never get here.
+      await notify(tx, memberId, "join_rejected", { tripId });
+      return { ok: true };
     }
+    // A closed or hidden (moderated) trip takes no new members and must not come back as "full".
+    if (trip.status !== "open" && trip.status !== "full") return { ok: false, error: "forbidden" };
     const n = await approvedCount(tx, tripId);
     if (trip.groupSizeMax != null && n >= trip.groupSizeMax) return { ok: false, error: "full" };
     const r = await tx.update(tripMembers).set({ status: "approved" }).where(where).returning();
@@ -131,23 +148,115 @@ export async function leaveTrip(userId: string, tripId: string) {
   await getDb().transaction(async (tx) => {
     const trip = await lockTripForJoin(tx, tripId);
     if (!trip || trip.ownerUserId === userId) return;
-    const r = await tx
-      .update(tripMembers)
-      .set({ status: "left" })
-      .where(
-        and(
-          eq(tripMembers.tripId, tripId),
-          eq(tripMembers.userId, userId),
-          inArray(tripMembers.status, ["requested", "approved"]),
-        ),
-      )
-      .returning({ was: tripMembers.status });
-    if (!r.length) return;
-    if (r[0].was === "approved" && trip.ticketDeadline && trip.ticketDeadline < todayISO())
-      await recordNoShow(tx, userId, tripId);
+    const mine = and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId));
+    const [before] = await tx.select({ status: tripMembers.status }).from(tripMembers).where(mine);
+    if (before?.status !== "requested" && before?.status !== "approved") return;
+    await tx.update(tripMembers).set({ status: "left" }).where(mine);
+    if (before.status !== "approved") return; // a cancelled request frees no seat
+    if (trip.ticketDeadline && trip.ticketDeadline < todayISO()) await recordNoShow(tx, userId, tripId);
     await removeTripChatMember(tx, tripId, userId);
     if (trip.status === "full") await setTripStatus(tx, tripId, "open");
   });
+}
+
+/**
+ * After a block between an organizer and someone in (or asking to join) their trip: the member
+ * leaves that group, so the two stop meeting in the room. Members who block each other stay —
+ * their messages and notifications are already hidden from one another.
+ */
+export async function separateAfterBlock(a: string, b: string) {
+  const shared = await getDb()
+    .select({ tripId: trips.id, memberId: tripMembers.userId })
+    .from(trips)
+    .innerJoin(tripMembers, eq(tripMembers.tripId, trips.id))
+    .where(
+      and(
+        inArray(tripMembers.status, ["requested", "approved"]),
+        or(
+          and(eq(trips.ownerUserId, a), eq(tripMembers.userId, b)),
+          and(eq(trips.ownerUserId, b), eq(tripMembers.userId, a)),
+        ),
+      ),
+    );
+  for (const s of shared) {
+    await getDb().transaction(async (tx) => {
+      const trip = await lockTripForJoin(tx, s.tripId);
+      if (!trip) return;
+      const mine = and(eq(tripMembers.tripId, s.tripId), eq(tripMembers.userId, s.memberId));
+      const [before] = await tx.select({ status: tripMembers.status }).from(tripMembers).where(mine);
+      if (before?.status === "requested")
+        await tx.update(tripMembers).set({ status: "rejected" }).where(mine);
+      if (before?.status !== "approved") return;
+      await tx.update(tripMembers).set({ status: "left" }).where(mine);
+      await removeTripChatMember(tx, s.tripId, s.memberId);
+      if (trip.status === "full") await setTripStatus(tx, s.tripId, "open");
+    });
+  }
+}
+
+/** Per-person "my trip story may be public" switch of an approved member. */
+export async function setStoryConsent(userId: string, tripId: string, on: boolean) {
+  const r = await getDb()
+    .update(tripMembers)
+    .set({ storyConsentAt: on ? new Date() : null })
+    .where(
+      and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId), eq(tripMembers.status, "approved")),
+    )
+    .returning({ id: tripMembers.id });
+  return r.length > 0;
+}
+
+/** How many of the approved members agreed, and did this person? Everyone must agree for a public page. */
+export async function storyConsent(tripId: string, userId: string | null) {
+  const rows = await getDb()
+    .select({ userId: tripMembers.userId, at: tripMembers.storyConsentAt })
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.status, "approved")));
+  const agreed = rows.filter((r) => r.at).length;
+  return {
+    total: rows.length,
+    agreed,
+    mine: !!rows.find((r) => r.userId === userId)?.at,
+    everyone: rows.length >= 2 && agreed === rows.length,
+    names: rows.map((r) => r.userId),
+  };
+}
+
+/** Were these two people both approved members of at least one trip? (The condition for writing to each other.) */
+export async function sharedApprovedTrip(a: string, b: string) {
+  const rows = await getDb().execute<{ n: number }>(sql`
+    select 1 as n from trip_members x join trip_members y on y.trip_id = x.trip_id
+    where x.user_id = ${a} and y.user_id = ${b} and x.status = 'approved' and y.status = 'approved' limit 1`);
+  return rows.length > 0;
+}
+
+/** Account deleted: free the person's seats and pending requests in other people's trips. */
+export async function leaveAllTrips(tx: DbOrTx, userId: string) {
+  const rows = await tx
+    .update(tripMembers)
+    .set({ status: "left" })
+    .where(
+      and(
+        eq(tripMembers.userId, userId),
+        eq(tripMembers.role, "member"),
+        inArray(tripMembers.status, ["requested", "approved"]),
+      ),
+    )
+    .returning({ tripId: tripMembers.tripId });
+  for (const { tripId } of rows) await removeTripChatMember(tx, tripId, userId);
+  if (rows.length)
+    await tx
+      .update(trips)
+      .set({ status: "open" })
+      .where(
+        and(
+          inArray(
+            trips.id,
+            rows.map((r) => r.tripId),
+          ),
+          eq(trips.status, "full"),
+        ),
+      );
 }
 
 /** Organizer view: pending requests + approved members with names. */

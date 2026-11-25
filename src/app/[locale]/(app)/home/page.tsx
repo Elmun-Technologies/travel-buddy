@@ -224,27 +224,6 @@ async function Home({ params }: PageProps<"/[locale]/home">) {
         <span aria-hidden="true">{"↗"}</span>
       </Link>
 
-      <div className="grid grid-cols-2 gap-2">
-        <Link
-          href="/clubs"
-          className="press flex min-h-[130px] flex-col justify-between rounded-panel bg-blue p-4 text-white"
-        >
-          <span className={label}>{t("clubs")}</span>
-          <Display as="span" className="text-xl">
-            {t("clubsText")}
-          </Display>
-        </Link>
-        <Link
-          href="/memories"
-          className="press flex min-h-[130px] flex-col justify-between rounded-panel bg-signal p-4 text-ink"
-        >
-          <span className={label}>{t("memories")}</span>
-          <Display as="span" className="text-xl">
-            {t("memoriesText")}
-          </Display>
-        </Link>
-      </div>
-
       <Link
         href="/trips/new"
         className="press fixed right-4 bottom-24 z-20 flex min-h-[52px] items-center gap-2 rounded-full bg-ink px-5 font-semibold text-white shadow-lg md:bottom-8"

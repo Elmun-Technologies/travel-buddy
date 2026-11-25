@@ -166,6 +166,7 @@ test.describe("Mini App onboarding", () => {
     await expect(page).toHaveURL(/\/uz\/onboarding/);
     await pickBirthDate(page, 10, 5, 1996);
     await pressWhen("Davom etamiz");
+    await expect(page.getByText(/^02\s*\/\s*0\d$/)).toBeVisible(); // same button text on both steps: wait for the step to change
     await pressWhen("Davom etamiz");
     await pressWhen("Profilni saqlaymiz");
     // No requestContact in this client → bot link, opened through openTelegramLink (plain t.me links are ignored).

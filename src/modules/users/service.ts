@@ -1,6 +1,6 @@
 import "server-only";
-import { and, eq, inArray, lt, ne } from "drizzle-orm";
-import { users } from "@/db/schema";
+import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
+import { sessions, users } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 
 export async function createUser(tx: DbOrTx, locale: string) {
@@ -14,6 +14,21 @@ export async function getUserState(tx: DbOrTx, userId: string) {
     .from(users)
     .where(eq(users.id, userId));
   return u ?? null;
+}
+
+/** Still a live account? (Suspended and deleted people lose live connections too.) */
+export async function isActiveUser(userId: string) {
+  return (await getUserState(getDb(), userId))?.status === "active";
+}
+
+/** Of these ids, the accounts that are deleted (their names are no longer shown). */
+export async function deletedAmong(userIds: string[]) {
+  if (!userIds.length) return new Set<string>();
+  const rows = await getDb()
+    .select({ id: users.id })
+    .from(users)
+    .where(and(inArray(users.id, userIds), eq(users.status, "deleted")));
+  return new Set(rows.map((r) => r.id));
 }
 
 export async function getPhoneVerified(userIds: string[]) {
@@ -46,6 +61,10 @@ export async function markPhoneVerified(userId: string, rawPhone: string): Promi
   return "ok";
 }
 
+export async function setEmail(userId: string, email: string) {
+  await getDb().update(users).set({ email }).where(eq(users.id, userId));
+}
+
 export async function getLocale(userId: string) {
   const [u] = await getDb().select({ locale: users.locale }).from(users).where(eq(users.id, userId));
   return u?.locale ?? null;
@@ -53,6 +72,15 @@ export async function getLocale(userId: string) {
 
 export async function setLocale(userId: string, locale: string) {
   await getDb().update(users).set({ locale }).where(eq(users.id, userId));
+}
+
+export async function setSmsConsent(userId: string, on: boolean) {
+  await getDb().update(users).set({ smsConsent: on }).where(eq(users.id, userId));
+}
+
+export async function getSmsConsent(userId: string) {
+  const [u] = await getDb().select({ on: users.smsConsent }).from(users).where(eq(users.id, userId));
+  return u?.on ?? false;
 }
 
 export async function getNotifyOff(userId: string) {
@@ -72,34 +100,52 @@ export async function setAdminRole(userId: string, admin: boolean) {
     .where(and(eq(users.id, userId), eq(users.role, admin ? "traveler" : "admin")));
 }
 
-/** Soft-delete the current user's account (GDPR). Worker hard-deletes after 30 days. */
-export async function deleteUser(userId: string) {
-  await getDb()
+/** Marks the account deleted (kept 30 days for a change of mind). False if it was not active. */
+export async function markDeleted(tx: DbOrTx, userId: string) {
+  const r = await tx
     .update(users)
     .set({ status: "deleted", deletedAt: new Date() })
-    .where(eq(users.id, userId));
+    .where(and(eq(users.id, userId), eq(users.status, "active")))
+    .returning({ id: users.id });
+  return r.length > 0;
 }
 
-/** Restore a soft-deleted account if within 30 days. Returns true if restored. */
+export async function endAllSessions(tx: DbOrTx, userId: string) {
+  await tx.delete(sessions).where(eq(sessions.userId, userId));
+}
+
+const ERASE_AFTER_MS = 30 * 86_400_000;
+
+/** Signing in within 30 days of deleting brings the account back. Returns true if restored. */
 export async function restoreUser(tx: DbOrTx, userId: string) {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const [u] = await tx
-    .select({ id: users.id, status: users.status, deletedAt: users.deletedAt })
-    .from(users)
-    .where(eq(users.id, userId));
-  if (!u || u.status !== "deleted") return false;
-  if (u.deletedAt && u.deletedAt < thirtyDaysAgo) return false;
-  await tx
+  const r = await tx
     .update(users)
     .set({ status: "active", deletedAt: null })
-    .where(eq(users.id, userId));
-  return true;
+    .where(
+      and(
+        eq(users.id, userId),
+        eq(users.status, "deleted"),
+        gt(users.deletedAt, new Date(Date.now() - ERASE_AFTER_MS)),
+      ),
+    )
+    .returning({ id: users.id });
+  return r.length > 0;
 }
 
-/** Hard-delete users whose soft-delete is older than 30 days. Runs in worker daily. */
-export async function permanentlyDeleteUsers(tx: DbOrTx) {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  await tx
-    .delete(users)
-    .where(and(eq(users.status, "deleted"), lt(users.deletedAt, thirtyDaysAgo)));
+/** Accounts whose 30 days are over. */
+export async function listErasable(db: DbOrTx) {
+  const rows = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.status, "deleted"), lt(users.deletedAt, new Date(Date.now() - ERASE_AFTER_MS))));
+  return rows.map((r) => r.id);
+}
+
+/**
+ * Erases one account for good. Personal rows go with it (cascade); what belongs to the group
+ * stays without a name: trips, messages, plans, polls (set null). Expenses the person paid and
+ * their settlements are removed with them — the group's remaining debts are between the others.
+ */
+export async function eraseUser(db: DbOrTx, userId: string) {
+  await db.delete(users).where(and(eq(users.id, userId), eq(users.status, "deleted")));
 }

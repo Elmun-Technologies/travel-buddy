@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { clientIp } from "@/lib/api";
 import { rateLimit } from "@/lib/rate-limit";
 import { joinWaitlist, type JoinResult } from "@/modules/waitlist/service";
 
@@ -9,7 +10,7 @@ export async function joinWaitlistAction(_prev: JoinResult | null, form: FormDat
   if (form.get("website")) return { ok: true };
   try {
     const h = await headers();
-    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const ip = clientIp(h);
     if (!(await rateLimit(`waitlist:ip:${ip}`, 5, 3600))) return { ok: false, error: "rate_limited" };
     // Same-origin POST carries the full page URL in Referer → utm_source for marketing.
     let source: string | undefined;

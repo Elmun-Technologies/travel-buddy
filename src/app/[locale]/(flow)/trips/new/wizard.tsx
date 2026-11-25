@@ -29,7 +29,15 @@ function Steps({ step }: { step: number }) {
   );
 }
 
-function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
+export function Switch({
+  on,
+  onChange,
+  label,
+}: {
+  on: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
   return (
     <button
       type="button"
@@ -60,6 +68,7 @@ export function CreateWizard({
   styles: profileStyles,
   canWomenOnly,
   bot,
+  clubId,
 }: {
   locale: string;
   today: string;
@@ -69,6 +78,7 @@ export function CreateWizard({
   styles: string[];
   canWomenOnly: boolean;
   bot: string;
+  clubId?: string;
 }) {
   const t = useTranslations("create");
   const to = useTranslations("onboarding");
@@ -145,6 +155,7 @@ export function CreateWizard({
         styles,
         womenOnly,
         note: note || undefined,
+        clubId,
       }),
     }).catch(() => null);
     setPending(false);

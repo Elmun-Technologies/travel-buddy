@@ -6,6 +6,8 @@ import { TelegramLoginButton } from "@/components/auth/telegram-login-button";
 import { PageLoading } from "@/components/page-loading";
 import { buttonVariants } from "@/components/ui/button";
 import { botUsername } from "@/lib/format";
+import { googleConfigured } from "@/modules/auth/google";
+import { AcceptLine } from "@/components/legal/legal-links";
 import { asLocale } from "@/lib/guard";
 
 export default function LoginPage(props: PageProps<"/[locale]/login">) {
@@ -51,6 +53,17 @@ async function Login({ params, searchParams }: PageProps<"/[locale]/login">) {
       ) : (
         <p className="text-muted-foreground">{t("notConfigured")}</p>
       )}
+      {googleConfigured() && (
+        <div className="border-t pt-6">
+          <ExternalLink
+            href={`/api/auth/google/start?locale=${locale}`}
+            className={buttonVariants({ variant: "outline", className: "h-11 w-full px-4" })}
+          >
+            {t("google")}
+          </ExternalLink>
+        </div>
+      )}
+      <AcceptLine />
     </div>
   );
 }

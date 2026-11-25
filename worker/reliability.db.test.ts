@@ -27,12 +27,12 @@ afterAll(async () => {
 
 it.runIf(run)("deadline frees unticketed places; finished trips count as went", async () => {
   const db = getDb();
-  const [org, ticketed, late, waiting] = await Promise.all(
-    [0, 1, 2, 3].map(
+  const [org, ticketed, late, waiting, newcomer] = await Promise.all(
+    [0, 1, 2, 3, 4].map(
       async () => (await db.insert(users).values({ locale: "uz" }).returning({ id: users.id }))[0].id,
     ),
   );
-  made.push(org, ticketed, late, waiting);
+  made.push(org, ticketed, late, waiting, newcomer);
   const trip = async (v: Partial<typeof trips.$inferInsert>) =>
     (
       await db
@@ -56,9 +56,11 @@ it.runIf(run)("deadline frees unticketed places; finished trips count as went", 
   const t1 = await trip({ ticketDeadline: day(-1) });
   await db.insert(tripMembers).values([
     { tripId: t1, userId: org, role: "organizer", status: "approved" },
-    { tripId: t1, userId: ticketed, status: "approved" },
-    { tripId: t1, userId: late, status: "approved" },
+    { tripId: t1, userId: ticketed, status: "approved", updatedAt: new Date(Date.now() - 3 * 864e5) },
+    { tripId: t1, userId: late, status: "approved", updatedAt: new Date(Date.now() - 3 * 864e5) },
     { tripId: t1, userId: waiting, status: "requested" },
+    // approved just now, after the deadline passed: not punished for missing it
+    { tripId: t1, userId: newcomer, status: "approved" },
   ]);
   await db.insert(tripTickets).values({ tripId: t1, userId: ticketed });
   const [c] = await db.insert(conversations).values({ kind: "trip_group", tripId: t1 }).returning();
@@ -89,6 +91,7 @@ it.runIf(run)("deadline frees unticketed places; finished trips count as went", 
     )[0].s;
   expect(await status(t1, late)).toBe("left");
   expect(await status(t1, ticketed)).toBe("approved");
+  expect(await status(t1, newcomer)).toBe("approved");
   expect((await db.select({ s: trips.status }).from(trips).where(eq(trips.id, t1)))[0].s).toBe("open");
   const chat = await db
     .select({ leftAt: conversationMembers.leftAt })
@@ -109,7 +112,14 @@ it.runIf(run)("deadline frees unticketed places; finished trips count as went", 
   const types = notes
     .map((n) => `${n.type}:${n.userId === org ? "org" : n.userId === late ? "late" : "waiting"}`)
     .sort();
-  expect(types).toEqual(["spot_freed:org", "ticket_dropped:late", "ticket_reminder:waiting"]);
+  // the finished trip t2 asks both people who were there to rate each other
+  expect(types).toEqual([
+    "review_ask:late",
+    "review_ask:org",
+    "spot_freed:org",
+    "ticket_dropped:late",
+    "ticket_reminder:waiting",
+  ]);
   expect(notes.find((n) => n.type === "spot_freed")?.payload).toEqual({ tripId: t1, n: "1", text: "1" });
   expect(await db.select().from(reliability).where(eq(reliability.tripId, t3))).toEqual([]);
 });

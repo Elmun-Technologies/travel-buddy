@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronRight, Link2, Send, Smartphone, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Panel } from "@/components/clay";
+import { trackEvent } from "@/components/analytics-beacon";
 import { haptic, openExternal, tg } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ function useShare(s: ShareLinks) {
     copied,
     telegram() {
       haptic.select();
+      trackEvent("share_clicked", { channel: "telegram", object: "trip" });
       const text = t("text", { title: s.title });
       if (!tg() && typeof navigator.share === "function") {
         void navigator.share({ url: s.webLink, text }).catch(() => {});
@@ -28,12 +30,14 @@ function useShare(s: ShareLinks) {
       openExternal(`https://t.me/share/url?${new URLSearchParams({ url: link, text })}`);
     },
     async copy() {
+      trackEvent("share_clicked", { channel: "copy", object: "trip" });
       await navigator.clipboard?.writeText(link).catch(() => {});
       haptic.success();
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     },
     story() {
+      trackEvent("share_clicked", { channel: "story", object: "trip" });
       openExternal(`${window.location.origin}/api/trips/${s.tripId}/story?locale=${locale}`);
     },
   };

@@ -1,0 +1,267 @@
+{
+  "updated": "Oxirgi yangilanish: 2026-yil 24-noyabr",
+  "back": "Orqaga",
+  "operator": "Xizmat egasi",
+  "contactEmail": "Aloqa uchun pochta",
+  "contactTelegram": "Telegram orqali yozing",
+  "nav": {
+    "terms": "Foydalanish shartlari",
+    "privacy": "Maxfiylik siyosati",
+    "safety": "Xavfsizlik qoidalari",
+    "support": "Yordam",
+    "label": "Hujjatlar"
+  },
+  "accept": "Davom etib, siz {terms} va {privacy} bilan roziligingizni bildirasiz.",
+  "terms": {
+    "title": "Foydalanish shartlari",
+    "description": "{app} dan foydalanish qoidalari: kimlar foydalana oladi, nima mumkin va nima mumkin emas, mas'uliyat chegaralari.",
+    "lead": "Bu shartlar {app} saytidan, Telegram botidan va Mini App'dan foydalanishni tartibga soladi. Foydalanishni boshlash orqali siz ularga rozilik bildirasiz.",
+    "sections": [
+      {
+        "h": "Biz kimmiz",
+        "p": [
+          "{app} — sayohatga sherik topish va guruh yig'ish xizmati. Biz vositachimiz: odamlarni bir-biri bilan tanishtiramiz va guruh uchun qulay vositalar (chat, reja, ro'yxat, xarajatlar hisobi) beramiz.",
+          "Biz sayohat sotmaymiz, mehmonxona yoki chipta bron qilmaymiz va sizning pulingizni ushlab turmaymiz."
+        ]
+      },
+      {
+        "h": "Kimlar foydalana oladi",
+        "p": [
+          "Xizmatdan faqat 18 yoshga to'lgan odamlar foydalana oladi. Ro'yxatdan o'tishda tug'ilgan sanangizni to'g'ri kiriting.",
+          "Bir odam — bitta akkaunt. Boshqa odam nomidan akkaunt ochish yoki yolg'on ma'lumot kiritish taqiqlanadi."
+        ]
+      },
+      {
+        "h": "Akkaunt va telefon raqami",
+        "p": [
+          "Kirish Telegram orqali amalga oshadi. Safar ochish va ba'zi harakatlar uchun telefon raqamini bot orqali tasdiqlash kerak bo'lishi mumkin.",
+          "Akkauntingiz xavfsizligi uchun o'zingiz javobgarsiz. Shubhali holat sezsangiz, bizga yozing."
+        ]
+      },
+      {
+        "h": "Safarlar va guruhlar",
+        "p": [
+          "Har bir safar tashkilotchisi sana, joy, narx va qoidalar haqida to'g'ri ma'lumot berishi shart. Tashkilotchi kimni qabul qilishni o'zi hal qiladi.",
+          "«Faqat ayollar» safarlariga faqat profilida ayol deb ko'rsatgan va telefonini tasdiqlagan foydalanuvchilar qo'shila oladi.",
+          "Safarga qo'shilish — odamlar o'rtasidagi kelishuv. Safarga chiqish, yo'l hujjatlari, sug'urta va xavfsizlik uchun har bir ishtirokchi o'zi javob beradi."
+        ]
+      },
+      {
+        "h": "Pul va xarajatlar",
+        "p": [
+          "{app} orqali to'lov o'tmaydi. «Xarajat» bo'limi faqat hisob-kitob uchun: kim nima uchun qancha to'lagani va kim kimga qarzdorligi yoziladi. Pulni o'zingiz o'zaro o'tkazasiz.",
+          "Aviachipta havolalari uchinchi tomon saytlariga olib boradi; ba'zilari hamkorlik (affiliate) havolasi bo'lishi mumkin. Narx va shartlar o'sha saytning javobgarligida."
+        ]
+      },
+      {
+        "h": "Ma'lumotnomalar",
+        "p": [
+          "Viza, hujjatlar, narxlar va favqulodda raqamlar haqidagi ma'lumotlar yo'l-yo'riq uchun. Ular o'zgarishi mumkin. Safardan oldin elchixona, aviakompaniya yoki rasmiy manbada tekshirib oling."
+        ]
+      },
+      {
+        "h": "Nima mumkin emas",
+        "p": [
+          "Tanishuv yoki shaxsiy munosabat maqsadida odamlarga yozish, bezovta qilish, haqorat, tahdid, kamsitish.",
+          "Yolg'on e'lon, firibgarlik, pul so'rash, reklama va spam.",
+          "Boshqa odamning ma'lumotini uning roziligisiz tarqatish.",
+          "Qonunga zid narsalar va xizmat ishini buzishga urinish."
+        ]
+      },
+      {
+        "h": "Shikoyat va choralar",
+        "p": [
+          "Har bir profil, safar va xabarda «Shikoyat qilish» va «Bloklash» tugmalari bor. Shikoyatlarni 24 soat ichida ko'rib chiqamiz.",
+          "Qoidalar buzilsa, e'lonni yashirishimiz, akkauntni vaqtincha yoki butunlay to'xtatishimiz mumkin."
+        ]
+      },
+      {
+        "h": "Mas'uliyat chegarasi",
+        "p": [
+          "Xizmat «borligicha» taqdim etiladi. Biz foydalanuvchilar o'rtasidagi kelishuvlar, safar jarayoni, boshqa odamlarning xatti-harakati yoki uchinchi tomon xizmatlari uchun javobgar emasmiz. Qonun ruxsat bergan eng yuqori darajada, mas'uliyatimiz xizmatning to'g'ridan-to'g'ri nosozligi bilan cheklanadi.",
+          "Xizmat vaqtincha ishlamay qolishi yoki o'zgarishi mumkin."
+        ]
+      },
+      {
+        "h": "Akkauntni o'chirish",
+        "p": [
+          "Akkauntni istalgan payt Profil → «Akkauntni o'chirish» orqali o'chirishingiz mumkin. Qanday ma'lumotlar o'chirilishi Maxfiylik siyosatida yozilgan."
+        ]
+      },
+      {
+        "h": "Shartlarni o'zgartirish",
+        "p": [
+          "Shartlarni vaqti-vaqti bilan yangilab turamiz. Muhim o'zgarishlar haqida ilova yoki bot orqali xabar beramiz. Yangilanishdan keyin foydalanishda davom etsangiz, yangi shartlarga rozi bo'lgan hisoblanasiz."
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Maxfiylik siyosati",
+    "description": "{app} qaysi ma'lumotlarni yig'adi, nima uchun ishlatadi, kimga ko'rsatadi va qanday o'chirasiz.",
+    "lead": "Biz faqat xizmat ishlashi uchun kerak bo'lgan ma'lumotlarni yig'amiz va ularni sotmaymiz.",
+    "sections": [
+      {
+        "h": "Qanday ma'lumotlarni yig'amiz",
+        "p": [
+          "Telegram orqali: Telegram ID, ism, (bo'lsa) foydalanuvchi nomi va til.",
+          "Profilingizdan: tug'ilgan sana, ixtiyoriy jins, shahar va davlat, tillar, sayohat uslublari, qiziqishlar va qisqa tavsif.",
+          "Telefon raqami: faqat botda «Raqamni ulashish» tugmasini o'zingiz bosganingizda. U hech qachon boshqalarga ko'rsatilmaydi.",
+          "Faoliyat: ochgan safarlaringiz, so'rovlaringiz, guruh chatidagi xabarlar, so'rovnomalar, reja, ro'yxat va xarajat yozuvlari, shikoyatlar va bloklar.",
+          "Xavfsizlik: SOS va «Hammasi joyida» belgilari; joylashuvni ulashishni o'zingiz yoqsangiz, joylashuv bir soat saqlanadi.",
+          "Texnik ma'lumotlar: IP manzil, qurilma turi, xatolar haqida hisobot. Bitta zarur sessiya cookie'si ishlatiladi."
+        ]
+      },
+      {
+        "h": "Nima uchun ishlatamiz",
+        "p": [
+          "Akkauntingizni yuritish va yoshingizni tekshirish.",
+          "Sizga mos safarlar va odamlarni ko'rsatish («nega mos» izohi bilan).",
+          "Guruh chati, reja va xarajatlar hisobini ishlatish.",
+          "Telegram orqali bildirishnomalar yuborish (turlarini profilda o'chirib qo'yishingiz mumkin).",
+          "Xavfsizlik: shikoyatlarni ko'rib chiqish, firibgarlik va suiiste'molni oldini olish.",
+          "Xizmatni yaxshilash uchun umumiy statistika."
+        ]
+      },
+      {
+        "h": "Boshqalar nimani ko'radi",
+        "p": [
+          "Boshqa foydalanuvchilar ismingiz, yoshingiz, shahringiz, tillaringiz, uslublaringiz va tavsifingizni ko'radi. Jins faqat ko'rsatishga rozi bo'lsangiz ko'rinadi. Tug'ilgan sana va telefon raqami hech qachon ko'rinmaydi.",
+          "Guruh a'zolari ro'yxati faqat guruh a'zolariga ko'rinadi. Bloklangan odamlar bir-birini hech qayerda ko'rmaydi.",
+          "«Yaqinlarimga ko'rsataman» havolasini o'zingiz yaratsangiz, u orqali havola egasi safar haqida cheklangan ma'lumotni ko'radi; havolani istalgan payt o'chirishingiz mumkin."
+        ]
+      },
+      {
+        "h": "Kimga uzatamiz",
+        "p": [
+          "Ma'lumotlaringizni sotmaymiz. Xizmat ishlashi uchun quyidagi tashqi xizmatlardan foydalanamiz: Telegram (kirish va bildirishnomalar), Hetzner (Finlyandiyadagi serverlar), Sentry (xatolarni kuzatish), PostHog (EU, umumiy foydalanish statistikasi).",
+          "Qonun talab qilsa yoki xavfsizlikka jiddiy xavf bo'lsa, vakolatli organlarga ma'lumot berishimiz mumkin."
+        ]
+      },
+      {
+        "h": "Qancha saqlaymiz",
+        "p": [
+          "Ma'lumotlar akkaunt mavjud ekan saqlanadi. Joylashuv bir soatdan keyin ishlatilmaydi. Muddati o'tgan texnik yozuvlar muntazam tozalanadi."
+        ]
+      },
+      {
+        "h": "Akkauntni va ma'lumotlarni o'chirish",
+        "p": [
+          "Profil → «Akkauntni o'chirish». Akkaunt darhol yashiriladi va tizimdan chiqarilasiz; ochiq e'lonlaringiz yopiladi.",
+          "30 kun ichida qayta kirsangiz, akkaunt tiklanadi. 30 kundan keyin shaxsiy ma'lumotlaringiz (profil, telefon, bog'langan Telegram akkaunt) butunlay o'chiriladi. Guruhdagi umumiy yozuvlar (masalan, xabar matni) muallifsiz qoladi.",
+          "Ma'lumotlaringizning nusxasini yoki tuzatishni so'rash uchun yordam bo'limi orqali yozing."
+        ]
+      },
+      {
+        "h": "Sizning huquqlaringiz",
+        "p": [
+          "Ma'lumotlaringizni ko'rish, tuzatish, o'chirish va ulardan foydalanishga e'tiroz bildirish huquqiga egasiz. Buning uchun Yordam sahifasidagi aloqa vositalaridan foydalaning."
+        ]
+      },
+      {
+        "h": "Bolalar",
+        "p": [
+          "Xizmat 18 yoshga to'lmaganlar uchun emas. 18 yoshdan kichik odamning akkauntini aniqlasak, o'chiramiz."
+        ]
+      },
+      {
+        "h": "Siyosatni o'zgartirish",
+        "p": ["Siyosat yangilanganda sana o'zgaradi, muhim o'zgarishlar haqida xabar beramiz."]
+      }
+    ]
+  },
+  "safety": {
+    "title": "Xavfsizlik qoidalari",
+    "description": "{app}da o'zingizni va boshqalarni himoya qilish: tanishuv, to'lov, safar va shikoyat qoidalari.",
+    "lead": "Notanish odamlar bilan sayohat qilish ishonch talab qiladi. Quyidagi oddiy qoidalar sizni himoya qiladi.",
+    "sections": [
+      {
+        "h": "Tanishishdan oldin",
+        "p": [
+          "Profildagi belgilarga qarang: Telegram, telefon tasdig'i, «N/N safarga bordi».",
+          "Guruh chatida avval umumiy savollar bering; shaxsiy ma'lumotni shoshilmay ulashing.",
+          "Uchrashuvni jamoat joyida va kunduzi o'tkazing, kimgadir qayerda ekaningizni ayting."
+        ]
+      },
+      {
+        "h": "Pul haqida",
+        "p": [
+          "{app} pul ushlab turmaydi. Notanish odamga oldindan katta summa o'tkazmang.",
+          "Chiptani va mehmonxonani o'zingiz, rasmiy sayt orqali band qiling. Kim nima to'lagani «Xarajat» bo'limida yoziladi.",
+          "«Tez va arzon» tur va'da qilib pul so'rayotganlar haqida darhol shikoyat qiling."
+        ]
+      },
+      {
+        "h": "Safar paytida",
+        "p": [
+          "Safar xonasidagi «SOS» tugmasi 3 soniya bosib turilganda guruhga va ishonchli kontaktlaringizga xabar yuboradi.",
+          "«Hammasi joyida» belgisi va «Yaqinlarimga ko'rsataman» sahifasi yaqinlaringizni xotirjam qiladi.",
+          "Davlatning favqulodda raqamini Yordam sahifasidan va SOS ekranidan topasiz."
+        ]
+      },
+      {
+        "h": "Hurmatli muomala",
+        "p": [
+          "Tanishuv va shaxsiy munosabat maqsadida yozish bu yerda taqiqlangan.",
+          "Haqorat, bosim, kamsitish va tahdidga yo'l yo'q.",
+          "Boshqa odamning suratini yoki ma'lumotini ruxsatsiz ulashmang."
+        ]
+      },
+      {
+        "h": "Shikoyat va bloklash",
+        "p": [
+          "Profil, safar yoki xabar yonidagi «Shikoyat qilish» tugmasini bosing. «Tanishuv maqsadida» va «Xavfli» sabablari tepada ko'rib chiqiladi; hammasi 24 soat ichida.",
+          "«Bloklash» bilan odam sizni ham, siz uni ham hech qayerda ko'rmaysiz. Bloklanganlar ro'yxatini Profil → «Bloklanganlar»da boshqarasiz."
+        ]
+      },
+      {
+        "h": "Bolalar va 18+",
+        "p": ["Xizmat faqat 18 yoshdan oshganlar uchun. Voyaga yetmagan odamni sezsangiz, shikoyat qiling."]
+      },
+      {
+        "h": "Jiddiy xavf bo'lsa",
+        "p": [
+          "Hayotingizga xavf bo'lsa, avval mahalliy favqulodda xizmatga qo'ng'iroq qiling. Keyin bizga yozing — qonuniy yordam ko'rsatamiz."
+        ]
+      }
+    ]
+  },
+  "support": {
+    "title": "Yordam",
+    "description": "{app} yordam markazi: bog'lanish, shikoyat, akkauntni o'chirish va favqulodda raqamlar.",
+    "lead": "Savol, taklif yoki muammo bo'lsa — yozing. Odatda bir ish kuni ichida javob beramiz.",
+    "contactTitle": "Bog'lanish",
+    "contactNone": "Aloqa ma'lumotlari tez orada shu yerda paydo bo'ladi. Shu paytgacha botimizga yozing.",
+    "botLink": "Botga yozish",
+    "faq": [
+      {
+        "h": "Shikoyat qanday qilinadi?",
+        "p": [
+          "Profil, safar yoki chatdagi xabar yonidagi «Shikoyat qilish» tugmasini bosing va sababni tanlang. 24 soat ichida ko'rib chiqamiz."
+        ]
+      },
+      {
+        "h": "Kimnidir qanday bloklayman?",
+        "p": [
+          "Odamning profilida yoki chatdagi xabar menyusida «Bloklash»ni tanlang. Ro'yxat: Profil → «Bloklanganlar»."
+        ]
+      },
+      {
+        "h": "Akkauntni qanday o'chiraman?",
+        "p": [
+          "Profil → «Akkauntni o'chirish». Akkaunt darhol yashiriladi, 30 kundan keyin ma'lumotlar butunlay o'chadi. 30 kun ichida qayta kirsangiz, akkaunt tiklanadi."
+        ]
+      },
+      {
+        "h": "Telefonni qanday tasdiqlayman?",
+        "p": ["Profil → «Botda tasdiqlash» → botda «Raqamni ulashish». Raqam hech kimga ko'rsatilmaydi."]
+      }
+    ],
+    "emergencyTitle": "Favqulodda raqamlar",
+    "emergencyLead": "Davlatni tanlab, mahalliy raqamni toping. Xavf bo'lsa, avval shu raqamga qo'ng'iroq qiling.",
+    "all": "Yagona raqam",
+    "police": "Politsiya",
+    "ambulance": "Tez yordam",
+    "emergencyNote": "Raqamlar o'zgarishi mumkin; safardan oldin tekshiring."
+  }
+}

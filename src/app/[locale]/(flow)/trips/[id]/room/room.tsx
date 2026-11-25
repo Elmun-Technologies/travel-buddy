@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, ImagePlus, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Display, Panel } from "@/components/clay";
 import { ReportLink } from "@/components/report-link";
@@ -65,6 +65,7 @@ export function Room({
   const [error, setError] = useState<string | null>(null);
   const [boardVersion, setBoardVersion] = useState(0); // bumped by live "board" events: tabs refetch
   const bottom = useRef<HTMLDivElement>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   // Live updates (SSE). EventSource reconnects by itself after network drops.
   useEffect(() => {
@@ -110,6 +111,35 @@ export function Room({
         : [
             ...list,
             { id, senderId: me, name: "", body, kind: "text", pollId: null, at: new Date().toISOString() },
+          ],
+    );
+  }
+
+  async function sendPhoto(file: File) {
+    const body = new FormData();
+    body.set("file", file);
+    const res = await fetch(`/api/rooms/${tripId}/images`, { method: "POST", body }).catch(() => null);
+    if (!res?.ok) {
+      setError(res?.status === 429 ? t("slowDown") : t("photoFailed"));
+      return;
+    }
+    setError(null);
+    sound.send();
+    const { id } = (await res.json()) as { id: string };
+    setMsgs((list) =>
+      list.some((x) => x.id === id)
+        ? list
+        : [
+            ...list,
+            {
+              id,
+              senderId: me,
+              name: "",
+              body: "",
+              kind: "image",
+              pollId: null,
+              at: new Date().toISOString(),
+            },
           ],
     );
   }
@@ -272,7 +302,17 @@ export function Room({
                         {m.senderId === organizerId && ` · ${t("organizer")}`}
                       </button>
                     )}
-                    <p className="text-[16px] whitespace-pre-wrap">{m.body}</p>
+                    {m.kind === "image" ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- compressed WebP behind a membership check
+                      <img
+                        src={`/api/media/message/${m.id}`}
+                        alt={t("photoAlt")}
+                        loading="lazy"
+                        className="mt-1 max-h-72 w-full rounded-[12px] object-cover"
+                      />
+                    ) : (
+                      <p className="text-[16px] whitespace-pre-wrap">{m.body}</p>
+                    )}
                     <div
                       className={cn(
                         "text-right text-[11px]",
@@ -305,7 +345,28 @@ export function Room({
           <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             {error && <p className="px-4 pt-2 text-sm text-danger">{error}</p>}
             {menu && (
-              <div className="mx-auto flex max-w-[480px] gap-2 px-3 pt-3">
+              <div className="mx-auto flex max-w-[480px] flex-wrap gap-2 px-3 pt-3">
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  aria-label={t("photo")}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void sendPhoto(f);
+                    e.target.value = "";
+                    setMenu(false);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInput.current?.click()}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-input px-4 text-sm font-medium"
+                >
+                  <ImagePlus className="size-4" aria-hidden="true" />
+                  {t("photo")}
+                </button>
                 <button
                   type="button"
                   onClick={() => {

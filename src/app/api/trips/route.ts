@@ -1,14 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { authedJson, json } from "@/lib/api";
-import { countryName } from "@/lib/catalog";
 import { fieldErrors } from "@/lib/form";
 import { formatBudget, formatTripDates } from "@/lib/format";
 import { rateLimit } from "@/lib/rate-limit";
+import { track } from "@/lib/track";
 import { bandToBudget, createTripBody, datesFor, tripSchema } from "@/modules/trips/schema";
+import { isClubOrganizer } from "@/modules/clubs/service";
 import { createTrip } from "@/modules/trips/service";
-
-const DAY = 86_400_000;
+import { buildTripTitle } from "@/modules/trips/title";
 
 // "Safarni ochamiz" (App-CreateTrip-2). Title, dates and budget are derived here so a trip opens in ~60 s.
 export async function POST(req: Request) {
@@ -22,14 +22,8 @@ export async function POST(req: Request) {
   const locale = routing.locales.find((l) => l === raw) ?? routing.defaultLocale;
   if (!(await rateLimit(`trip:user:${user.id}`, 10, 86_400))) return json({ error: "rate_limited" }, 429);
 
-  const t = await getTranslations({ locale, namespace: "create" });
   const dates = datesFor(b);
-  const place = b.city || countryName(b.country, locale);
-  const days = Math.round((Date.parse(dates.endDate) - Date.parse(dates.startDate)) / DAY) + 1;
-  const title =
-    dates.datePrecision === "month"
-      ? t("titleMonth", { place, month: formatTripDates(dates, locale) })
-      : t("titleDays", { place, n: days });
+  const title = await buildTripTitle(locale, b.country, b.city, dates);
   const [min, max] = bandToBudget(b.band);
 
   const input = tripSchema.safeParse({
@@ -50,8 +44,10 @@ export async function POST(req: Request) {
     description: b.note ?? "",
   });
   if (!input.success) return json({ errors: fieldErrors(input.error) }, 422);
-  const res = await createTrip(user.id, input.data);
+  if (b.clubId && !(await isClubOrganizer(user.id, b.clubId))) return json({ error: "forbidden" }, 403);
+  const res = await createTrip(user.id, input.data, b.clubId);
   if (!res.ok) return json({ error: res.error }, 409);
+  track("trip_created", user.id, { country: b.country, size: b.size, women_only: b.womenOnly });
   const ts = await getTranslations({ locale, namespace: "share" });
   const budget = formatBudget(min == null ? null : min * 100, max == null ? null : max * 100, "USD");
   const meta = [formatTripDates(dates, locale), budget, ts("spots", { n: 1, max: b.size })]

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { connection } from "next/server";
 import { z } from "zod";
+import { Avatar } from "@/components/avatar";
 import { CheckIcon, Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
 import { MainAction } from "@/components/telegram-actions";
@@ -22,6 +24,12 @@ import { joinDenied } from "@/modules/groups/rules";
 import { getPrices, getVisaRule } from "@/modules/destinations/service";
 import { getMyMembership, listMembers } from "@/modules/groups/service";
 import { getJoinProfile, getPublicProfile } from "@/modules/profiles/service";
+import { getOffer, bumpViews, myLeadFor } from "@/modules/agencies/service";
+import { LeadForm } from "@/components/trips/lead-form";
+import { Candidates } from "@/components/trips/candidates";
+import { getDb } from "@/lib/db";
+import { candidatesForTrip } from "@/modules/matching/jobs";
+import { clubName } from "@/modules/clubs/service";
 import { getTripView } from "@/modules/trips/service";
 import { closeTripAction, decideAction, leaveAction } from "../../actions";
 
@@ -34,10 +42,18 @@ const tag =
 const avatarTones = ["bg-[#cfdae6]", "bg-[#e8dccb]", "bg-[#d6e6d3]", "bg-[#ead3e0]", "bg-[#d3e8e6]"];
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/trips/[id]">): Promise<Metadata> {
+  await connection(); // APP_URL is a runtime value; the preview image URL must be absolute
   const { id } = await params;
   const ok = z.uuid().safeParse(id);
   const trip = ok.success ? await getTripView(ok.data, null) : null;
-  return trip ? { title: trip.title, openGraph: { title: trip.title } } : {};
+  const base = process.env.APP_URL;
+  return trip
+    ? {
+        ...(base ? { metadataBase: new URL(base) } : {}),
+        title: trip.title,
+        openGraph: { title: trip.title },
+      }
+    : {};
 }
 
 export default function TripPage(props: PageProps<"/[locale]/trips/[id]">) {
@@ -55,9 +71,14 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
   const user = await getSessionUser();
   const tripId = z.uuid().safeParse(id);
   const trip = tripId.success ? await getTripView(tripId.data, user?.id ?? null) : null;
-  const [t, ts] = await Promise.all([getTranslations("trip"), getTranslations("styles")]);
+  const [t, ts, tclub] = await Promise.all([
+    getTranslations("trip"),
+    getTranslations("styles"),
+    getTranslations("clubsUi"),
+  ]);
   if (!trip) return <p className="py-16 text-center text-muted-foreground">{t("notFound")}</p>;
 
+  const club = trip.clubId ? await clubName(trip.clubId) : null;
   const days = Math.round((Date.parse(trip.endDate) - Date.parse(trip.startDate)) / 864e5) + 1;
   const [organizer, members, visa, prices] = await Promise.all([
     trip.ownerUserId ? getPublicProfile(user?.id ?? trip.ownerUserId, trip.ownerUserId) : null,
@@ -106,6 +127,14 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         </p>
         <Display className="text-[32px]">{trip.title}</Display>
         <div className="mt-1 flex flex-wrap gap-1.5">
+          {club && trip.clubId && (
+            <Link
+              href={`/clubs/${trip.clubId}`}
+              className={cn(tag, "border-blue bg-blue-soft text-blue-ink")}
+            >
+              {tclub("byClub", { name: club })}
+            </Link>
+          )}
           {trip.womenOnly && (
             <span className={cn(tag, "border-ink bg-ink text-white")}>{t("womenOnlyBadge")}</span>
           )}
@@ -143,14 +172,12 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         <Panel className="flex flex-col gap-3">
           <span className={label}>{t("organizer")}</span>
           <div className="flex items-center gap-4">
-            <span
-              className={cn(
-                "flex size-16 flex-none items-center justify-center rounded-full text-xl font-semibold",
-                avatarTones[0],
-              )}
-            >
-              {organizer.displayName.slice(0, 1)}
-            </span>
+            <Avatar
+              userId={organizer.userId}
+              name={organizer.displayName}
+              version={organizer.avatar}
+              className="size-16 text-xl"
+            />
             <div className="min-w-0 flex-1">
               <div className="text-lg font-semibold">
                 {organizer.displayName} · {organizer.age}
@@ -178,19 +205,23 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         </Panel>
       )}
 
-      <Panel className="flex flex-col gap-3">
-        <div className="flex justify-between gap-3">
-          <span className={label}>
-            {t("membersLabel")}
-            {trip.groupSizeMax ? ` · ${trip.approvedCount}/${trip.groupSizeMax}` : ` · ${trip.approvedCount}`}
-          </span>
-          {left != null && (
-            <span className="text-sm text-muted-foreground">{t("spotsLeft", { n: left })}</span>
-          )}
-        </div>
-        <Avatars names={approved?.map((m) => m.name) ?? null} count={trip.approvedCount} />
-        {!approved && <p className="text-[13px] text-muted-foreground">{t("membersNote")}</p>}
-      </Panel>
+      {trip.kind !== "agency" && (
+        <Panel className="flex flex-col gap-3">
+          <div className="flex justify-between gap-3">
+            <span className={label}>
+              {t("membersLabel")}
+              {trip.groupSizeMax
+                ? ` · ${trip.approvedCount}/${trip.groupSizeMax}`
+                : ` · ${trip.approvedCount}`}
+            </span>
+            {left != null && (
+              <span className="text-sm text-muted-foreground">{t("spotsLeft", { n: left })}</span>
+            )}
+          </div>
+          <Avatars names={approved?.map((m) => m.name) ?? null} count={trip.approvedCount} />
+          {!approved && <p className="text-[13px] text-muted-foreground">{t("membersNote")}</p>}
+        </Panel>
+      )}
 
       {links && trip.status === "open" && <ShareFriendCard {...links} />}
 
@@ -235,21 +266,29 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         </Panel>
       )}
 
-      <Panel tone="dark" className="flex flex-col gap-3">
-        <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
-          {t("rulesLabel")}
-        </span>
-        <p className="text-[15px] leading-relaxed">{t("rules")}</p>
-        {user && !trip.isOwner && <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />}
-      </Panel>
+      {trip.kind !== "agency" && (
+        <Panel tone="dark" className="flex flex-col gap-3">
+          <span className="text-xs font-semibold tracking-[.06em] text-[#c9c9c9] uppercase">
+            {t("rulesLabel")}
+          </span>
+          <p className="text-[15px] leading-relaxed">{t("rules")}</p>
+          {user && !trip.isOwner && (
+            <ReportLink targetType="trip" targetId={trip.id} className="text-signal" />
+          )}
+        </Panel>
+      )}
 
-      <JoinArea
-        trip={trip}
-        user={user}
-        locale={locale}
-        members={members}
-        organizer={organizer?.displayName ?? null}
-      />
+      {trip.kind === "agency" ? (
+        <AgencyTour trip={trip} user={user} />
+      ) : (
+        <JoinArea
+          trip={trip}
+          user={user}
+          locale={locale}
+          members={members}
+          organizer={organizer?.displayName ?? null}
+        />
+      )}
     </div>
   );
 }
@@ -313,6 +352,114 @@ function Avatars({ names, count }: { names: string[] | null; count: number }) {
   );
 }
 
+// A tour sold by a verified agency: price, what is included, the programme, and "send a request".
+async function AgencyTour({ trip, user }: { trip: Trip; user: SessionUser | null }) {
+  const t = await getTranslations("agency");
+  const row = await getOffer(trip.id);
+  if (!row) return null;
+  const { offer } = row;
+  const mine = user ? await myLeadFor(user.id, trip.id) : null;
+  if (!mine || !user) void bumpViews(trip.id);
+  const itinerary = offer.itinerary as { title: string; text: string }[];
+  const price = `${trip.currency === "USD" ? "$" : ""}${Math.round(offer.price / 100)}${trip.currency === "USD" ? "" : ` ${trip.currency}`}`;
+  return (
+    <>
+      <Panel className="flex flex-col gap-2">
+        <span className={label}>{t("tour")}</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <span className="font-display text-[28px]">{t("pricePer", { price })}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("seats", { left: offer.seatsAvailable, total: offer.seatsTotal })}
+          </span>
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {t("byAgency", { name: row.agencyName })}
+          {row.website && (
+            <>
+              {" · "}
+              <a href={row.website} target="_blank" rel="noreferrer noopener nofollow" className="underline">
+                {new URL(row.website).hostname}
+              </a>
+            </>
+          )}
+        </span>
+      </Panel>
+      {(offer.includes.length > 0 || offer.excludes.length > 0) && (
+        <Panel className="grid gap-4 sm:grid-cols-2">
+          {offer.includes.length > 0 && (
+            <div>
+              <span className={label}>{t("includes")}</span>
+              <ul className="mt-1 list-disc pl-5 text-[15px]">
+                {offer.includes.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {offer.excludes.length > 0 && (
+            <div>
+              <span className={label}>{t("excludes")}</span>
+              <ul className="mt-1 list-disc pl-5 text-[15px]">
+                {offer.excludes.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Panel>
+      )}
+      {itinerary.length > 0 && (
+        <Panel className="flex flex-col gap-2">
+          <span className={label}>{t("itinerary")}</span>
+          {itinerary.map((d, i) => (
+            <div key={i} className="flex gap-3 border-t border-line pt-2 first:border-t-0 first:pt-0">
+              <span className="font-display text-xl text-muted-foreground">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <div className="font-semibold">{d.title}</div>
+                {d.text && <p className="text-sm text-muted-foreground">{d.text}</p>}
+              </div>
+            </div>
+          ))}
+        </Panel>
+      )}
+      {offer.refundPolicy && (
+        <Panel className="flex flex-col gap-1">
+          <span className={label}>{t("refund")}</span>
+          <p className="text-[15px] whitespace-pre-line">{offer.refundPolicy}</p>
+        </Panel>
+      )}
+      {!user ? (
+        <MainAction label={t("loginToLead")} href="/login" />
+      ) : mine && (mine.status === "new" || mine.status === "accepted" || mine.status === "booked") ? (
+        <Panel tone="soft" className="flex flex-col gap-2">
+          <p className="font-semibold">
+            {mine.status === "new"
+              ? t("leadSent")
+              : mine.status === "accepted"
+                ? t("leadAccepted")
+                : t("leadBooked")}
+          </p>
+          {mine.conversationId && (
+            <Link
+              href={`/chats/${mine.conversationId}`}
+              className="press inline-flex min-h-11 items-center self-start rounded-full bg-ink px-5 text-sm font-medium text-white"
+            >
+              {t("leadOpenChat")}
+            </Link>
+          )}
+        </Panel>
+      ) : trip.status === "open" && offer.seatsAvailable > 0 ? (
+        <LeadForm tripId={trip.id} maxPeople={offer.seatsAvailable} />
+      ) : (
+        <Panel>{t("leadClosed")}</Panel>
+      )}
+      {user && <ReportLink targetType="trip" targetId={trip.id} className="px-2 text-muted-foreground" />}
+    </>
+  );
+}
+
 async function JoinArea({
   trip,
   user,
@@ -329,6 +476,10 @@ async function JoinArea({
   const t = await getTranslations("trip");
   const te = await getTranslations("errors");
   const tr = await getTranslations("room");
+  const tcr = await getTranslations("create");
+  const trv = await getTranslations("reviews");
+  const tal = await getTranslations("album");
+  const ttg = await getTranslations("tgGroup");
   const hidden = (name: string, value: string) => <input type="hidden" name={name} value={value} />;
   const small = "min-h-11 self-start py-2.5 text-sm text-muted-foreground underline-offset-4 hover:underline";
 
@@ -339,11 +490,32 @@ async function JoinArea({
   ]);
   if (!profile) return <MainAction label={t("profileToJoin")} href={`/welcome?next=/trips/${trip.id}`} />;
 
+  if (trip.isOwner && trip.status === "completed")
+    return (
+      <>
+        <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />
+        <Link
+          href={`/trips/${trip.id}/album`}
+          className="press flex min-h-[52px] items-center justify-center rounded-button bg-card font-semibold"
+        >
+          {tal("mine")}
+        </Link>
+      </>
+    );
+
   if (trip.isOwner) {
     const requests = members?.filter((m) => m.status === "requested") ?? [];
+    const fits = trip.status === "open" ? await candidatesForTrip(getDb(), user.id, trip.id) : [];
     return (
       <>
         <MainAction label={tr("enter")} href={`/trips/${trip.id}/room`} />
+        {fits.length > 0 && (
+          <Panel className="flex flex-col gap-3">
+            <span className={label}>{t("fitsTitle")}</span>
+            <p className="text-sm text-muted-foreground">{t("fitsHint")}</p>
+            <Candidates tripId={trip.id} items={fits} />
+          </Panel>
+        )}
         <Panel className="flex flex-col gap-3">
           <span className={label}>{t("requests")}</span>
           {requests.length === 0 && <p className="text-sm text-muted-foreground">{t("noRequests")}</p>}
@@ -381,6 +553,14 @@ async function JoinArea({
               </div>
             </div>
           ))}
+          <Link href={`/trips/${trip.id}/telegram`} className={small}>
+            {ttg("link")}
+          </Link>
+          {["open", "full", "closed"].includes(trip.status) && trip.startDate > todayISO() && (
+            <Link href={`/trips/${trip.id}/edit`} className={small}>
+              {tcr("editTitle")}
+            </Link>
+          )}
           {(trip.status === "open" || trip.status === "full") && (
             <form action={closeTripAction}>
               {hidden("locale", locale)}
@@ -401,11 +581,29 @@ async function JoinArea({
     </form>
   );
 
+  if (membership?.status === "approved" && trip.status === "completed")
+    return (
+      <>
+        <Panel tone="soft" className="flex flex-col gap-2">
+          <p className="text-lg font-semibold">{t("approved")}</p>
+          <Link
+            href={`/trips/${trip.id}/album`}
+            className="min-h-11 py-2.5 text-sm font-medium underline underline-offset-4"
+          >
+            {tal("mine")}
+          </Link>
+        </Panel>
+        <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />
+      </>
+    );
   if (membership?.status === "approved")
     return (
       <>
         <Panel tone="soft" className="flex flex-col gap-1">
           <p className="text-lg font-semibold">{t("approved")}</p>
+          <Link href={`/trips/${trip.id}/telegram`} className={small}>
+            {ttg("link")}
+          </Link>
           {leaveForm(t("leave"))}
         </Panel>
         <MainAction label={tr("enter")} href={`/trips/${trip.id}/room`} />

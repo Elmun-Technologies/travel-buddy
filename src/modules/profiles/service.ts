@@ -6,7 +6,8 @@ import { ageOn } from "@/lib/catalog";
 import { getDb } from "@/lib/db";
 import { hasTelegram } from "@/modules/auth/service";
 import { isBlockedBetween } from "@/modules/moderation/service";
-import { getPhoneVerified } from "@/modules/users/service";
+import { ratingsOf } from "@/modules/reviews/service";
+import { deletedAmong, getPhoneVerified, isActiveUser } from "@/modules/users/service";
 import type { ProfileInput } from "./schema";
 
 export async function getOwnProfile(userId: string) {
@@ -23,6 +24,28 @@ export async function saveProfile(userId: string, input: ProfileInput) {
       .onConflictDoUpdate({ target: travelerProfiles.userId, set: { ...input, telegramVerified } });
     await tx.delete(onboardingDrafts).where(eq(onboardingDrafts.userId, userId));
   });
+}
+
+/** Store a new picture key; returns the old one so the caller can delete the file. */
+export async function replaceAvatar(userId: string, key: string | null) {
+  const [old] = await getDb()
+    .select({ key: travelerProfiles.avatarKey })
+    .from(travelerProfiles)
+    .where(eq(travelerProfiles.userId, userId));
+  if (!old) return { ok: false as const, old: null };
+  await getDb().update(travelerProfiles).set({ avatarKey: key }).where(eq(travelerProfiles.userId, userId));
+  return { ok: true as const, old: old.key };
+}
+
+/** Picture of someone the viewer may see (not blocked, account alive); null otherwise. */
+export async function avatarKeyFor(viewerId: string, userId: string) {
+  if (viewerId !== userId && (await isBlockedBetween(viewerId, userId))) return null;
+  if (viewerId !== userId && !(await isActiveUser(userId))) return null;
+  const [p] = await getDb()
+    .select({ key: travelerProfiles.avatarKey })
+    .from(travelerProfiles)
+    .where(eq(travelerProfiles.userId, userId));
+  return p?.key ?? null;
 }
 
 export async function getDraft(userId: string) {
@@ -48,15 +71,22 @@ export async function getDisplayNames(userIds: string[]) {
     .select({ id: travelerProfiles.userId, name: travelerProfiles.displayName })
     .from(travelerProfiles)
     .where(inArray(travelerProfiles.userId, userIds));
-  return new Map(rows.map((r) => [r.id, r.name]));
+  const gone = await deletedAmong(userIds); // deleted accounts are nameless at once
+  return new Map(rows.filter((r) => !gone.has(r.id)).map((r) => [r.id, r.name]));
 }
 
 /** What other users may see. Never phone, never exact birth date; gender only if opted in. */
 export async function getPublicProfile(viewerId: string, userId: string) {
   if (viewerId !== userId && (await isBlockedBetween(viewerId, userId))) return null;
+  // Suspended and deleted accounts have no public profile.
+  if (viewerId !== userId && !(await isActiveUser(userId))) return null;
   const p = await getOwnProfile(userId);
   if (!p) return null;
-  const [phones, rel] = await Promise.all([getPhoneVerified([userId]), getReliability([userId])]);
+  const [phones, rel, rated] = await Promise.all([
+    getPhoneVerified([userId]),
+    getReliability([userId]),
+    ratingsOf([userId]),
+  ]);
   const phone = phones.get(userId) ?? false;
   return {
     userId,
@@ -69,8 +99,10 @@ export async function getPublicProfile(viewerId: string, userId: string) {
     travelStyles: p.travelStyles,
     interests: p.interests,
     bio: p.bio,
+    avatar: p.avatarKey ? p.avatarKey.slice(8, 16) : null, // version for cache busting
     verified: { telegram: p.telegramVerified, phone, id: p.idVerified },
     reliability: rel.get(userId) ?? null, // "N/N safarga bordi"
+    rating: rated.get(userId) ?? null, // average of 1–5, from 3 reviews on
   };
 }
 

@@ -6,13 +6,34 @@ import { Panel } from "@/components/clay";
 import { haptic } from "@/lib/telegram-webapp";
 import { cn } from "@/lib/utils";
 
-const KINDS = ["pin", "poll", "mine", "chat"] as const;
+const KINDS = ["pin", "poll", "mine", "chat", "match"] as const;
 
 /** Profile → Bildirishnomalar: each kind of bot message can be turned off. Saved on every tap. */
-export function NotifySettings({ initialOff }: { initialOff: string[] }) {
+export function NotifySettings({
+  initialOff,
+  sms,
+}: {
+  initialOff: string[];
+  /** Shown only when SMS is switched on and the phone is verified. */
+  sms?: { on: boolean };
+}) {
   const t = useTranslations("notify");
   const [off, setOff] = useState(initialOff);
   const [error, setError] = useState(false);
+  const [smsOn, setSmsOn] = useState(sms?.on ?? false);
+
+  async function toggleSms() {
+    const next = !smsOn;
+    setSmsOn(next);
+    haptic.select();
+    const r = await fetch("/api/profile/sms", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ on: next }),
+    }).catch(() => null);
+    setError(!r?.ok);
+    if (!r?.ok) setSmsOn(!next);
+  }
 
   async function toggle(k: string) {
     const next = off.includes(k) ? off.filter((x) => x !== k) : [...off, k];
@@ -70,6 +91,38 @@ export function NotifySettings({ initialOff }: { initialOff: string[] }) {
           </div>
         );
       })}
+      {sms && (
+        <div className="flex min-h-16 items-center justify-between gap-3 border-b border-line py-2 last:border-0">
+          <div className="flex flex-col">
+            <span id="notify-sms" className="text-[16px]">
+              {t("sms")}
+            </span>
+            <span className="text-sm text-muted-foreground">{t("smsHint")}</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={smsOn}
+            aria-labelledby="notify-sms"
+            onClick={toggleSms}
+            className="flex min-h-11 flex-none items-center"
+          >
+            <span
+              className={cn(
+                "flex h-7 w-12 items-center rounded-full p-0.5 transition-colors",
+                smsOn ? "bg-ink" : "bg-line",
+              )}
+            >
+              <span
+                className={cn(
+                  "size-6 rounded-full bg-white shadow transition-transform",
+                  smsOn && "translate-x-5",
+                )}
+              />
+            </span>
+          </button>
+        </div>
+      )}
       {error && (
         <p role="alert" className="pt-2 text-sm text-danger">
           {t("failed")}

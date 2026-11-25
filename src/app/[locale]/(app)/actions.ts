@@ -1,11 +1,13 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { z } from "zod";
 import { redirect } from "@/i18n/navigation";
 import { fieldErrors, formError, type FormState } from "@/lib/form";
 import { asLocale } from "@/lib/guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { destroySession, getSessionUser } from "@/lib/session";
+import { track } from "@/lib/track";
 import { decideRequest, leaveTrip } from "@/modules/groups/service";
 import { intentFromForm, intentSchema } from "@/modules/trips/schema";
 import { closeIntent, closeTrip, createIntent } from "@/modules/trips/service";
@@ -20,6 +22,11 @@ async function authed(f: FormData) {
 }
 
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" ? v : "");
+// Ids from forms are checked before they reach a query: junk is ignored, not a 500.
+const uid = (v: FormDataEntryValue | null) => {
+  const r = z.uuid().safeParse(str(v));
+  return r.success ? r.data : null;
+};
 
 export async function logoutAction(f: FormData) {
   const locale = asLocale(f.get("locale"));
@@ -42,30 +49,38 @@ export async function createIntentAction(_: FormState, f: FormData): Promise<For
 
 export async function closeIntentAction(f: FormData) {
   const { user } = await authed(f);
-  await closeIntent(user.id, str(f.get("intentId")));
+  const id = uid(f.get("intentId"));
+  if (id) await closeIntent(user.id, id);
   refresh();
 }
 
 export async function decideAction(f: FormData) {
   const { user } = await authed(f);
-  await decideRequest(user.id, str(f.get("tripId")), str(f.get("userId")), f.get("decision") === "approve");
+  const [tripId, userId] = [uid(f.get("tripId")), uid(f.get("userId"))];
+  if (tripId && userId) {
+    const res = await decideRequest(user.id, tripId, userId, f.get("decision") === "approve");
+    if (res.ok && f.get("decision") === "approve") track("join_approved", userId);
+  }
   refresh();
 }
 
 export async function leaveAction(f: FormData) {
   const { user } = await authed(f);
-  await leaveTrip(user.id, str(f.get("tripId")));
+  const id = uid(f.get("tripId"));
+  if (id) await leaveTrip(user.id, id);
   refresh();
 }
 
 export async function closeTripAction(f: FormData) {
   const { user } = await authed(f);
-  await closeTrip(user.id, str(f.get("tripId")));
+  const id = uid(f.get("tripId"));
+  if (id) await closeTrip(user.id, id);
   refresh();
 }
 
 export async function unblockAction(f: FormData) {
   const { user } = await authed(f);
-  await unblock(user.id, str(f.get("blockedId")));
+  const id = uid(f.get("blockedId"));
+  if (id) await unblock(user.id, id);
   refresh();
 }

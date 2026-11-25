@@ -7,7 +7,7 @@ export async function GET() {
   await connection();
   try {
     await getDb().execute(sql`select 1`);
-    return Response.json({ status: "ok" });
+    return Response.json({ status: "ok", env: process.env.APP_ENV ?? "unset" });
   } catch {
     return Response.json({ status: "db_unreachable" }, { status: 503 });
   }

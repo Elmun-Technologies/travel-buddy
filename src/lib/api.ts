@@ -7,6 +7,15 @@ type Err = { ok: false; res: Response };
 export const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
+/** Client IP behind Traefik: it appends the address it saw, so the LAST entry can't be spoofed. */
+export function clientIp(h: Headers) {
+  const parts = (h.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+  return parts.at(-1) ?? "unknown";
+}
+
 const originHost = (origin: string | null) => {
   try {
     return origin ? new URL(origin).host : null; // "null" origin (sandboxed/privacy) → reject
@@ -37,4 +46,36 @@ export async function authedJson(
   } catch {
     return { ok: false, res: json({ error: "invalid" }, 400) };
   }
+}
+
+/**
+ * Guard for file uploads (multipart): same-origin only, a size cap taken from Content-Length
+ * before the body is read, signed-in user.
+ */
+export async function authedForm(
+  req: Request,
+  maxBytes: number,
+): Promise<Ok<{ user: SessionUser; form: FormData }> | Err> {
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  if (!host || originHost(origin) !== host) return { ok: false, res: json({ error: "forbidden" }, 403) };
+  if (!req.headers.get("content-type")?.startsWith("multipart/form-data"))
+    return { ok: false, res: json({ error: "invalid" }, 415) };
+  const length = Number(req.headers.get("content-length") ?? NaN);
+  if (!Number.isFinite(length) || length > maxBytes)
+    return { ok: false, res: json({ error: "too_big" }, 413) };
+  const user = await getSessionUser();
+  if (!user) return { ok: false, res: json({ error: "unauthorized" }, 401) };
+  try {
+    return { ok: true, value: { user, form: await req.formData() } };
+  } catch {
+    return { ok: false, res: json({ error: "invalid" }, 400) };
+  }
+}
+
+/** The uploaded picture from a form field, or null. */
+export async function pictureFrom(form: FormData, field = "file") {
+  const f = form.get(field);
+  if (!(f instanceof File) || f.size === 0) return null;
+  return Buffer.from(await f.arrayBuffer());
 }

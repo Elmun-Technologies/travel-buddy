@@ -61,6 +61,7 @@ it.runIf(!!process.env.DATABASE_URL)(
     const worker = spawn(process.execPath, ["dist/index.mjs"], {
       env: {
         ...process.env,
+        APP_ENV: "test",
         TELEGRAM_BOT_TOKEN: "1:test",
         TELEGRAM_API_ROOT: `http://127.0.0.1:${port}`,
         APP_URL: "https://example.com", // https → bot also sets the Mini App menu button
@@ -85,11 +86,16 @@ it.runIf(!!process.env.DATABASE_URL)(
       );
       expect(sent.join()).toContain(chatId);
       expect(sent.join()).toContain("TEST notify");
-      const [row] = await db
-        .select({ sentAt: notifications.sentAt })
-        .from(notifications)
-        .where(eq(notifications.id, n.id));
-      expect(row.sentAt).not.toBeNull();
+      // marked as sent right after Telegram accepted it (a moment after the request arrived)
+      let sentAt: Date | null = null;
+      for (let i = 0; i < 50 && !sentAt; i++) {
+        [{ sentAt }] = await db
+          .select({ sentAt: notifications.sentAt })
+          .from(notifications)
+          .where(eq(notifications.id, n.id));
+        if (!sentAt) await new Promise((r) => setTimeout(r, 100));
+      }
+      expect(sentAt).not.toBeNull();
     } finally {
       const exited = new Promise<number | null>((r) => worker.on("exit", r));
       worker.kill("SIGTERM");

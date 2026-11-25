@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -7,6 +8,7 @@ import { routing } from "@/i18n/routing";
 import Script from "next/script";
 import { SoundRoot } from "@/components/sound";
 import { TelegramInit } from "@/components/telegram-actions";
+import { AnalyticsBeacon } from "@/components/analytics-beacon";
 import { UpdateBanner } from "@/components/update-banner";
 import { TG_SCRIPT } from "@/lib/telegram-webapp";
 import { APP_NAME } from "@/lib/config";
@@ -30,9 +32,8 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   return {
     title: t("title", { app: APP_NAME }),
     description: t("description"),
-    alternates: {
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
-    },
+    // Absolute base for canonical/alternate links. Baked at build (APP_URL build arg), like APP_NAME.
+    ...(process.env.APP_URL ? { metadataBase: new URL(process.env.APP_URL) } : {}),
     openGraph: { title: t("title", { app: APP_NAME }), description: t("description"), locale },
   };
 }
@@ -56,6 +57,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <UpdateBanner />
           <TelegramInit />
           <SoundRoot />
+          <Suspense fallback={null}>
+            <AnalyticsBeacon />
+          </Suspense>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,8 +1,18 @@
 // grammY bot (long polling: no webhook, no public URL for the worker). Texts: Bot-Start.png.
 // No emoji (product-decisions §1): symbols only where the design has them (↗, ·).
 import { Bot, InlineKeyboard, Keyboard } from "grammy";
-import { getTelegramLocale, setTelegramLocale, verifyPhoneFromTelegram } from "@/modules/auth/service";
+import {
+  getTelegramLocale,
+  setTelegramLocale,
+  userIdByTelegram,
+  verifyPhoneFromTelegram,
+} from "@/modules/auth/service";
+import { createHash } from "node:crypto";
+import { personId, sendEvent } from "@/lib/analytics";
 import { acceptContact } from "@/modules/safety/service";
+import { completeLink } from "@/modules/telegram-group/service";
+
+const APP = process.env.APP_NAME || "Travel Buddy"; // the brand is never hardcoded in texts
 
 type Lang = "uz" | "ru" | "en";
 const LANGS: Lang[] = ["uz", "ru", "en"];
@@ -10,7 +20,7 @@ const LANGS: Lang[] = ["uz", "ru", "en"];
 const T = {
   uz: {
     welcome:
-      "<b>Salom! Men Travel Buddy — sayohatga sherik topishga yordam beraman.</b>\n" +
+      "<b>Salom! Men {app} — sayohatga sherik topishga yordam beraman.</b>\n" +
       "Qayerga borishni ayting — mos odamlar va guruhlarni topib beraman. Qolganini birga rejalaymiz.\n\n" +
       "Bepul · 18+ · 2 daqiqa vaqt oladi",
     open: "Sherik qidiramiz ↗",
@@ -32,12 +42,19 @@ const T = {
     trusted:
       'Siz <b>{n}</b>ning ishonchli odamisiz. Safar paytida favqulodda holat bo\'lsa yoki "Hammasi joyida" deb belgilasa, shu yerga xabar keladi.',
     trustedBad: "Havola eskirgan yoki o'chirilgan. Yangi havolani so'rang.",
+    groupHello:
+      'Salom! Bu guruhni safarga ulash uchun ilovada safarning "Telegram guruh" bo\'limidan kodni oling va shu yerga yozing: /link KOD',
+    linkOk: `Tayyor! Bu guruh «{trip}» safariga ulandi. Muhim e'lonlar, so'rovnomalar va sana o'zgarishlari shu yerga yoziladi.`,
+    linkBad: "Kod noto'g'ri yoki eskirgan (30 daqiqa amal qiladi). Ilovadan yangisini oling.",
+    linkNotOrg: "Guruhni faqat safar tashkilotchisi ulay oladi (ilovaga kirgan Telegram akkaunt bilan).",
+    linkTaken: "Bu guruh boshqa safarga ulangan.",
+    linkGroupOnly: "Bu buyruq guruhda ishlaydi: botni safar guruhingizga qo'shing.",
     taken: "Bu raqam boshqa akkauntga bog'langan. Qo'llab-quvvatlash xizmatiga yozing.",
     invalid: "Raqamni tanib bo'lmadi. Qaytadan urinib ko'ring.",
   },
   ru: {
     welcome:
-      "<b>Привет! Я Travel Buddy — помогаю найти попутчиков.</b>\n" +
+      "<b>Привет! Я {app} — помогаю найти попутчиков.</b>\n" +
       "Скажите, куда хотите поехать, — я подберу подходящих людей и группы. Остальное спланируем вместе.\n\n" +
       "Бесплатно · 18+ · займёт 2 минуты",
     open: "Найти попутчика ↗",
@@ -58,12 +75,20 @@ const T = {
     trusted:
       "Вы — доверенный контакт <b>{n}</b>. Если в поездке что-то случится или придёт отметка «Всё в порядке», сообщение придёт сюда.",
     trustedBad: "Ссылка устарела или отключена. Попросите новую.",
+    groupHello:
+      "Привет! Чтобы привязать эту группу к поездке, возьмите код в разделе «Telegram-группа» поездки в приложении и напишите сюда: /link КОД",
+    linkOk: `Готово! Группа привязана к поездке «{trip}». Важные объявления, опросы и изменения дат будут появляться здесь.`,
+    linkBad: "Код неверный или устарел (действует 30 минут). Возьмите новый в приложении.",
+    linkNotOrg:
+      "Группу может привязать только организатор поездки (с того Telegram-аккаунта, которым он вошёл в приложение).",
+    linkTaken: "Эта группа уже привязана к другой поездке.",
+    linkGroupOnly: "Эта команда работает в группе: добавьте бота в группу поездки.",
     taken: "Этот номер привязан к другому аккаунту. Напишите в поддержку.",
     invalid: "Не удалось распознать номер. Попробуйте ещё раз.",
   },
   en: {
     welcome:
-      "<b>Hi! I'm Travel Buddy — I help you find travel buddies.</b>\n" +
+      "<b>Hi! I'm {app} — I help you find travel buddies.</b>\n" +
       "Tell me where you want to go and I'll find the right people and groups. We'll plan the rest together.\n\n" +
       "Free · 18+ · takes 2 minutes",
     open: "Find a buddy ↗",
@@ -84,6 +109,14 @@ const T = {
     trusted:
       "You're <b>{n}</b>'s trusted contact. If something happens on the trip, or they mark \"All good\", you'll get a message here.",
     trustedBad: "This link has expired or was switched off. Ask for a new one.",
+    groupHello:
+      'Hi! To link this group to a trip, get the code in the trip\'s "Telegram group" section in the app and send it here: /link CODE',
+    linkOk: `Done! This group is linked to “{trip}”. Important notices, polls and date changes will appear here.`,
+    linkBad: "The code is wrong or expired (it lasts 30 minutes). Get a new one in the app.",
+    linkNotOrg:
+      "Only the trip organizer can link a group (from the Telegram account used to sign in to the app).",
+    linkTaken: "This group is already linked to another trip.",
+    linkGroupOnly: "This command works in a group: add the bot to your trip's group.",
     taken: "This number is linked to another account. Please contact support.",
     invalid: "Couldn't read the number. Please try again.",
   },
@@ -132,8 +165,21 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       });
       return;
     }
+    // Ad campaigns link t.me/<bot>?start=src_<name>: count bot starts per source.
+    const src = /^src_([a-z0-9_]{1,30})$/.exec(ctx.match)?.[1];
+    if (src && ctx.from)
+      void sendEvent(
+        "bot_start",
+        `tg_${createHash("sha256").update(String(ctx.from.id)).digest("hex").slice(0, 20)}`,
+        {
+          source: src,
+        },
+      );
     await setMenu(ctx.chat.id, l);
-    await ctx.reply(T[l].welcome, { parse_mode: "HTML", reply_markup: startKeyboard(l) });
+    await ctx.reply(T[l].welcome.replaceAll("{app}", APP), {
+      parse_mode: "HTML",
+      reply_markup: startKeyboard(l),
+    });
   });
 
   bot.callbackQuery("how", async (ctx) => {
@@ -160,7 +206,10 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
     await setTelegramLocale(ctx.from.id, l);
     await ctx.answerCallbackQuery({ text: T[l].languageSet });
     if (ctx.chat) await setMenu(ctx.chat.id, l);
-    await ctx.reply(T[l].welcome, { parse_mode: "HTML", reply_markup: startKeyboard(l) });
+    await ctx.reply(T[l].welcome.replaceAll("{app}", APP), {
+      parse_mode: "HTML",
+      reply_markup: startKeyboard(l),
+    });
   });
 
   bot.on("message:contact", async (ctx) => {
@@ -172,12 +221,48 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       return;
     }
     const res = await verifyPhoneFromTelegram(ctx.from.id, c.phone_number);
+    if (res === "ok") {
+      const uid = await userIdByTelegram(ctx.from.id);
+      if (uid) void sendEvent("phone_verified", personId(uid));
+    }
     const text = { ok: T[l].ok, no_user: T[l].noUser, phone_taken: T[l].taken, invalid: T[l].invalid }[res];
     await ctx.reply(text, { reply_markup: { remove_keyboard: true } });
     if ((res === "ok" || res === "no_user") && https)
       await ctx.reply(T[l].open, {
         reply_markup: new InlineKeyboard().webApp(T[l].open, `${appUrl}/${l}/tg`),
       });
+  });
+
+  // "/link CODE" in the trip's own Telegram group
+  bot.command("link", async (ctx) => {
+    const l = await langOf(ctx.from);
+    if (ctx.chat.type !== "group" && ctx.chat.type !== "supergroup") {
+      await ctx.reply(T[l].linkGroupOnly);
+      return;
+    }
+    const code = ctx.match.trim().toUpperCase();
+    const res =
+      /^[2-9A-HJKMNP-Z]{8}$/.test(code) && ctx.from
+        ? await completeLink(code, String(ctx.chat.id), ctx.chat.title ?? "", ctx.from.id)
+        : ({ ok: false, error: "bad_code" } as const);
+    await ctx.reply(
+      res.ok
+        ? T[l].linkOk.replace("{trip}", res.tripTitle.replace(/[<>&]/g, ""))
+        : res.error === "not_organizer"
+          ? T[l].linkNotOrg
+          : res.error === "chat_taken"
+            ? T[l].linkTaken
+            : T[l].linkBad,
+    );
+  });
+  // The bot was added to a group: say how to link it (once per addition).
+  bot.on("my_chat_member", async (ctx) => {
+    const c = ctx.myChatMember;
+    const joined =
+      ["member", "administrator"].includes(c.new_chat_member.status) &&
+      ["left", "kicked"].includes(c.old_chat_member.status);
+    if ((c.chat.type === "group" || c.chat.type === "supergroup") && joined)
+      await ctx.reply(T[await langOf(c.from)].groupHello).catch(() => {});
   });
 
   bot.catch((err) => console.error("bot error", err.error));
@@ -194,7 +279,10 @@ export function createBot(token: string, appUrl: string, apiRoot?: string) {
       const me = await bot.api.getMe();
       console.log(`bot @${me.username} polling`);
       // start() deletes any webhook and long-polls; one instance per token.
-      return bot.start({ allowed_updates: ["message", "callback_query"], drop_pending_updates: false });
+      return bot.start({
+        allowed_updates: ["message", "callback_query", "my_chat_member"],
+        drop_pending_updates: false,
+      });
     },
   };
 }

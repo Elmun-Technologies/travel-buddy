@@ -13,7 +13,7 @@
 
 ## Tiklashni sinash (asosiy bazaga tegmasdan)
 
-Serverda (`ssh root@2.29.137.243`), ega ruxsati bilan. `C` — Postgres konteyneri, `F` — nusxa fayli:
+Serverda (`ssh root@<server-ip>`), ega ruxsati bilan. `C` — Postgres konteyneri, `F` — nusxa fayli:
 
 ```bash
 C=5rzekijiyerpgchhodhcwb9i

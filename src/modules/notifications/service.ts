@@ -1,5 +1,5 @@
 import "server-only";
-import { sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { notifications } from "@/db/schema";
 import type { DbOrTx } from "@/lib/db";
 
@@ -17,13 +17,33 @@ export type NotificationType =
   | "sos"
   | "sos_contact"
   | "checkin_contact"
-  | "creator_invite";
+  | "creator_invite"
+  | "trip_updated"
+  | "join_rejected"
+  | "trip_soon"
+  | "review_ask"
+  | "dm"
+  | "club_requested"
+  | "club_approved"
+  | "lead_new"
+  | "lead_accepted"
+  | "lead_rejected"
+  | "match_trip"
+  | "trip_invite";
 
 /** What the user can turn off in the profile. Everything about them personally is "mine". */
-export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine"] as const;
+export const NOTIFY_KINDS = ["pin", "poll", "chat", "mine", "match"] as const;
 export type NotifyKind = (typeof NOTIFY_KINDS)[number];
 export const kindOf = (type: string): NotifyKind =>
-  type === "room_pin" ? "pin" : type === "room_poll" ? "poll" : type === "room_digest" ? "chat" : "mine";
+  type === "room_pin"
+    ? "pin"
+    : type === "room_poll"
+      ? "poll"
+      : type === "room_digest" || type === "dm"
+        ? "chat"
+        : type === "match_trip"
+          ? "match"
+          : "mine";
 
 /**
  * Queue a Telegram message. Written in the caller's transaction (so it exists only if the action
@@ -54,4 +74,9 @@ export async function notifyRoom(
       and not exists (select 1 from blocks b
         where (b.blocker_id = cm.user_id and b.blocked_id = ${senderId})
            or (b.blocker_id = ${senderId} and b.blocked_id = cm.user_id))`);
+}
+
+/** Account deleted: nothing queued for the person is sent any more. */
+export async function dropUnsent(tx: DbOrTx, userId: string) {
+  await tx.delete(notifications).where(and(eq(notifications.userId, userId), isNull(notifications.sentAt)));
 }

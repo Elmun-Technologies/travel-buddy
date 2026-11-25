@@ -19,6 +19,9 @@ import {
 } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { emit } from "@/modules/chat/service";
+import { decideAgency } from "@/modules/agencies/service";
+import { setClubStatus } from "@/modules/clubs/service";
+import { decideId } from "@/modules/verification/service";
 import type { AdminOp } from "./schema";
 
 // ponytail: the admin module reads and writes other modules' tables directly — it is the one place
@@ -84,13 +87,41 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
         target = op.id;
         break;
       }
+      case "agencyorg.verify":
+      case "agencyorg.suspend": {
+        const ok = await decideAgency(
+          tx,
+          adminId,
+          op.id,
+          op.op === "agencyorg.verify" ? "verified" : "suspended",
+        );
+        if (!ok) return false;
+        target = op.id;
+        break;
+      }
+      case "club.hide":
+      case "club.restore": {
+        if (!(await setClubStatus(op.id, op.op === "club.hide" ? "hidden" : "active", tx))) return false;
+        target = op.id;
+        break;
+      }
+      case "id.approve":
+      case "id.reject": {
+        const userId = await decideId(tx, adminId, op.id, op.op === "id.approve");
+        if (!userId) return false;
+        target = op.id;
+        break;
+      }
       case "user.suspend":
       case "user.restore": {
         const suspend = op.op === "user.suspend";
         const r = await tx
           .update(users)
           .set({ status: suspend ? "suspended" : "active" })
-          .where(and(eq(users.id, op.id), inArray(users.status, suspend ? ["active"] : ["suspended"])))
+          // A reported person who deleted their own account can still be suspended (no quiet comeback).
+          .where(
+            and(eq(users.id, op.id), inArray(users.status, suspend ? ["active", "deleted"] : ["suspended"])),
+          )
           .returning({ id: users.id });
         if (!r.length) return false;
         if (suspend) {
@@ -329,7 +360,6 @@ export async function searchUsers(q: string) {
     .leftJoin(authAccounts, and(eq(authAccounts.userId, users.id), eq(authAccounts.provider, "telegram")))
     .where(
       and(
-        isNull(users.deletedAt),
         q.trim()
           ? or(ilike(travelerProfiles.displayName, term), eq(authAccounts.providerUserId, q.trim()))
           : undefined,

@@ -201,6 +201,8 @@ export const trips = pgTable(
     kind: tripKind("kind").notNull(),
     // Null once the organizer's account is erased: the group keeps its history.
     ownerUserId: uuid("owner_user_id").references(() => users.id, { onDelete: "set null" }),
+    // A trip opened in the name of a club (shown on the club page and in the feed).
+    clubId: uuid("club_id"),
     agencyId: uuid("agency_id").references(() => agencies.id),
     title: text("title").notNull(),
     destinationCountry: text("destination_country").notNull(),
@@ -359,6 +361,8 @@ export const conversations = pgTable("conversations", {
   tripId: uuid("trip_id").references(() => trips.id, { onDelete: "cascade" }),
   leadId: uuid("lead_id").references(() => leads.id, { onDelete: "cascade" }),
   lastMessageAt: ts("last_message_at"),
+  // "<smaller user id>:<larger user id>" for direct chats: one conversation per pair.
+  directKey: text("direct_key").unique(),
   // Organizer's announcement pinned on top of the room chat ("E'LON · Uchrashuv: 06:00, aeroport").
   pinnedText: text("pinned_text"),
   pinnedAt: ts("pinned_at"),
@@ -391,8 +395,9 @@ export const messages = pgTable(
       .references(() => conversations.id, { onDelete: "cascade" }),
     senderId: uuid("sender_id").references(() => users.id, { onDelete: "set null" }),
     body: text("body").notNull(),
-    kind: text("kind").notNull().default("text"), // text | poll
+    kind: text("kind").notNull().default("text"), // text | poll | image
     pollId: uuid("poll_id"),
+    imageKey: text("image_key"), // private object key; served through /api/media/message/<id>
     hiddenAt: ts("hidden_at"),
   },
   (t) => [index("messages_conv_created").on(t.conversationId, t.createdAt)],
@@ -815,3 +820,85 @@ export const waitlist = pgTable("waitlist", {
   source: text("source"), // utm_source
   isTest: boolean("is_test").notNull().default(false),
 });
+
+// ---------- memories: photo album and stories (after / during a trip) ----------
+export const tripPhotos = pgTable(
+  "trip_photos",
+  {
+    ...base,
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    caption: text("caption"),
+    hiddenAt: ts("hidden_at"),
+  },
+  (t) => [index("trip_photos_trip").on(t.tripId, t.createdAt)],
+);
+
+/** One short story per person per trip ("hikoya"). */
+export const tripStories = pgTable(
+  "trip_stories",
+  {
+    ...base,
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+  },
+  (t) => [uniqueIndex("trip_stories_once").on(t.tripId, t.userId)],
+);
+
+// ---------- clubs ----------
+export const clubs = pgTable(
+  "clubs",
+  {
+    ...base,
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    rules: text("rules"),
+    city: text("city"),
+    // open: anyone joins at once; closed: join by request
+    privacy: text("privacy").notNull().default("open"),
+    status: text("status").notNull().default("active"), // active | hidden
+    ownerUserId: uuid("owner_user_id").references(() => users.id, { onDelete: "set null" }),
+  },
+  (t) => [index("clubs_status").on(t.status, t.createdAt)],
+);
+
+export const clubMembers = pgTable(
+  "club_members",
+  {
+    ...base,
+    clubId: uuid("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"), // organizer | member
+    status: text("status").notNull().default("approved"), // requested | approved | rejected | left
+  },
+  (t) => [uniqueIndex("club_members_unique").on(t.clubId, t.userId), index("club_members_user").on(t.userId)],
+);
+
+export const clubPosts = pgTable(
+  "club_posts",
+  {
+    ...base,
+    clubId: uuid("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    body: text("body").notNull(),
+    hiddenAt: ts("hidden_at"),
+  },
+  (t) => [index("club_posts_club").on(t.clubId, t.createdAt)],
+);

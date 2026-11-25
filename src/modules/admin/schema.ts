@@ -15,6 +15,8 @@ export const adminOp = z.discriminatedUnion("op", [
   z.object({ op: z.literal("trip.restore"), id }),
   z.object({ op: z.literal("user.suspend"), id, reportId: opt(id) }),
   z.object({ op: z.literal("user.restore"), id }),
+  z.object({ op: z.literal("id.approve"), id }),
+  z.object({ op: z.literal("id.reject"), id }),
   z.object({
     op: z.literal("visa.save"),
     destination: country,

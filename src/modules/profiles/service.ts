@@ -26,6 +26,28 @@ export async function saveProfile(userId: string, input: ProfileInput) {
   });
 }
 
+/** Store a new picture key; returns the old one so the caller can delete the file. */
+export async function replaceAvatar(userId: string, key: string | null) {
+  const [old] = await getDb()
+    .select({ key: travelerProfiles.avatarKey })
+    .from(travelerProfiles)
+    .where(eq(travelerProfiles.userId, userId));
+  if (!old) return { ok: false as const, old: null };
+  await getDb().update(travelerProfiles).set({ avatarKey: key }).where(eq(travelerProfiles.userId, userId));
+  return { ok: true as const, old: old.key };
+}
+
+/** Picture of someone the viewer may see (not blocked, account alive); null otherwise. */
+export async function avatarKeyFor(viewerId: string, userId: string) {
+  if (viewerId !== userId && (await isBlockedBetween(viewerId, userId))) return null;
+  if (viewerId !== userId && !(await isActiveUser(userId))) return null;
+  const [p] = await getDb()
+    .select({ key: travelerProfiles.avatarKey })
+    .from(travelerProfiles)
+    .where(eq(travelerProfiles.userId, userId));
+  return p?.key ?? null;
+}
+
 export async function getDraft(userId: string) {
   const [d] = await getDb()
     .select({ data: onboardingDrafts.data, updatedAt: onboardingDrafts.updatedAt })
@@ -77,6 +99,7 @@ export async function getPublicProfile(viewerId: string, userId: string) {
     travelStyles: p.travelStyles,
     interests: p.interests,
     bio: p.bio,
+    avatar: p.avatarKey ? p.avatarKey.slice(8, 16) : null, // version for cache busting
     verified: { telegram: p.telegramVerified, phone, id: p.idVerified },
     reliability: rel.get(userId) ?? null, // "N/N safarga bordi"
     rating: rated.get(userId) ?? null, // average of 1–5, from 3 reviews on

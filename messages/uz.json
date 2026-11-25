@@ -141,7 +141,19 @@
       "confirm": "{name}ni blokdan chiqarishni istaysizmi?",
       "unblocked": "{name} blokidan chiqarildi"
     },
-    "rating": "★ {avg} · {n} baho"
+    "rating": "★ {avg} · {n} baho",
+    "avatar": {
+      "choose": "Rasm tanlash",
+      "add": "Rasm qo'shish",
+      "change": "Rasmni almashtirish",
+      "remove": "Rasmni o'chirish",
+      "uploading": "Yuklanmoqda...",
+      "error_network": "Yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
+      "error_too_big": "Rasm juda katta (8 MB gacha).",
+      "error_not_image": "Faqat JPG, PNG yoki WebP rasm yuklang.",
+      "error_unreadable": "Bu rasmni o'qib bo'lmadi. Boshqasini tanlang.",
+      "error_uploads_off": "Rasm yuklash hozircha ishlamayapti."
+    }
   },
   "feed": {
     "title": "Safarlar",
@@ -633,8 +645,13 @@
   },
   "memories": {
     "title": "Taassurotlar",
-    "soon": "Safardan qaytgach — umumiy albom va hikoyalar shu yerda bo'ladi.",
-    "action": "Safarlarni ko'ramiz"
+    "soon": "Safar boshlangach, shu yerda albom va hikoyalar to'planadi.",
+    "action": "Safarlarni ko'ramiz",
+    "listTitle": "Taassurotlar",
+    "photos": "{n} rasm",
+    "empty": "Safar boshlangach, shu yerda albom va hikoyalar to'planadi.",
+    "rate": "Birga borganlarga baho",
+    "openAlbum": "Albom va hikoyalar"
   },
   "share": {
     "cta": "Men ham boraman",
@@ -744,7 +761,10 @@
     "cancel": "Bekor",
     "save": "Saqlash",
     "enter": "Guruh xonasiga kirish",
-    "sosLabel": "Xavfsizlik va SOS"
+    "sosLabel": "Xavfsizlik va SOS",
+    "photo": "Rasm yuborish",
+    "photoFailed": "Rasmni yuborib bo'lmadi. Boshqasini tanlang yoki internetni tekshiring.",
+    "photoAlt": "Chatga yuborilgan rasm"
   },
   "board": {
     "loading": "Yuklanmoqda…",
@@ -1130,7 +1150,15 @@
     "noCreator": "Hali qatnashuvchi yo'q.",
     "views": "Ko'rishlar",
     "status": "Holat",
-    "openReel": "Reels'ni ochish"
+    "openReel": "Reels'ni ochish",
+    "nav_ids": "ID tekshiruv",
+    "idTitle": "ID tekshiruv navbati",
+    "idEmpty": "Kutayotgan so'rov yo'q.",
+    "approve": "Tasdiqlash",
+    "reject": "Rad etish",
+    "idDoc": "Hujjat",
+    "idSelfie": "Selfi",
+    "idHint": "Hujjatdagi ism va yosh profilga mos kelishini, selfidagi odam hujjatdagi odam ekanini tekshiring. Rasmlar qaror qilingach 30 kunda o'chadi."
   },
   "creator": {
     "back": "Orqaga",
@@ -1284,5 +1312,51 @@
     "error": "Yuborib bo'lmadi. Qayta urinib ko'ring.",
     "cta": "Birga borganlarga baho beramiz",
     "back": "Safarga qaytish"
+  },
+  "album": {
+    "title": "Safar albomi",
+    "lead": "Birga olingan suratlar va qisqa hikoyalar. Albomni faqat guruhdagilar ko'radi.",
+    "back": "Safarga qaytish",
+    "add": "Rasm qo'shish",
+    "adding": "Yuklanmoqda: {n}",
+    "empty": "Hali rasm yo'q. Birinchi bo'lib qo'shing!",
+    "limit": "Bitta odam {n} tagacha rasm qo'shadi.",
+    "delete": "O'chirish",
+    "by": "{name}",
+    "storiesTitle": "Hikoyalar",
+    "storyHint": "Safar haqida bir-ikki jumla — guruhdagilar o'qiydi.",
+    "storyPlaceholder": "Eng yaxshi lahza qaysi edi?",
+    "storySave": "Saqlash",
+    "storySaved": "Saqlandi",
+    "noStories": "Hali hikoya yo'q.",
+    "errUpload": "Rasmni yuklab bo'lmadi. Internetni tekshiring yoki boshqasini tanlang.",
+    "errTooBig": "Rasm juda katta (8 MB gacha).",
+    "errOff": "Rasm yuklash hozircha ishlamayapti.",
+    "photoAlt": "Safar albomidan rasm",
+    "open": "Albom ({n} rasm)",
+    "mine": "Albom va hikoyalar"
+  },
+  "verifyId": {
+    "title": "ID tasdiqlash",
+    "lead": "Hujjat va selfi bo'yicha odam sizni tekshiradi. Profilingizda \"ID ✓\" belgisi chiqadi — guruhlar sizga ko'proq ishonadi.",
+    "step1": "1. Pasport yoki ID-karta rasmi",
+    "step1Hint": "Ism va rasm ko'rinsin. Seriya raqamini yopishingiz mumkin.",
+    "step2": "2. Hujjat bilan selfi",
+    "step2Hint": "Yuzingiz va hujjat bir kadrda.",
+    "send": "Tekshirishga yuborish",
+    "sending": "Yuborilmoqda...",
+    "privacy": "Rasmlar yopiq saqlanadi, faqat tekshiruvchi ko'radi va qaror qilingach 30 kunda o'chib ketadi. Bazada faqat holat qoladi.",
+    "pending": "So'rovingiz ko'rib chiqilmoqda. Odatda 1 kun ichida javob beramiz.",
+    "approved": "ID tasdiqlandi. Profilingizda belgi bor.",
+    "rejected": "So'rov rad etildi: rasmlar aniq emas yoki ma'lumot mos kelmadi. Yangidan yuborishingiz mumkin.",
+    "retry": "Qayta yuborish",
+    "off": "Rasm yuklash hozircha ishlamayapti.",
+    "errInvalid": "Ikkala rasmni ham tanlang.",
+    "errImage": "Rasmni o'qib bo'lmadi yoki juda katta (8 MB gacha). Boshqasini tanlang.",
+    "errNetwork": "Yuborib bo'lmadi. Internetni tekshiring.",
+    "open": "ID tasdiqlash",
+    "done": "Yuborildi",
+    "chooseDoc": "Hujjat rasmini tanlash",
+    "chooseSelfie": "Selfini tanlash"
   }
 }

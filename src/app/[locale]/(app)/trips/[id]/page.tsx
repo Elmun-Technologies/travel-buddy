@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import { z } from "zod";
+import { Avatar } from "@/components/avatar";
 import { CheckIcon, Display, Panel } from "@/components/clay";
 import { PageLoading } from "@/components/page-loading";
 import { MainAction } from "@/components/telegram-actions";
@@ -152,14 +153,12 @@ async function TripDetail({ params }: PageProps<"/[locale]/trips/[id]">) {
         <Panel className="flex flex-col gap-3">
           <span className={label}>{t("organizer")}</span>
           <div className="flex items-center gap-4">
-            <span
-              className={cn(
-                "flex size-16 flex-none items-center justify-center rounded-full text-xl font-semibold",
-                avatarTones[0],
-              )}
-            >
-              {organizer.displayName.slice(0, 1)}
-            </span>
+            <Avatar
+              userId={organizer.userId}
+              name={organizer.displayName}
+              version={organizer.avatar}
+              className="size-16 text-xl"
+            />
             <div className="min-w-0 flex-1">
               <div className="text-lg font-semibold">
                 {organizer.displayName} · {organizer.age}
@@ -340,6 +339,7 @@ async function JoinArea({
   const tr = await getTranslations("room");
   const tcr = await getTranslations("create");
   const trv = await getTranslations("reviews");
+  const tal = await getTranslations("album");
   const hidden = (name: string, value: string) => <input type="hidden" name={name} value={value} />;
   const small = "min-h-11 self-start py-2.5 text-sm text-muted-foreground underline-offset-4 hover:underline";
 
@@ -351,7 +351,17 @@ async function JoinArea({
   if (!profile) return <MainAction label={t("profileToJoin")} href={`/welcome?next=/trips/${trip.id}`} />;
 
   if (trip.isOwner && trip.status === "completed")
-    return <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />;
+    return (
+      <>
+        <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />
+        <Link
+          href={`/trips/${trip.id}/album`}
+          className="press flex min-h-[52px] items-center justify-center rounded-button bg-card font-semibold"
+        >
+          {tal("mine")}
+        </Link>
+      </>
+    );
 
   if (trip.isOwner) {
     const requests = members?.filter((m) => m.status === "requested") ?? [];
@@ -423,8 +433,14 @@ async function JoinArea({
   if (membership?.status === "approved" && trip.status === "completed")
     return (
       <>
-        <Panel tone="soft" className="flex flex-col gap-1">
+        <Panel tone="soft" className="flex flex-col gap-2">
           <p className="text-lg font-semibold">{t("approved")}</p>
+          <Link
+            href={`/trips/${trip.id}/album`}
+            className="min-h-11 py-2.5 text-sm font-medium underline underline-offset-4"
+          >
+            {tal("mine")}
+          </Link>
         </Panel>
         <MainAction label={trv("cta")} href={`/trips/${trip.id}/reviews`} />
       </>

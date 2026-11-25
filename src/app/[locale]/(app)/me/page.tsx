@@ -35,7 +35,7 @@ const row = "flex min-h-14 items-center justify-between gap-3 border-b border-li
 async function Me({ params }: PageProps<"/[locale]/me">) {
   const locale = asLocale((await params).locale);
   const { user, profile } = await requireProfile(locale);
-  const [p, trips, intents, notifyOff, t, tt, tc, ta, ts] = await Promise.all([
+  const [p, trips, intents, notifyOff, t, tt, tc, ta, ts, tm, tv] = await Promise.all([
     getPublicProfile(user.id, user.id),
     listMyTrips(user.id),
     listMyIntents(user.id),
@@ -45,6 +45,8 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
     getTranslations("common"),
     getTranslations("app"),
     getTranslations("styles"),
+    getTranslations("memories"),
+    getTranslations("verifyId"),
   ]);
   const bot = botUsername();
   const joined = trips.filter((x) => x.myStatus.status === "approved");
@@ -65,6 +67,11 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
                 >
                   {t("phoneButton")}
                 </ExternalLink>
+              )}
+              {!p.verified.id && (
+                <Link href="/profile/verify" className={`${profileChip} border-input`}>
+                  {tv("open")}
+                </Link>
               )}
               <Link href="/profile/edit" className={`${profileChip} border-input`}>
                 {t("editTitle")}
@@ -186,6 +193,12 @@ async function Me({ params }: PageProps<"/[locale]/me">) {
         </div>
         <div className={row}>
           <DeleteAccountTrigger />
+        </div>
+        <div className={row}>
+          <Link href="/memories" className="min-h-11 py-3 font-medium">
+            {tm("listTitle")}
+          </Link>
+          <span aria-hidden="true">{"↗"}</span>
         </div>
         <div className={row}>
           <span className="font-medium">{t("blocked.title")}</span>

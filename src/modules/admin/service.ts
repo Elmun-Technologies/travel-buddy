@@ -19,6 +19,7 @@ import {
 } from "@/db/schema";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { emit } from "@/modules/chat/service";
+import { decideId } from "@/modules/verification/service";
 import type { AdminOp } from "./schema";
 
 // ponytail: the admin module reads and writes other modules' tables directly — it is the one place
@@ -81,6 +82,13 @@ export async function applyAdminOp(adminId: string, op: AdminOp, ip: string | nu
           .returning({ id: trips.id });
         if (!r.length) return false;
         if (op.op === "trip.hide") await closeReport(tx, op.reportId, adminId);
+        target = op.id;
+        break;
+      }
+      case "id.approve":
+      case "id.reject": {
+        const userId = await decideId(tx, adminId, op.id, op.op === "id.approve");
+        if (!userId) return false;
         target = op.id;
         break;
       }

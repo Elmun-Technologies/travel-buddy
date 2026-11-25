@@ -141,7 +141,19 @@
       "confirm": "Unblock {name}?",
       "unblocked": "{name} has been unblocked"
     },
-    "rating": "★ {avg} · {n} ratings"
+    "rating": "★ {avg} · {n} ratings",
+    "avatar": {
+      "choose": "Choose a photo",
+      "add": "Add a photo",
+      "change": "Change photo",
+      "remove": "Remove photo",
+      "uploading": "Uploading...",
+      "error_network": "Couldn't upload. Check your connection and try again.",
+      "error_too_big": "The photo is too big (up to 8 MB).",
+      "error_not_image": "Please upload a JPG, PNG or WebP photo.",
+      "error_unreadable": "We couldn't read that photo. Please pick another.",
+      "error_uploads_off": "Photo upload is unavailable right now."
+    }
   },
   "feed": {
     "title": "Trips",
@@ -633,8 +645,13 @@
   },
   "memories": {
     "title": "Memories",
-    "soon": "After a trip, the shared album and stories will live here.",
-    "action": "See trips"
+    "soon": "Once a trip starts, its album and stories gather here.",
+    "action": "See trips",
+    "listTitle": "Memories",
+    "photos": "{n} photos",
+    "empty": "Once a trip starts, its album and stories gather here.",
+    "rate": "Rate your companions",
+    "openAlbum": "Album and stories"
   },
   "share": {
     "cta": "I'm in",
@@ -744,7 +761,10 @@
     "cancel": "Cancel",
     "save": "Save",
     "enter": "Enter the group room",
-    "sosLabel": "Safety and SOS"
+    "sosLabel": "Safety and SOS",
+    "photo": "Send a photo",
+    "photoFailed": "Couldn't send the photo. Pick another or check your connection.",
+    "photoAlt": "Photo from the chat"
   },
   "board": {
     "loading": "Loading…",
@@ -1130,7 +1150,15 @@
     "noCreator": "No participants yet.",
     "views": "Views",
     "status": "Status",
-    "openReel": "Open the Reel"
+    "openReel": "Open the Reel",
+    "nav_ids": "ID checks",
+    "idTitle": "ID check queue",
+    "idEmpty": "Nothing waiting.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "idDoc": "Document",
+    "idSelfie": "Selfie",
+    "idHint": "Check that the name and age match the profile and that the person in the selfie is the one on the document. Photos are erased 30 days after the decision."
   },
   "creator": {
     "back": "Back",
@@ -1284,5 +1312,51 @@
     "error": "Couldn't send. Please try again.",
     "cta": "Rate your companions",
     "back": "Back to the trip"
+  },
+  "album": {
+    "title": "Trip album",
+    "lead": "Shared photos and short stories. Only people from the group can see the album.",
+    "back": "Back to the trip",
+    "add": "Add photos",
+    "adding": "Uploading: {n}",
+    "empty": "No photos yet. Add the first one!",
+    "limit": "Each person can add up to {n} photos.",
+    "delete": "Delete",
+    "by": "{name}",
+    "storiesTitle": "Stories",
+    "storyHint": "A sentence or two about the trip — the group will read it.",
+    "storyPlaceholder": "What was the best moment?",
+    "storySave": "Save",
+    "storySaved": "Saved",
+    "noStories": "No stories yet.",
+    "errUpload": "Couldn't upload the photo. Check your connection or pick another.",
+    "errTooBig": "The photo is too big (up to 8 MB).",
+    "errOff": "Photo upload is unavailable right now.",
+    "photoAlt": "Photo from the trip album",
+    "open": "Album ({n} photos)",
+    "mine": "Album and stories"
+  },
+  "verifyId": {
+    "title": "Verify your identity",
+    "lead": "Someone on our team compares your document and selfie. An \"ID ✓\" badge appears on your profile — groups will trust you more.",
+    "step1": "1. A photo of your passport or ID card",
+    "step1Hint": "Name and photo must be visible. You can cover the number.",
+    "step2": "2. A selfie with the document",
+    "step2Hint": "Your face and the document in one shot.",
+    "send": "Send for review",
+    "sending": "Sending...",
+    "privacy": "Photos are stored privately, only the reviewer sees them, and they are erased 30 days after the decision. Only the status stays in the database.",
+    "pending": "Your request is being reviewed. We usually answer within a day.",
+    "approved": "Identity verified. The badge is on your profile.",
+    "rejected": "The request was declined: photos unclear or details didn't match. You can send again.",
+    "retry": "Send again",
+    "off": "Photo upload is unavailable right now.",
+    "errInvalid": "Choose both photos.",
+    "errImage": "We couldn't read a photo or it is too big (up to 8 MB). Pick another.",
+    "errNetwork": "Couldn't send. Check your connection.",
+    "open": "Verify identity",
+    "done": "Sent",
+    "chooseDoc": "Choose a document photo",
+    "chooseSelfie": "Choose a selfie"
   }
 }

@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, count, desc, eq, inArray, isNull, lt, notInArray, sql } from "drizzle-orm";
 import { conversationMembers, conversations, messages, pollOptions, polls, pollVotes } from "@/db/schema";
+import { isActiveUser } from "@/modules/users/service";
 import { type DbOrTx, getDb } from "@/lib/db";
 import { getBlockedIds } from "@/modules/moderation/service";
 import { notifyRoom } from "@/modules/notifications/service";
@@ -168,6 +169,42 @@ export async function sendMessage(conversationId: string, userId: string, body: 
     await emit(tx, { t: "message", c: conversationId, id: m.id });
     return m.id;
   });
+}
+
+/** A picture message. The caption is optional; the file lives in storage under `key`. */
+export async function sendImage(conversationId: string, userId: string, key: string, caption: string) {
+  return getDb().transaction(async (tx) => {
+    const [m] = await tx
+      .insert(messages)
+      .values({ conversationId, senderId: userId, body: caption, kind: "image", imageKey: key })
+      .returning({ id: messages.id });
+    await tx
+      .update(conversations)
+      .set({ lastMessageAt: new Date() })
+      .where(eq(conversations.id, conversationId));
+    await emit(tx, { t: "message", c: conversationId, id: m.id });
+    return m.id;
+  });
+}
+
+/** Storage key of a picture message, if this person may see it (current member, not blocked, not hidden). */
+export async function messageImageKey(viewerId: string, messageId: string) {
+  const [m] = await getDb()
+    .select({ key: messages.imageKey, sender: messages.senderId, conv: messages.conversationId })
+    .from(messages)
+    .innerJoin(
+      conversationMembers,
+      and(
+        eq(conversationMembers.conversationId, messages.conversationId),
+        eq(conversationMembers.userId, viewerId),
+        isNull(conversationMembers.leftAt),
+      ),
+    )
+    .where(and(eq(messages.id, messageId), isNull(messages.hiddenAt), eq(messages.kind, "image")));
+  if (!m?.key) return null;
+  if (m.sender && m.sender !== viewerId && (await getBlockedIds(viewerId)).includes(m.sender)) return null;
+  if (!(await isActiveUser(viewerId))) return null;
+  return m.key;
 }
 
 export async function setPinned(conversationId: string, text: string | null, byUserId: string) {
